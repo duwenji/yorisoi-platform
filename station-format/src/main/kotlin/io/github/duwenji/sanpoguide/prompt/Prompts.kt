@@ -1,6 +1,6 @@
-package com.example.sanpoguide.prompt
+package io.github.duwenji.sanpoguide.prompt
 
-import com.example.sanpoguide.station.format.TalkEventKind
+import io.github.duwenji.sanpoguide.station.format.TalkEventKind
 
 /**
  * The app's prompt files, kept as resources under `sanpoguide/prompts/` (see docs/prompts.md).

@@ -1,9 +1,9 @@
-package com.example.sanpoguide.prompt
+package io.github.duwenji.sanpoguide.prompt
 
-import com.example.sanpoguide.station.format.GuideLength
-import com.example.sanpoguide.station.format.Slot
-import com.example.sanpoguide.station.format.StationPackage
-import com.example.sanpoguide.station.format.TalkEventKind
+import io.github.duwenji.sanpoguide.station.format.GuideLength
+import io.github.duwenji.sanpoguide.station.format.Slot
+import io.github.duwenji.sanpoguide.station.format.StationPackage
+import io.github.duwenji.sanpoguide.station.format.TalkEventKind
 
 /**
  * How a channel's slots go into the app's prompts (API-003 "組み立て方"). The app and the

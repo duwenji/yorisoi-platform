@@ -1,9 +1,9 @@
-package com.example.sanpoguide.prompt
+package io.github.duwenji.sanpoguide.prompt
 
-import com.example.sanpoguide.station.format.BuiltInChannels
-import com.example.sanpoguide.station.format.Slot
-import com.example.sanpoguide.station.format.StationPackage
-import com.example.sanpoguide.station.format.TalkEventKind
+import io.github.duwenji.sanpoguide.station.format.BuiltInChannels
+import io.github.duwenji.sanpoguide.station.format.Slot
+import io.github.duwenji.sanpoguide.station.format.StationPackage
+import io.github.duwenji.sanpoguide.station.format.TalkEventKind
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull

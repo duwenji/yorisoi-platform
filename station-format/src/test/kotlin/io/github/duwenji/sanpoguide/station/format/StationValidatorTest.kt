@@ -1,4 +1,4 @@
-package com.example.sanpoguide.station.format
+package io.github.duwenji.sanpoguide.station.format
 
 import org.json.JSONArray
 import org.json.JSONObject

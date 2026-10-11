@@ -1,4 +1,4 @@
-package com.example.sanpoguide.prompt
+package io.github.duwenji.sanpoguide.prompt
 
 import java.util.concurrent.ConcurrentHashMap
 

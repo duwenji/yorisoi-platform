@@ -1,8 +1,8 @@
-package com.example.sanpoguide.prompt
+package io.github.duwenji.sanpoguide.prompt
 
-import com.example.sanpoguide.station.format.BuiltInChannels
-import com.example.sanpoguide.station.format.StationPackage
-import com.example.sanpoguide.station.format.TalkEventKind
+import io.github.duwenji.sanpoguide.station.format.BuiltInChannels
+import io.github.duwenji.sanpoguide.station.format.StationPackage
+import io.github.duwenji.sanpoguide.station.format.TalkEventKind
 
 /** One scene a reviewer has the AI speak, with the prompts the app would send for it. */
 data class ReviewSample(val id: String, val label: String, val system: String, val user: String)
