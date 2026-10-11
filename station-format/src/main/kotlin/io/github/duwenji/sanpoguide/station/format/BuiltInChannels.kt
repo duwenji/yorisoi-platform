@@ -1,4 +1,4 @@
-package com.example.sanpoguide.station.format
+package io.github.duwenji.sanpoguide.station.format
 
 /**
  * The channels that ship with the app, as resources under `sanpoguide/channels/{id}/` in the

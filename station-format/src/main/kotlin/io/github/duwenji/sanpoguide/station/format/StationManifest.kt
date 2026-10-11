@@ -1,4 +1,4 @@
-package com.example.sanpoguide.station.format
+package io.github.duwenji.sanpoguide.station.format
 
 /** `channel.json` of a channel package (API-003). Only the values the format allows can be held. */
 data class StationManifest(

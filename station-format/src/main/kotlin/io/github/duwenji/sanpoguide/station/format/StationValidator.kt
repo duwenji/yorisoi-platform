@@ -1,4 +1,4 @@
-package com.example.sanpoguide.station.format
+package io.github.duwenji.sanpoguide.station.format
 
 import org.json.JSONArray
 import org.json.JSONException
@@ -43,7 +43,7 @@ data class ListedAs(val id: String, val version: Int, val publisher: String)
  *
  * Covers unpacking the ZIP ([checkArchive]), the files, the publisher's signature, `channel.json`
  * and the prompt slots. Not here: the package's size and SHA-256 against the list (the caller has
- * the list) and rendering the prompts ([com.example.sanpoguide.prompt.StationPrompts]). Resources
+ * the list) and rendering the prompts ([io.github.duwenji.sanpoguide.prompt.StationPrompts]). Resources
  * and cues aren't supported yet, so a package using them is turned away as
  * [RejectCode.UNSUPPORTED_RESOURCE].
  */

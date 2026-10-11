@@ -1,4 +1,4 @@
-package com.example.sanpoguide.station.format
+package io.github.duwenji.sanpoguide.station.format
 
 /**
  * The places in the app's prompts where a channel may put its own text (API-003). Everything

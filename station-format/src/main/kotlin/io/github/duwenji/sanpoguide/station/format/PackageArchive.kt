@@ -1,4 +1,4 @@
-package com.example.sanpoguide.station.format
+package io.github.duwenji.sanpoguide.station.format
 
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
