@@ -39,7 +39,7 @@ dependencyResolutionManagement {
 }
 ```
 
-GitHub Actions から読むときは、パッケージの設定の「Manage Actions access」に、読むリポジトリを足してください。
+GitHub Actions からは `GITHUB_TOKEN` で読めます（このリポジトリは公開なので、パッケージの設定は要りません）。
 
 ### ソースに差し替えて試す
 
