@@ -11,7 +11,7 @@
 | 作成日 | 2026-10-13 |
 | 作成者 | Claude（開発者との検討） |
 | 承認者 | 開発者（1.0: 2026-10-13） |
-| ステータス | 承認済（実施中） |
+| ステータス | 承認済（実施中。手順 0〜2 を手元で済ませた） |
 | 版 | 1.0 |
 
 ## 目的・背景
@@ -97,6 +97,14 @@
 | 5 | 今の `duwenji/SanpoGuide` に案内を書き、アーカイブする（R-9）。手元のフォルダを `c:\Dev\apps\yorisoi-platform`・`c:\Dev\apps\<SanpoGuide の新しい名前>` にする | 新しいリポジトリへのリンクが README から辿れる |
 
 外に出る操作（リポジトリの作成・公開・アーカイブ・タグの push）は、手順ごとに開発者の確認を取ってから行う。
+
+### 実施の記録
+
+| 手順 | 日付 | 結果 |
+|---|---|---|
+| 0 | 2026-10-13 | #55 のマージ後の `main`（0f3d7d8）で `./gradlew test lint assembleRelease` が通った。テストは 460 件（`platform/` 159 件、アプリとプロンプト・パック 247 件。debug・release の両方を数えた件数）。リリース版 APK の中身（全 344 ファイルの CRC32）と、dex のクラスの一覧（47,723）を記録した |
+| 1（手元） | 2026-10-13 | `git filter-repo` で、`platform/`（直下に上げた）・`station-format/`・移す文書の履歴を取り出した（94 コミット、タグは `michizure-core-v*`・`station-format-v*`）。R-8 の「`app/` のパスも含める」はやめた: `app/` 全体を取り出すとアプリの履歴まで入るため。キットの 2026-10-12 より前の履歴は yorisoi-sanpoguide に残る（README に記した）。公開の設定はルートの `build.gradle.kts` にまとめた（各モジュールは `description` だけ書く）。結果: `./gradlew test lint` が通り、テストは 159 件（手順 0 の `platform/` と同じ）。`publishToMavenLocal` で 7 モジュール（JAR 3・AAR 4）が出て、POM の依存はモジュールどうしが `io.github.duwenji.yorisoi:*:2.0.0` になった。移した文書からアプリの文書へのリンク 26 か所を yorisoi-sanpoguide の URL にした |
+| 2（手元） | 2026-10-13 | 今の履歴をそのまま写し（タグは `sanpoguide-prompts-v*` だけ）、`platform/` と移した文書を消し、`:app`・`:prompts` に上げた。依存は `libs.versions.toml` の `yorisoi-*`（2.0.0）。手元では mavenLocal から読んだ。結果: `./gradlew test lint assembleRelease` が通り、テストは 247 件（手順 0 と同じ）。APK はクラスの一覧と資源ファイルがすべて同じで、差は `version-control-info`（コミットの ID）・`baseline.prof`（1 バイト）・`classes5.dex` だけ。dex の差を逆アセンブルで比べ、`BuiltInChannels` のエラーの文言（`:apps:sanpoguide:prompts` → `:prompts`）だけだと確かめた。`-Pyorisoi.platformDir=../yorisoi-platform` で公開の版がソースに置き換わり、リリースビルドが通ることも確かめた。気づいたこと: モジュールを直下に上げたので、lint が手元の `local.properties` を見るようになり、`sdk.dir` の `:` のエスケープを求める（Android Studio が書く形 `C\:/…` にすれば通る。CI には `local.properties` がないので影響しない） |
 
 ### 戻し方
 
