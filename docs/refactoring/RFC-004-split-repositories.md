@@ -11,7 +11,7 @@
 | 作成日 | 2026-10-13 |
 | 作成者 | Claude（開発者との検討） |
 | 承認者 | 開発者（1.0: 2026-10-13） |
-| ステータス | 承認済（実施中。手順 0〜4 を済ませた） |
+| ステータス | 実施済（2026-10-13。手元のフォルダの整理を除く） |
 | 版 | 1.0 |
 
 ## 目的・背景
@@ -29,7 +29,7 @@
 |---|---|
 | 進め方 | ADR-003 を改訂し（1.3。E-19 を改め E-28 を足す）、本書の承認後に分ける |
 | 共通パッケージのリポジトリ名 | `yorisoi-platform` |
-| SanpoGuide のリポジトリ | 新しく作る（`yorisoi-sanpoguide`。未決事項 No.1）。今の `duwenji/SanpoGuide` は移行の後にアーカイブする |
+| SanpoGuide のリポジトリ | 新しく作る（`yorisoi-sanpoguide`。未決事項 No.1）。今の `duwenji/SanpoGuide` は移行の後にアーカイブする（実際には、開発者の判断で削除した。R-9） |
 | アプリが共通パッケージを使う方法 | GitHub Packages に公開した版を固定して使う。コアとアプリを同時に直すときだけ、手元の Gradle の設定で隣のフォルダのソースに差し替える（composite build） |
 
 分ける理由（ADR-003 1.3 E-28 に記録する）:
@@ -64,7 +64,7 @@
 | R-6 | CI | リポジトリごとに持つ。`yorisoi-platform`: 全モジュールのテストと lint、公開の前にもう一度テスト。SanpoGuide: 公開された版を読んでテスト・lint・リリースビルド。GitHub Packages の Maven は公開のパッケージでも読むのにトークンが要る。`yorisoi-platform` は公開リポジトリなので `GITHUB_TOKEN` で読める（非公開のあいだは、各パッケージの「Actions のアクセス」に SanpoGuide のリポジトリを足す必要があった） |
 | R-7 | 手元での差し替え | SanpoGuide の `settings.gradle.kts` は、Gradle のプロパティ `yorisoi.platformDir`（`local.properties` ではなく `~/.gradle/gradle.properties` か `-P`）があれば、そのフォルダを `includeBuild` する。`yorisoi-platform` のモジュールの `group` と名前が座標と同じなので、Gradle が公開の版をソースに自動で置き換える。CI では設定しない（常に公開の版で確かめる） |
 | R-8 | 履歴 | `yorisoi-platform`: `git filter-repo` で、R-2 のパスの履歴だけを取り出して作る（`platform/` は 2026-10-12 に作ったので、それより前の履歴は `station-format/`・`app/` のパスも含めて取り出す）。SanpoGuide: 今のリポジトリの履歴をそのまま新しいリポジトリに push し、`platform/` を消すコミットを足す。タグは、`michizure-core-v*`・`station-format-v*` を `yorisoi-platform` に、`sanpoguide-prompts-v*` を SanpoGuide に持っていく |
-| R-9 | 今の `duwenji/SanpoGuide` | 移行と確認のあとにアーカイブする（読むだけになる）。README の先頭に、新しい 2 つのリポジトリへの案内を書いてからアーカイブする。Issue・PR・過去の公開物（`station-format`・`michizure` の版）は残る。消さない |
+| R-9 | 今の `duwenji/SanpoGuide` | 移行と確認のあとにアーカイブする（読むだけになる）。README の先頭に、新しい 2 つのリポジトリへの案内を書いてからアーカイブする。Issue・PR・過去の公開物（`station-format`・`michizure` の版）は残る。消さない。**2026-10-13 に開発者の判断で、アーカイブではなく削除した**（Issue・PR・Actions の記録と、リポジトリに結びついた公開物も一緒に消えた。使っているところはない） |
 | R-10 | 他のリポジトリの参照 | yorisoi-console の validator が読むリポジトリ（`maven.pkg.github.com/duwenji/SanpoGuide`）を、コアは `yorisoi-platform`、プロンプト・パックは SanpoGuide の新しいリポジトリに変える。文書のリンクも直す。yorisoi-tutorial は、MAINTENANCE.md の照合先を 2 つのリポジトリにし、本文のパス（`platform/…`・`apps/sanpoguide/…`）を直す |
 
 ### 文書の置き場所
@@ -108,12 +108,13 @@
 | 1・2（GitHub） | 2026-10-13 | 開発者の判断で、最初の版を 2.0.0 から **1.0.0** に改めた（新しい座標なので）。`duwenji/yorisoi-platform`・`duwenji/yorisoi-sanpoguide` を非公開で作って push した。`yorisoi-platform` の最初の CI は `gradlew` に実行の権限がなく失敗した（Windows で写したため。`git update-index --chmod=+x` で直した）。タグ `v1.0.0` で 7 モジュールを公開した。`yorisoi-sanpoguide` の CI は、非公開のパッケージを読めず失敗した（`Could not find io.github.duwenji.yorisoi:core-format:1.0.0`）。R-6 の Actions access を 7 つ設定する代わりに、開発者の判断で `yorisoi-platform` を公開にした（手順 1 の「手順 4 のあとで公開にする」を早めた）。再実行で `yorisoi-sanpoguide` の CI が通った |
 | 3 | 2026-10-13 | `yorisoi-sanpoguide` の debug 版（公開された yorisoi-platform 1.0.0 でビルド）を、エミュレータ（Pixel_10_Pro_XL、鎌倉駅で位置を指定、API キーなし）に新しく入れて確かめた。起動、地図（国土地理院のタイル）と現在地、スポットの検索（Overpass は主サーバーが 504・予備の 1 つが時間切れで、3 つ目の maps.mail.ru で取れた。コードは関係ない）、施設のチップと地図のマーカーの色分け（`kit-geo` の drawable）、スポットの簡易解説とルートの検索、読み上げ（オーディオフォーカスの取得と日本語の TTS）、散策モードの開始（常駐サービス）、雰囲気の絵（「秋の昼、晴れ、史跡の近く」）、話しかけのカード、組み込みの 6 チャンネルの一覧、歴史探訪への切り替えと切り替えのあいさつ、散策の終了。アプリのクラッシュはなかった |
 | 4 | 2026-10-13 | 未決事項 No.2 が起きた: `yorisoi-sanpoguide` からプロンプト・パック 2.0.0 を公開すると 422（`io.github.duwenji.sanpoguide:prompts` は 1.x を公開した古い SanpoGuide に結びついている）。開発者の判断で古いパッケージ（1.0.0・1.1.0）を GitHub の画面で削除し、公開し直して成功した。yorisoi-console（公開リポジトリ）の CI が読めるよう、`yorisoi-sanpoguide` も開発者の判断で公開にした。yorisoi-console の validator を `core-format:1.0.0`（yorisoi-platform）・`prompts:2.0.0`（yorisoi-sanpoguide）に切り替え、文書のリンクを直した（yorisoi-console #38、CI 成功）。yorisoi-tutorial のリンク・構成の説明・ハンズオンを直した（yorisoi-tutorial #7） |
+| 5 | 2026-10-13 | 開発者が GitHub の `duwenji/SanpoGuide` を削除した（アーカイブの予定を変えた）。削除の前に、使っているところがないことを確かめた: yorisoi-console は #38 で読み先を切り替え済み、yorisoi-tutorial は #7 で参照を切り替え済み。削除のあとに、yorisoi-console の画面（`web/src/pages/validation.tsx`）の宣伝の審査基準へのリンクが古いリポジトリを指していたのを見つけて直した（#39。#38 の置き換えが `.tsx` を対象にしていなかった）。履歴は yorisoi-sanpoguide（全部）と yorisoi-platform（`platform/`・`station-format/`・移した文書）に残っている |
 
 ### 戻し方
 
 - 手順 1〜3 の間は、今の `duwenji/SanpoGuide` を何も変えていないので、新しいリポジトリを消せば元に戻る
 - 手順 4 のあとは、yorisoi-console の参照を元のリポジトリに戻す PR で戻す
-- 手順 5 のアーカイブは、GitHub の設定で解除できる
+- 手順 5 のアーカイブは、GitHub の設定で解除できる（実際には削除したので、戻せない。GitHub は削除から 90 日以内ならリポジトリの復元を受け付ける）
 
 ## 影響範囲
 
