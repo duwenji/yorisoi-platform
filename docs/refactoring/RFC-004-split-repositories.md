@@ -11,7 +11,7 @@
 | 作成日 | 2026-10-13 |
 | 作成者 | Claude（開発者との検討） |
 | 承認者 | 開発者（1.0: 2026-10-13） |
-| ステータス | 承認済（実施中。手順 0〜2 を手元で済ませた） |
+| ステータス | 承認済（実施中。手順 0〜3 を済ませた） |
 | 版 | 1.0 |
 
 ## 目的・背景
@@ -106,6 +106,7 @@
 | 1（手元） | 2026-10-13 | `git filter-repo` で、`platform/`（直下に上げた）・`station-format/`・移す文書の履歴を取り出した（94 コミット、タグは `michizure-core-v*`・`station-format-v*`）。R-8 の「`app/` のパスも含める」はやめた: `app/` 全体を取り出すとアプリの履歴まで入るため。キットの 2026-10-12 より前の履歴は yorisoi-sanpoguide に残る（README に記した）。公開の設定はルートの `build.gradle.kts` にまとめた（各モジュールは `description` だけ書く）。結果: `./gradlew test lint` が通り、テストは 159 件（手順 0 の `platform/` と同じ）。`publishToMavenLocal` で 7 モジュール（JAR 3・AAR 4）が出て、POM の依存はモジュールどうしが `io.github.duwenji.yorisoi:*:2.0.0` になった（このあと版を 1.0.0 に改めた）。移した文書からアプリの文書へのリンク 26 か所を yorisoi-sanpoguide の URL にした |
 | 2（手元） | 2026-10-13 | 今の履歴をそのまま写し（タグは `sanpoguide-prompts-v*` だけ）、`platform/` と移した文書を消し、`:app`・`:prompts` に上げた。依存は `libs.versions.toml` の `yorisoi-*`（2.0.0。このあと 1.0.0 に改めた）。手元では mavenLocal から読んだ。結果: `./gradlew test lint assembleRelease` が通り、テストは 247 件（手順 0 と同じ）。APK はクラスの一覧と資源ファイルがすべて同じで、差は `version-control-info`（コミットの ID）・`baseline.prof`（1 バイト）・`classes5.dex` だけ。dex の差を逆アセンブルで比べ、`BuiltInChannels` のエラーの文言（`:apps:sanpoguide:prompts` → `:prompts`）だけだと確かめた。`-Pyorisoi.platformDir=../yorisoi-platform` で公開の版がソースに置き換わり、リリースビルドが通ることも確かめた。気づいたこと: モジュールを直下に上げたので、lint が手元の `local.properties` を見るようになり、`sdk.dir` の `:` のエスケープを求める（Android Studio が書く形 `C\:/…` にすれば通る。CI には `local.properties` がないので影響しない） |
 | 1・2（GitHub） | 2026-10-13 | 開発者の判断で、最初の版を 2.0.0 から **1.0.0** に改めた（新しい座標なので）。`duwenji/yorisoi-platform`・`duwenji/yorisoi-sanpoguide` を非公開で作って push した。`yorisoi-platform` の最初の CI は `gradlew` に実行の権限がなく失敗した（Windows で写したため。`git update-index --chmod=+x` で直した）。タグ `v1.0.0` で 7 モジュールを公開した。`yorisoi-sanpoguide` の CI は、非公開のパッケージを読めず失敗した（`Could not find io.github.duwenji.yorisoi:core-format:1.0.0`）。R-6 の Actions access を 7 つ設定する代わりに、開発者の判断で `yorisoi-platform` を公開にした（手順 1 の「手順 4 のあとで公開にする」を早めた）。再実行で `yorisoi-sanpoguide` の CI が通った |
+| 3 | 2026-10-13 | `yorisoi-sanpoguide` の debug 版（公開された yorisoi-platform 1.0.0 でビルド）を、エミュレータ（Pixel_10_Pro_XL、鎌倉駅で位置を指定、API キーなし）に新しく入れて確かめた。起動、地図（国土地理院のタイル）と現在地、スポットの検索（Overpass は主サーバーが 504・予備の 1 つが時間切れで、3 つ目の maps.mail.ru で取れた。コードは関係ない）、施設のチップと地図のマーカーの色分け（`kit-geo` の drawable）、スポットの簡易解説とルートの検索、読み上げ（オーディオフォーカスの取得と日本語の TTS）、散策モードの開始（常駐サービス）、雰囲気の絵（「秋の昼、晴れ、史跡の近く」）、話しかけのカード、組み込みの 6 チャンネルの一覧、歴史探訪への切り替えと切り替えのあいさつ、散策の終了。アプリのクラッシュはなかった |
 
 ### 戻し方
 
