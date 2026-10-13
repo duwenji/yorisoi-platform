@@ -257,9 +257,9 @@ flowchart TB
 - [channel-package-format.md（API-003）](../channel-package-format.md): チャンネル・パッケージの形式
 - [channel-list-api.md（API-002）](../channel-list-api.md): 承認済みチャンネル・リスト
 - [material-producer-api.md（API-004）](../material-producer-api.md): 素材提供者 IF と素材集の形式
-- [RFC-001](../refactoring/RFC-001-prompts-to-station-format.md): プロンプトと組み込みのチャンネルを `:station-format` に移す
+- [RFC-001](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/refactoring/RFC-001-prompts-to-station-format.md): プロンプトと組み込みのチャンネルを `:station-format` に移す
 - [RFC-004](../refactoring/RFC-004-split-repositories.md): リポジトリを分ける
-- [architecture.md](../architecture.md): 今のアプリの構造
+- [architecture.md](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/architecture.md): 今のアプリの構造
 
 ## 変更履歴
 

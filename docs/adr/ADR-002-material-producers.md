@@ -226,8 +226,8 @@ flowchart TB
 - [channel-package-format.md（API-003）](../channel-package-format.md): 素材・きっかけ・見せ方
 - [channel-list-api.md（API-002）](../channel-list-api.md): 承認済みチャンネル・リスト
 - [ADR-001](ADR-001-third-party-channel-curation.md): 第三者のチャンネルの審査と署名
-- [channels.md](../channels.md): アプリ側の設計
-- 検討の記録: [skill-logs/adr_2026-10-11.md](../skill-logs/adr_2026-10-11.md)
+- [channels.md](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/channels.md): アプリ側の設計
+- 検討の記録: [skill-logs/adr_2026-10-11.md](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/skill-logs/adr_2026-10-11.md)
 
 ## 変更履歴
 

@@ -389,7 +389,7 @@ resources/
 - [ADR-002](adr/ADR-002-material-producers.md): 素材提供者を切り出す判断
 - [channel-package-format.md（API-003）](channel-package-format.md): 素材・きっかけ・見せ方
 - [channel-list-api.md（API-002）](channel-list-api.md): 承認済みチャンネル・リスト
-- [channels.md](channels.md): アプリ側の設計
+- [channels.md](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/channels.md): アプリ側の設計
 
 ## 変更履歴
 

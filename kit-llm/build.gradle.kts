@@ -1,9 +1,11 @@
 // AI services (Claude, OpenAI-compatible APIs) and the Keystore cipher for their keys (RFC-002).
-// Used by the apps in this repository; not published (RFC-002 R-11).
+// Published with the other modules (RFC-004 R-4).
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
 }
+
+description = "AI services (Claude, OpenAI-compatible APIs) and the Keystore cipher for their keys."
 
 android {
     namespace = "io.github.duwenji.yorisoi.kit.llm"

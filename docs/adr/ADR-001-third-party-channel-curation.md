@@ -16,7 +16,7 @@
 
 ## 目的・背景
 
-[TODO.md「チャンネル」](../TODO.md#チャンネル)で、語り手・話題・話す量・雰囲気をまとめて切り替える「チャンネル」を導入することにした。チャンネルを作るのは、アプリに組み込みのもの（散策者が設定でカスタマイズできる）と、第三者が配信するものの 2 者。第三者のチャンネルの話しかけの頻度・雰囲気はチャンネル提供者が決める（2026-10-03 の決定）。
+[TODO.md「チャンネル」](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/TODO.md#チャンネル)で、語り手・話題・話す量・雰囲気をまとめて切り替える「チャンネル」を導入することにした。チャンネルを作るのは、アプリに組み込みのもの（散策者が設定でカスタマイズできる）と、第三者が配信するものの 2 者。第三者のチャンネルの話しかけの頻度・雰囲気はチャンネル提供者が決める（2026-10-03 の決定）。
 
 第三者のチャンネルには、組み込みのチャンネルにない次の問題がある。
 
@@ -37,7 +37,7 @@
 - チャンネルのパッケージの形式（契約書として別に作る。[追従タスク](#影響範囲追従タスク) T-2）
 - 審査基準の具体的な中身（T-1）
 - 組み込みのチャンネルの設計（本書の決定に依存しないので、先に進めてよい）
-- 場所に紐づく第三者のコンテンツの配信（[TODO「第三者の媒体」](../TODO.md#第三者の媒体広告の再生)・[API-001](../secret-messages-api.md) の `publisher`）
+- 場所に紐づく第三者のコンテンツの配信（[TODO「第三者の媒体」](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/TODO.md#第三者の媒体広告の再生)・[API-001](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/secret-messages-api.md) の `publisher`）
 
 ## 対応元ID（トレーサビリティ）
 
@@ -171,11 +171,11 @@ flowchart LR
 
 ## 関連ドキュメント・参照リンク
 
-- [TODO.md「チャンネル」](../TODO.md#チャンネル)
+- [TODO.md「チャンネル」](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/TODO.md#チャンネル)
 - [channel-list-api.md（API-002）](../channel-list-api.md): 承認済みチャンネル・リストの形式
-- [secret-messages-api.md（API-001）](../secret-messages-api.md): 鍵とアカウントID、D-5
-- [prompts.md](../prompts.md): プロンプトの構成（第三者が差し替える範囲を決める元）
-- 検討の記録: [skill-logs/adr_2026-10-03.md](../skill-logs/adr_2026-10-03.md)
+- [secret-messages-api.md（API-001）](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/secret-messages-api.md): 鍵とアカウントID、D-5
+- [prompts.md](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/prompts.md): プロンプトの構成（第三者が差し替える範囲を決める元）
+- 検討の記録: [skill-logs/adr_2026-10-03.md](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/skill-logs/adr_2026-10-03.md)
 
 ## 変更履歴
 

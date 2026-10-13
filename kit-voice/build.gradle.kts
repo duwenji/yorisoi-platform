@@ -1,9 +1,11 @@
-// Speech (TTS with audio focus) and synthesized background sounds (RFC-002). Used by the apps in
-// this repository; not published (RFC-002 R-11).
+// Speech (TTS with audio focus) and synthesized background sounds (RFC-002). Published with
+// the other modules (RFC-004 R-4).
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
 }
+
+description = "Speech (TTS with audio focus) and synthesized background sounds."
 
 android {
     namespace = "io.github.duwenji.yorisoi.kit.voice"

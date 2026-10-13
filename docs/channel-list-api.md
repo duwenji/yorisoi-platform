@@ -33,7 +33,7 @@
 
 非スコープ（別途決める）:
 - チャンネルのパッケージの中身（上書きできるプロンプト、設定値、上限）。**API-003（チャンネル・パッケージ形式）** として別に作る。本書では、パッケージを URL・SHA-256・大きさで指すところまでを扱う
-- チャンネル管理システムの内部（チャンネル提供者の申請画面、審査の画面、審査の手順、データベース）と、チャンネル提供者向けの API。要件は [TODO.md「チャンネル管理システム」](TODO.md#チャンネル管理システム) で詰める
+- チャンネル管理システムの内部（チャンネル提供者の申請画面、審査の画面、審査の手順、データベース）と、チャンネル提供者向けの API。要件は [TODO.md「チャンネル管理システム」](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/TODO.md#チャンネル管理システム) で詰める
 - 審査基準の中身（ADR-001 T-1）
 - 組み込みのチャンネル
 
@@ -494,10 +494,10 @@ sequenceDiagram
 ## 関連ドキュメント・参照リンク
 
 - [ADR-001](adr/ADR-001-third-party-channel-curation.md): 第三者のチャンネルは運営の審査と署名を経たものだけ取り込む
-- [secret-messages-api.md（API-001）](secret-messages-api.md): アカウントID、Ed25519、D-5
+- [secret-messages-api.md（API-001）](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/secret-messages-api.md): アカウントID、Ed25519、D-5
 - [ADR-002](adr/ADR-002-material-producers.md)・[material-producer-api.md（API-004）](material-producer-api.md): 素材の素材提供者と素材集
-- [TODO.md「チャンネル」「チャンネル管理システム」](TODO.md#チャンネル)
-- 検討の記録: [skill-logs/api_contract_design_2026-10-03.md](skill-logs/api_contract_design_2026-10-03.md)
+- [TODO.md「チャンネル」「チャンネル管理システム」](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/TODO.md#チャンネル)
+- 検討の記録: [skill-logs/api_contract_design_2026-10-03.md](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/skill-logs/api_contract_design_2026-10-03.md)
 
 ## 変更履歴
 

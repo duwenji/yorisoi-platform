@@ -1,10 +1,11 @@
-// Places, routes, photos, weather and the map (RFC-002). Used by the apps in this repository;
-// not published (RFC-002 R-11).
+// Places, routes, photos, weather and the map (RFC-002). Published with the other modules (RFC-004 R-4).
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
 }
+
+description = "Places, routes, photos, weather and the map."
 
 android {
     namespace = "io.github.duwenji.yorisoi.kit.geo"
@@ -30,7 +31,7 @@ kotlin {
 
 dependencies {
     // The spot kinds a search asks for (SpotKind).
-    api(project(":platform:core-format"))
+    api(project(":core-format"))
 
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)

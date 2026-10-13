@@ -169,7 +169,7 @@ val rideRules = listOf(
 
 - [ADR-003](../adr/ADR-003-companion-app-platform.md): 付き添いアプリのエコシステム（E-7・E-23、T-2・T-3）
 - [RFC-002](RFC-002-platform-stage1.md): 段階 1（共通部分の切り出し）
-- [architecture.md](../architecture.md) 図 2: 散策モードの話しかけるまでの流れ
+- [architecture.md](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/architecture.md) 図 2: 散策モードの話しかけるまでの流れ
 
 ## 変更履歴
 

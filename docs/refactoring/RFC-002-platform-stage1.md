@@ -158,8 +158,8 @@ PR は手順ごとに分ける。どの PR も、その時点で下の「毎回�
 ## 関連ドキュメント・参照リンク
 
 - [ADR-003](../adr/ADR-003-companion-app-platform.md): 付き添いアプリのエコシステム
-- [RFC-001](RFC-001-prompts-to-station-format.md): プロンプトと組み込みのチャンネルを `:station-format` に移す
-- [architecture.md](../architecture.md): 今のアプリの構造
+- [RFC-001](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/refactoring/RFC-001-prompts-to-station-format.md): プロンプトと組み込みのチャンネルを `:station-format` に移す
+- [architecture.md](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/architecture.md): 今のアプリの構造
 
 ## 変更履歴
 

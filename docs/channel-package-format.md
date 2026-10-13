@@ -35,7 +35,7 @@
 非スコープ:
 - パッケージの取得・リスト・運営の署名（API-002）
 - 人が確かめる審査の項目（ADR-001 T-1）
-- アプリの画面・保存・切り替えの設計（[channels.md](channels.md)）
+- アプリの画面・保存・切り替えの設計（[channels.md](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/channels.md)）
 
 ## 対応元ID（トレーサビリティ）
 
@@ -531,7 +531,7 @@ Claude の提案を開発者が承認した。
 
 ## 確認の手順
 
-アプリと審査用の道具は、同じ確認を同じ順で行う。アプリの実装を、審査用の道具でも使えるように JVM のライブラリにしておく（[channels.md](channels.md)）。
+アプリと審査用の道具は、同じ確認を同じ順で行う。アプリの実装を、審査用の道具でも使えるように JVM のライブラリにしておく（[channels.md](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/channels.md)）。
 
 1. 大きさ（API-002: 2MB 以内）と SHA-256（リストの値）を確かめる
 2. ZIP を展開する。パスに `..`・絶対パス・バックスラッシュがある、展開後の合計が 2MB を超える、ファイルが 100 個を超える場合は拒む
@@ -651,9 +651,9 @@ API-002 の `package_rejected` の詳細の理由。審査用の道具は同じ�
 - [ADR-001](adr/ADR-001-third-party-channel-curation.md): C-4・C-7・C-8
 - [ADR-002](adr/ADR-002-material-producers.md): 素材の素材提供者の切り出し
 - [material-producer-api.md（API-004）](material-producer-api.md): 素材提供者 IF・参照の書き方・省略形の展開・素材集の形式
-- [channels.md](channels.md): アプリ側の設計（組み込みのチャンネル・カスタマイズ・切り替え）
-- [prompts.md](prompts.md): 今のプロンプトの構成
-- 検討の記録: [skill-logs/api_contract_design_2026-10-03.md](skill-logs/api_contract_design_2026-10-03.md)
+- [channels.md](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/channels.md): アプリ側の設計（組み込みのチャンネル・カスタマイズ・切り替え）
+- [prompts.md](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/prompts.md): 今のプロンプトの構成
+- 検討の記録: [skill-logs/api_contract_design_2026-10-03.md](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/skill-logs/api_contract_design_2026-10-03.md)
 
 ## 変更履歴
 

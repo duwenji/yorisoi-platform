@@ -4,16 +4,13 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 // apps and the channel management system render prompts the same way (ADR-003 E-3).
 plugins {
     alias(libs.plugins.kotlin.jvm)
-    `maven-publish`
 }
 
-group = "io.github.duwenji.yorisoi"
-version = providers.gradleProperty("yorisoiCoreVersion").get()
+description = "Prompt templates: the subset of Mustache the apps' prompt files are written in."
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
-    withSourcesJar()
 }
 
 kotlin {
@@ -24,28 +21,4 @@ kotlin {
 
 dependencies {
     testImplementation(libs.junit)
-}
-
-publishing {
-    publications {
-        create<MavenPublication>("corePrompt") {
-            artifactId = "core-prompt"
-            from(components["java"])
-            pom {
-                name.set("yorisoi core-prompt")
-                description.set("Prompt templates: the subset of Mustache the apps' prompt files are written in.")
-                url.set("https://github.com/duwenji/SanpoGuide")
-            }
-        }
-    }
-    repositories {
-        maven {
-            name = "GitHubPackages"
-            url = uri("https://maven.pkg.github.com/duwenji/SanpoGuide")
-            credentials {
-                username = System.getenv("GITHUB_ACTOR")
-                password = System.getenv("GITHUB_TOKEN")
-            }
-        }
-    }
 }
