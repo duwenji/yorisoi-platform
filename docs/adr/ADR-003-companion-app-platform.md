@@ -216,7 +216,7 @@ flowchart TB
 | T-8 | 新しいアプリの雛形（`templates/`）と、要望からプロファイル・ルール・プロンプト・組み込みのチャンネルを生成する Claude Code のスキル | Claude | T-3・T-4 の後 |
 | T-9 | サイクリングのアプリ（E-23）を作り、合わなかった抽象を直す。代表のアプリとして `cycle` の見本に使う | 開発者・Claude | T-8 の後 |
 | T-10 | 文書の更新: architecture.md・README・channels.md・stakeholders.md（利用者の呼び方。E-27）、yorisoi-tutorial 第 5 部 | Claude | 段階ごと |
-| T-11 | `yorisoi` への改名（E-22、1.2）。範囲はエコシステム全体: SanpoGuide の Kotlin のパッケージと公開の座標（`core-format`・`core-prompt` を 2.0.0、プロンプト・パックを 2.0.0 として新しい座標で公開。`io.github.duwenji.michizure` の 1.x は GitHub Packages に残るが、以後は更新しない）、管理システム（リポジトリ・パッケージ・AWS のスタック。管理システムの ADR-001）、チュートリアル | 開発者・Claude | 2026-10-13〜 |
+| T-11 | `yorisoi` への改名（E-22、1.2）。範囲はエコシステム全体: SanpoGuide の Kotlin のパッケージと公開の座標（`core-format`・`core-prompt` は新しい座標 `io.github.duwenji.yorisoi` で 1.0.0 から始める（開発者の判断、2026-10-13。yorisoi-platform から公開する。E-28）。プロンプト・パックは 2.0.0。`io.github.duwenji.michizure` の 1.x は GitHub Packages に残るが、以後は更新しない）、管理システム（リポジトリ・パッケージ・AWS のスタック。管理システムの ADR-001）、チュートリアル | 開発者・Claude | 2026-10-13〜 |
 | T-12 | リポジトリを分ける（E-28）。[RFC-004](../refactoring/RFC-004-split-repositories.md): `yorisoi-platform` と SanpoGuide の新しいリポジトリを作り、yorisoi-console・yorisoi-tutorial の参照を切り替え、今の `duwenji/SanpoGuide` をアーカイブする | 開発者・Claude | T-11 の後 |
 
 見直しの条件:
