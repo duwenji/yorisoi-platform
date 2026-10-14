@@ -8,14 +8,14 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.time.Instant
 
-/** API-003: format 2's fields, how review and an app read unknown values, and choosing channels (V-23〜V-28). */
-class FormatTwoTest {
+/** API-003: the ecosystem's fields, how review and an app read unknown values, and choosing channels (V-24〜V-28). */
+class EcosystemFieldsTest {
     private class MemoryFiles(val files: Map<String, ByteArray>) : StationFiles {
         override fun list() = files.keys.toList()
         override fun read(path: String) = files[path]
     }
 
-    private fun manifest(format: Int = 2, change: JSONObject.() -> Unit = {}) = JSONObject(
+    private fun manifest(format: Int = 1, change: JSONObject.() -> Unit = {}) = JSONObject(
         """
         {
           "format": $format, "id": "kamakura-history", "version": 3,
@@ -51,7 +51,7 @@ class FormatTwoTest {
     private val walkingApp = AppProfile(AppIds.SANPOGUIDE, Activity.WALK, Feature.entries.toSet(), versionCode = 10)
 
     @Test
-    fun `format 2 carries activities, genres and required features`() {
+    fun `a channel carries activities, genres and required features`() {
         val m = ok(read(files(manifest()), Strictness.REVIEW)).manifest
         assertEquals(setOf(Activity.WALK, Activity.CYCLE), m.activities)
         assertEquals(setOf(Genre.HISTORY), m.genres)
@@ -61,17 +61,12 @@ class FormatTwoTest {
     }
 
     @Test
-    fun `format 1 is a walking channel with no genre and no requirement (V-23)`() {
-        val m = ok(read(files(manifest(format = 1) { remove("activities"); remove("genres"); remove("requires") }), Strictness.APP)).manifest
-        assertEquals(setOf(Activity.WALK), m.activities)
-        assertEquals(emptySet<Genre>(), m.genres)
-        assertEquals(emptySet<Feature>(), m.requires)
-        // Format 1 knows nothing of these fields: written anyway, they're ignored like any unknown field.
-        assertEquals(setOf(Activity.WALK), ok(read(files(manifest(format = 1) { put("activities", JSONArray().put("cycle")) }), Strictness.REVIEW)).manifest.activities)
+    fun `only format 1 is read`() {
+        assertEquals(RejectCode.UNSUPPORTED_FORMAT, code(read(files(manifest(format = 2)), Strictness.APP)))
     }
 
     @Test
-    fun `review turns away what the lists don't hold, and format 2 without activities (V-24)`() {
+    fun `review turns away what the lists don't hold, and a channel without activities (V-24)`() {
         fun reviewed(change: JSONObject.() -> Unit) = code(read(files(manifest(change = change)), Strictness.REVIEW))
         assertEquals(RejectCode.BAD_MANIFEST, reviewed { remove("activities") })
         assertEquals(RejectCode.BAD_VALUE, reviewed { put("activities", JSONArray()) })
@@ -122,12 +117,6 @@ class FormatTwoTest {
     }
 
     @Test
-    fun `an app still rejects unknown values in format 1 (G-3)`() {
-        val old = manifest(format = 1) { getJSONObject("talk").put("level", "nonstop") }
-        assertEquals(RejectCode.BAD_VALUE, code(read(files(old), Strictness.APP)))
-    }
-
-    @Test
     fun `a channel for another activity, or needing what the app lacks, isn't offered (V-25)`() {
         val cycling = ok(read(files(manifest { put("activities", JSONArray().put("cycle")) }), Strictness.REVIEW)).manifest
         assertEquals(listOf("not for walk (cycle)"), Compatibility.reasons(cycling, walkingApp))
@@ -159,7 +148,7 @@ class FormatTwoTest {
     fun `the package must agree with what the list copied from it (API-002 P-19)`() {
         val publisher = TestPublisher()
         val signed = MemoryStationFiles(publisher.signed(packageFiles(manifestJson(publisher.accountId) {
-            put("format", 2); put("activities", JSONArray().put("walk").put("cycle")); put("genres", JSONArray().put("history"))
+            put("activities", JSONArray().put("walk").put("cycle")); put("genres", JSONArray().put("history"))
         })))
         fun check(activities: List<String>?, genres: List<String>? = listOf("history"), requires: List<String>? = emptyList()) = StationValidator.check(
             signed, StationOrigin.THIRD_PARTY, ListedAs("kamakura-history", 3, publisher.accountId, activities, genres, requires), JcaEd25519,
@@ -179,18 +168,18 @@ class FormatTwoTest {
 
     @Test
     fun `the list's values decide before fetching (API-002 P-19, P-20)`() {
-        fun listed(activities: List<String> = listOf("walk"), requires: List<String> = emptyList(), versions: Map<String, Int>? = null) = ListedChannel(
+        fun listed(activities: List<String> = listOf("walk"), requires: List<String> = emptyList(), versions: Map<String, Int> = emptyMap()) = ListedChannel(
             id = "c", version = 1, publisher = "p", publisherName = "p", publisherChange = null, name = "n", summary = "s", description = null,
-            lang = listOf("ja"), tags = emptyList(), regions = emptyList(), icon = FileRef("u", "h"), pkg = PackageRef("u", "h", 1, 2),
-            minAppVersion = 12, approvedAt = Instant.EPOCH, activities = activities, requires = requires, minAppVersions = versions,
+            lang = listOf("ja"), tags = emptyList(), regions = emptyList(), icon = FileRef("u", "h"), pkg = PackageRef("u", "h", 1, 1),
+            approvedAt = Instant.EPOCH, media = emptyList(), resourcesSize = 0, activities = activities, genres = emptyList(), requires = requires,
+            minAppVersions = versions,
         )
         assertEquals(emptyList<String>(), Compatibility.reasons(listed(listOf("walk", "boat")), walkingApp))
         assertEquals(listOf("not for walk (cycle)"), Compatibility.reasons(listed(listOf("cycle")), walkingApp))
         assertEquals(listOf("needs present:hologram"), Compatibility.reasons(listed(requires = listOf("slot:guide", "present:hologram")), walkingApp))
-        // P-20: an app's own entry; none means no requirement; a list without the map has only SanpoGuide's.
+        // P-20: an app's own entry; none means no requirement.
         assertEquals(14, listed(versions = mapOf("sanpoguide" to 14)).minAppVersionFor("sanpoguide"))
         assertNull(listed(versions = mapOf("cycle" to 3)).minAppVersionFor("sanpoguide"))
-        assertEquals(12, listed().minAppVersionFor("sanpoguide"))
         assertNull(listed().minAppVersionFor("cycle"))
     }
 }

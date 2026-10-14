@@ -85,28 +85,23 @@ class ListedChannel(
     val regions: List<String>,
     val icon: FileRef,
     val pkg: PackageRef,
-    val minAppVersion: Int,
     val approvedAt: Instant,
-    /** The kinds of material the channel uses (API-002 P-14); empty when the list leaves it out. */
-    val media: List<String> = emptyList(),
-    /** Bytes fetched ahead when the channel is chosen, collections included (P-14); null when the list leaves it out. */
-    val resourcesSize: Long? = null,
-    /** API-002 P-19: as the package writes them; `["walk"]` when the list leaves it out (API-003 G-6). */
-    val activities: List<String> = listOf(Activity.WALK.json),
-    val genres: List<String> = emptyList(),
-    val requires: List<String> = emptyList(),
-    /** API-002 P-20: the version each app needs, by app id; null when the list leaves it out. */
-    val minAppVersions: Map<String, Int>? = null,
-    /** API-002 P-16: the channel carries promotion; false when the list leaves it out. */
+    /** The kinds of material the channel uses (API-002 P-14). */
+    val media: List<String>,
+    /** Bytes fetched ahead when the channel is chosen, collections included (P-14). */
+    val resourcesSize: Long,
+    /** API-002 P-19: as the package writes them. */
+    val activities: List<String>,
+    val genres: List<String>,
+    val requires: List<String>,
+    /** API-002 P-20: the version each app needs, by app id. */
+    val minAppVersions: Map<String, Int>,
+    /** API-002 P-16: the channel carries promotion. */
     val promotional: Boolean = false,
 ) {
     /** The version [appId] needs, or null if none (API-002 P-20). */
-    fun minAppVersionFor(appId: String): Int? = minAppVersionFor(appId, minAppVersions, minAppVersion)
+    fun minAppVersionFor(appId: String): Int? = minAppVersions[appId]
 }
-
-/** API-002 P-20: an app's own entry; without the map, [legacy] is SanpoGuide's. */
-internal fun minAppVersionFor(appId: String, byApp: Map<String, Int>?, legacy: Int): Int? =
-    if (byApp != null) byApp[appId] else legacy.takeIf { appId == AppIds.SANPOGUIDE }
 
 /** One entry of `collections[]` (API-002 P-10・P-15). */
 class ListedCollection(
@@ -126,14 +121,13 @@ class ListedCollection(
     /** A copy of the package's grants, to choose before fetching; the package must agree. */
     val grants: Grants,
     val pkg: PackageRef,
-    val minAppVersion: Int,
     val approvedAt: Instant,
-    /** API-002 P-20; null when the list leaves it out. */
-    val minAppVersions: Map<String, Int>? = null,
-    /** API-002 P-16: made to promote, so selectors never choose it (API-004); false when the list leaves it out. */
+    /** API-002 P-20: the version each app needs, by app id. */
+    val minAppVersions: Map<String, Int>,
+    /** API-002 P-16: made to promote, so selectors never choose it (API-004). */
     val promotional: Boolean = false,
 ) {
-    fun minAppVersionFor(appId: String): Int? = minAppVersionFor(appId, minAppVersions, minAppVersion)
+    fun minAppVersionFor(appId: String): Int? = minAppVersions[appId]
 }
 
 class RevokedCollection(val id: String, val versions: List<Int>?, val reason: String, val revokedAt: Instant) {
@@ -153,7 +147,7 @@ class ChannelList(
     val sha256: String,
     val channels: List<ListedChannel>,
     val revoked: List<RevokedChannel>,
-    /** Approved collections (API-002); empty when the list leaves it out. */
+    /** Approved collections (API-002). */
     val collections: List<ListedCollection> = emptyList(),
     /** Kept apart from [revoked]: collection ids are another namespace (P-11). */
     val revokedCollections: List<RevokedCollection> = emptyList(),
@@ -265,10 +259,10 @@ class ProviderDocuments(private val ed25519: Ed25519Verifier) {
             revoked = list.getJSONArray("revoked").objects().map { r ->
                 RevokedChannel(r.getString("id"), r.optJSONArray("versions")?.ints(), r.getString("reason"), instant(r.getString("revokedAt")))
             },
-            collections = list.optJSONArray("collections")?.objects()?.map(::listedCollection).orEmpty(),
-            revokedCollections = list.optJSONArray("revokedCollections")?.objects()?.map { r ->
+            collections = list.getJSONArray("collections").objects().map(::listedCollection),
+            revokedCollections = list.getJSONArray("revokedCollections").objects().map { r ->
                 RevokedCollection(r.getString("id"), r.optJSONArray("versions")?.ints(), r.getString("reason"), instant(r.getString("revokedAt")))
-            }.orEmpty(),
+            },
         )
     }
 
@@ -332,14 +326,13 @@ class ProviderDocuments(private val ed25519: Ed25519Verifier) {
         regions = c.optJSONArray("regions")?.strings().orEmpty(),
         icon = c.getJSONObject("icon").let { FileRef(it.getString("url"), it.getString("sha256")) },
         pkg = packageRef(c.getJSONObject("package")),
-        minAppVersion = c.getInt("minAppVersion"),
         approvedAt = instant(c.getString("approvedAt")),
-        media = c.optJSONArray("media")?.strings().orEmpty(),
-        resourcesSize = if (c.has("resourcesSize")) c.getLong("resourcesSize") else null,
-        activities = c.optJSONArray("activities")?.strings() ?: listOf(Activity.WALK.json),
-        genres = c.optJSONArray("genres")?.strings().orEmpty(),
-        requires = c.optJSONArray("requires")?.strings().orEmpty(),
-        minAppVersions = c.optJSONObject("minAppVersions")?.let(::versionsByApp),
+        media = c.getJSONArray("media").strings(),
+        resourcesSize = c.getLong("resourcesSize"),
+        activities = c.getJSONArray("activities").strings(),
+        genres = c.getJSONArray("genres").strings(),
+        requires = c.getJSONArray("requires").strings(),
+        minAppVersions = versionsByApp(c.getJSONObject("minAppVersions")),
         promotional = c.optBoolean("promotional", false),
     )
 
@@ -369,9 +362,8 @@ class ProviderDocuments(private val ed25519: Ed25519Verifier) {
             )
         },
         pkg = packageRef(c.getJSONObject("package")),
-        minAppVersion = c.getInt("minAppVersion"),
         approvedAt = instant(c.getString("approvedAt")),
-        minAppVersions = c.optJSONObject("minAppVersions")?.let(::versionsByApp),
+        minAppVersions = versionsByApp(c.getJSONObject("minAppVersions")),
         promotional = c.optBoolean("promotional", false),
     )
 

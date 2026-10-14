@@ -52,6 +52,7 @@ internal fun manifestJson(publisher: String?, change: JSONObject.() -> Unit = {}
     {
       "format": 1, "id": "kamakura-history", "version": 3,
       "name": "鎌倉歴史散歩", "summary": "鎌倉の寺社と武士の歴史を、語り部の口調で", "lang": "ja",
+      "activities": ["walk"],
       "greeting": "ここからは、鎌倉の歴史をたどりながら歩きましょう。",
       "talk": { "level": "normal",
                 "events": { "spot": true, "revisit": true, "milestone": true, "rest": false, "start": true, "finish": true } },

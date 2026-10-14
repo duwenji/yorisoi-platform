@@ -20,7 +20,7 @@ data class StationManifest(
     val guideLength: GuideLength,
     val moodTone: Boolean,
     val sound: SoundChoice,
-    /** API-003: what the channel is for. A format 1 channel is a walking one (G-6). */
+    /** API-003: what the channel is for. */
     val activities: Set<Activity> = setOf(Activity.WALK),
     val genres: Set<Genre> = emptySet(),
     /** API-003: what an app must implement for this channel to make sense. */

@@ -124,7 +124,7 @@ class ProviderDocumentsTest {
         assertEquals(listOf("xn7"), kamakura.regions)
         assertEquals(1, kamakura.pkg.format)
         assertNull(list.channels[1].publisherChange)
-        assertEquals(99, list.channels[1].minAppVersion)
+        assertEquals(99, list.channels[1].minAppVersionFor("sanpoguide"))
         val revoked = list.revoked.single()
         assertTrue(revoked.covers(2))
         assertFalse(revoked.covers(3))
@@ -141,15 +141,16 @@ class ProviderDocumentsTest {
         assertTrue(collection.grants.allows(kamakura.publisher))
         assertFalse(collection.grants.allows("sg1" + "a".repeat(32)))
         assertEquals(9120, collection.pkg.size)
-        assertEquals(14, collection.minAppVersion)
+        assertEquals(14, collection.minAppVersionFor("sanpoguide"))
         assertEquals(setOf("sg1" + "d".repeat(32)), list.formerProducerIds(collection.producer))
         assertEquals("old-collection", list.revokedCollections.single().id)
         assertTrue(list.revokedCollections.single().covers(1))
-        // Channels without media or sizes still read (they are optional).
+        // A channel without material lists no media and nothing to fetch ahead.
         assertEquals(emptyList<String>(), kamakura.media)
-        assertNull(kamakura.resourcesSize)
+        assertEquals(0L, kamakura.resourcesSize)
+        assertEquals(listOf("walk"), kamakura.activities)
         assertEquals(setOf("sg1" + "a".repeat(32)), list.formerPublisherIds(kamakura.publisher))
-        // A list that leaves it out marks nothing as promotional.
+        // A list that leaves it out marks nothing as promotional (an optional flag).
         assertFalse(kamakura.promotional)
     }
 
@@ -163,7 +164,7 @@ class ProviderDocumentsTest {
               "name": "鎌倉音声ガイド", "summary": "寺社の音声ガイド", "media": ["text", "audio"], "resourcesSize": 2480000,
               "tags": ["history", "faith"], "regions": ["xn7"], "grants": { "publishers": $grants },
               "package": { "url": "https://cdn.example.com/col/k-2.zip", "sha256": "${"0".repeat(64)}", "size": 9120, "format": 1 },
-              "minAppVersion": 14, "approvedAt": "2026-10-11T09:00:00Z" }
+              "minAppVersions": { "sanpoguide": 14 }, "approvedAt": "2026-10-11T09:00:00Z" }
             """.trimIndent(),
         )
         val json = listWith { body ->
@@ -200,7 +201,7 @@ class ProviderDocumentsTest {
                   "name": "商店街のお知らせ", "summary": "お店の紹介", "media": ["text"], "resourcesSize": 1000,
                   "tags": ["shopping"], "grants": { "publishers": "*" }, "promotional": true,
                   "package": { "url": "https://cdn.example.com/col/s-1.zip", "sha256": "${"0".repeat(64)}", "size": 900, "format": 1 },
-                  "minAppVersion": 20, "approvedAt": "2026-10-11T09:00:00Z" }
+                  "minAppVersions": { "sanpoguide": 20 }, "approvedAt": "2026-10-11T09:00:00Z" }
                 """.trimIndent(),
             )))
         }
@@ -226,6 +227,9 @@ class ProviderDocumentsTest {
         assertEquals(ProviderError.EXPIRED, error { docs.channelList(listWith { it.put("expiresAt", "2026-10-18T03:00:00.000Z") }, keyset, now) })
         assertEquals(ProviderError.BAD_SIGNATURE, error { docs.channelList(listWith(editDigest = { it.put("type", "test-ticket") }), keyset, now) })
         assertEquals(ProviderError.UNSUPPORTED_VERSION, error { docs.channelList(listWith { it.put("format", 2) }, keyset, now) })
+        // A field the list must carry is missing.
+        assertEquals(ProviderError.BAD_DOCUMENT, error { docs.channelList(listWith { it.getJSONArray("channels").getJSONObject(0).remove("minAppVersions") }, keyset, now) })
+        assertEquals(ProviderError.BAD_DOCUMENT, error { docs.channelList(listWith { it.remove("collections") }, keyset, now) })
         // The key: unknown, revoked, or not yet valid when the list was issued.
         assertEquals(ProviderError.UNKNOWN_KEY, error { docs.channelList(listWith(keyId = "k-other"), keyset, now) })
         val revoked = Keyset(keyset.provider, keyset.seq, keyset.keys, setOf("k-2026-10"))
