@@ -12,7 +12,7 @@
 | 作成者 | Claude（開発者との検討） |
 | 承認者 | 開発者（1.0: 2026-10-13） |
 | ステータス | 実施済（2026-10-13。手元のフォルダの整理を除く） |
-| 版 | 1.0 |
+| 版 | 1.1 |
 
 ## 目的・背景
 
@@ -58,7 +58,7 @@
 |---|---|---|
 | R-1 | 始める時期 | PR #55（yorisoi への改名）をマージしてから始める。#55 はパッケージと公開の座標を変えるので、先に分けると衝突が大きくなる。#55 のあとは、分け終わるまで SanpoGuide の `main` への変更を止める |
 | R-2 | `yorisoi-platform` に移すもの | `platform/` のモジュール（`core-format`・`core-prompt`・`kit-voice`・`kit-llm`・`kit-geo`・`kit-mood`・`kit-companion`）、Gradle の wrapper と `libs.versions.toml`（写す）、エコシステム全体の文書（下の表）。今後の `templates/`（ADR-003 T-8） |
-| R-3 | SanpoGuide のリポジトリに残すもの | `apps/sanpoguide/app`・`apps/sanpoguide/prompts`、アプリの文書（下の表）、署名の設定（`keystore.properties.example`）、`releases/`。モジュールはリポジトリの直下に上げる（`:apps:sanpoguide:app` → `:app`、`:apps:sanpoguide:prompts` → `:prompts`）。アプリだけのリポジトリで、深い階層の意味がなくなるため。`applicationId`・パッケージ名・リソースの中のパス（`sanpoguide/channels/…`）は変えない |
+| R-3 | SanpoGuide のリポジトリに残すもの | `apps/sanpoguide/app`・`apps/sanpoguide/prompts`、アプリの文書（下の表）、署名の設定（`keystore.properties.example`）、`releases/`。モジュールはリポジトリの直下に上げる（`:apps:sanpoguide:app` → `:app`、`:apps:sanpoguide:prompts` → `:prompts`）。アプリだけのリポジトリで、深い階層の意味がなくなるため。`applicationId`・パッケージ名・リソースの中のパス（`sanpoguide/channels/…`）は変えない（`applicationId`・パッケージ名は、分割の後に ADR-003 1.4 で `io.github.duwenji.yorisoi.sanpoguide` に改めた） |
 | R-4 | 公開 | `yorisoi-platform` は、コアに加えて**キットも** GitHub Packages に公開する（キットは AAR、`kit-companion` は JAR）。座標は `io.github.duwenji.yorisoi:<モジュール名>`。版は全モジュールで 1 つ（`yorisoiVersion`）、タグは `v<版>`。コアだけ・キットだけの版を分けると、組み合わせの確認が増えるため。最初の版は 1.0.0（新しい座標なので 1.0.0 から始める。開発者の判断、2026-10-13。yorisoi の座標ではまだ公開していない。タグは `michizure-core-v1.3.0` まで） |
 | R-5 | プロンプト・パックの公開 | SanpoGuide のリポジトリから公開する（座標 `io.github.duwenji.sanpoguide:prompts` は変えない。タグ `prompts-v<版>`）。GitHub Packages では、パッケージが最初に公開したリポジトリに結びつくため、新しいリポジトリから 2.0.0 を出せるかを手順 1 で確かめる（未決事項 No.2） |
 | R-6 | CI | リポジトリごとに持つ。`yorisoi-platform`: 全モジュールのテストと lint、公開の前にもう一度テスト。SanpoGuide: 公開された版を読んでテスト・lint・リリースビルド。GitHub Packages の Maven は公開のパッケージでも読むのにトークンが要る。`yorisoi-platform` は公開リポジトリなので `GITHUB_TOKEN` で読める（非公開のあいだは、各パッケージの「Actions のアクセス」に SanpoGuide のリポジトリを足す必要があった） |
@@ -124,7 +124,7 @@
 | 開発の流れ | コアとアプリを同時に直すときは、`yorisoi-platform` の PR を先にマージして公開し、アプリの PR で版を上げる。手元では R-7 の差し替えで一緒に試せる |
 | 管理システム | 読むリポジトリの URL が変わる。版の固定は今のまま |
 | チュートリアル | パスとリポジトリ名の書き直し（第 5 部が中心） |
-| Play・散策者 | 影響なし（`applicationId` と署名の鍵は変わらない） |
+| Play・散策者 | 影響なし（`applicationId` と署名の鍵は変わらない。`applicationId` は、Play に上げる前に ADR-003 1.4 で改めた） |
 | 文書 | ADR-003 1.3、本書、移した文書のリンク、両リポジトリの README、TODO.md |
 
 ## 未決事項・リスク
@@ -153,3 +153,4 @@
 |---|---|---|---|
 | 2026-10-13 | 0.1 | 草案 | Claude |
 | 2026-10-13 | 1.0 | 承認。未決事項 No.1（`yorisoi-sanpoguide`）・No.4 を解決 | Claude（承認: 開発者） |
+| 2026-10-14 | 1.1 | R-3 と影響の表に、ADR-003 1.4 で `applicationId`・パッケージ名を改めたことを注記（計画の中身は変えない） | Claude |
