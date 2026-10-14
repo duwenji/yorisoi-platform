@@ -15,7 +15,7 @@ internal open class Reject(val code: RejectCode, detail: String) : Exception(det
 
 /**
  * A value outside the ecosystem's lists in a cue (API-003「アプリでの知らない値」): rejected in
- * review, but an app reading a format 2 package leaves out the cue or presentation that holds it.
+ * review, but an app reading a package leaves out the cue or presentation that holds it.
  */
 internal class UnknownValue(code: RejectCode, detail: String) : Reject(code, detail)
 

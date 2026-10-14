@@ -116,7 +116,7 @@ internal object CueReader {
     private val OSM = Regex("(node|way|relation)/[1-9][0-9]*")
 
     /**
-     * @param lenient an app reading a format 2 package (API-003 G-3): a cue with a trigger it doesn't
+     * @param lenient an app reading a package (API-003 G-3): a cue with a trigger it doesn't
      *   know is left out, and so is a presentation it doesn't know (and the cue, if none is left)
      */
     fun read(json: JSONObject, resources: Resources, lenient: Boolean = false): StationMedia {

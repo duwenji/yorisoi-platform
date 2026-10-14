@@ -34,7 +34,7 @@ enum class Feature(override val json: String) : JsonValue {
 
 /**
  * How strictly a package is read (API-003 G-3). [REVIEW], the channel management system's machine
- * review, turns away any value the ecosystem's lists don't hold. [APP] reads a format 2 package the
+ * review, turns away any value the ecosystem's lists don't hold. [APP] reads a package the
  * way an app must when newer values may be in it ("アプリでの知らない値"): never looser than the
  * channel meant, but without turning it away for what this app doesn't know yet.
  */

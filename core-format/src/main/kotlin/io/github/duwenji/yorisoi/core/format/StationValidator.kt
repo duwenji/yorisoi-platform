@@ -41,7 +41,7 @@ enum class StationOrigin { BUILT_IN, THIRD_PARTY }
 /**
  * What the approved channel list says about a package; the package must agree. [activities],
  * [genres] and [requires] are the list's values as written (API-002 P-19); null skips the check
- * (the list leaves them out, or a caller that doesn't have them).
+ * (a caller that doesn't have them).
  */
 data class ListedAs(
     val id: String,
@@ -66,9 +66,8 @@ data class ListedAs(
  * is turned away without reading it. The review tools pass [ALL_STAGES] to check everything.
  */
 object StationValidator {
-    /** The package formats this core-format reads (API-003 1.x and 2.0). */
-    val FORMATS = 1..2
-    const val LATEST_FORMAT = 2
+    /** The package format this core-format reads (API-003). */
+    const val FORMAT = 1
     const val MAX_FILES = 100
     const val MAX_TOTAL_BYTES = 2 * 1024 * 1024
     /** Every stage of API-003 M-1; what the review tools check with. */
@@ -113,9 +112,9 @@ object StationValidator {
 
         val json = readJson(files, MANIFEST, RejectCode.BAD_MANIFEST)
         val format = json.int("format")
-        if (format !in FORMATS) reject(RejectCode.UNSUPPORTED_FORMAT, "format $format")
-        // API-003 G-3: an app reads a format 2 package expecting values newer than it knows.
-        val lenient = strictness == Strictness.APP && format >= 2
+        if (format != FORMAT) reject(RejectCode.UNSUPPORTED_FORMAT, "format $format")
+        // API-003 G-3: an app reads a package expecting values newer than it knows.
+        val lenient = strictness == Strictness.APP
         val allowed = buildSet {
             add(MANIFEST)
             Slot.entries.forEach { add(it.path) }
@@ -149,7 +148,7 @@ object StationValidator {
             }
             if (manifest.publisher != listedAs.publisher) reject(RejectCode.PUBLISHER_MISMATCH, "publisher ${manifest.publisher}")
             // API-002 P-19: the list's values are copied from the package, as written.
-            val written = writtenEcosystemValues(json, format)
+            val written = writtenEcosystemValues(json)
             listOf("activities" to listedAs.activities, "genres" to listedAs.genres, "requires" to listedAs.requires).forEach { (field, listed) ->
                 if (listed != null && listed.toSet() != written.getValue(field).toSet()) {
                     reject(RejectCode.BAD_MANIFEST, "$field ${written.getValue(field)} is listed as $listed")
@@ -208,24 +207,15 @@ object StationValidator {
         if (prefer.size > 8) reject(RejectCode.BAD_VALUE, "spots.prefer has ${prefer.size} kinds (max 8)")
         (prefer intersect skip.toSet()).firstOrNull()?.let { reject(RejectCode.BAD_VALUE, "${it.json} is both preferred and skipped") }
         val mood = json.obj("mood")
-        val activities: Set<Activity>
-        val genres: Set<Genre>
-        val requires: Set<Feature>
-        if (format >= 2) {
-            val written = json.list("activities").strings("activities", RejectCode.BAD_MANIFEST)
-            if (written.size !in 1..4) reject(RejectCode.BAD_VALUE, "activities has ${written.size} values (1..4)")
-            activities = written.distinctOrReject("activities").mapNotNull { parseEnum<Activity>(it) ?: unknown("activities", it, restricts = false) }.toSet()
-            val g = json.optList("genres").strings("genres", RejectCode.BAD_MANIFEST)
-            if (g.size > 3) reject(RejectCode.BAD_VALUE, "genres has ${g.size} values (max 3)")
-            genres = g.distinctOrReject("genres").mapNotNull { parseEnum<Genre>(it) ?: unknown("genres", it, restricts = false) }.toSet()
-            val f = (json.optNullable("requires")?.let { json.obj("requires").optList("features") } ?: emptyList()).strings("requires.features", RejectCode.BAD_MANIFEST)
-            if (f.size > 20) reject(RejectCode.BAD_VALUE, "requires.features has ${f.size} values (max 20)")
-            requires = f.distinctOrReject("requires.features").mapNotNull { parseEnum<Feature>(it) ?: unknown("requires.features", it, restricts = true) }.toSet()
-        } else {
-            activities = setOf(Activity.WALK)
-            genres = emptySet()
-            requires = emptySet()
-        }
+        val written = json.list("activities").strings("activities", RejectCode.BAD_MANIFEST)
+        if (written.size !in 1..4) reject(RejectCode.BAD_VALUE, "activities has ${written.size} values (1..4)")
+        val activities = written.distinctOrReject("activities").mapNotNull { parseEnum<Activity>(it) ?: unknown("activities", it, restricts = false) }.toSet()
+        val g = json.optList("genres").strings("genres", RejectCode.BAD_MANIFEST)
+        if (g.size > 3) reject(RejectCode.BAD_VALUE, "genres has ${g.size} values (max 3)")
+        val genres = g.distinctOrReject("genres").mapNotNull { parseEnum<Genre>(it) ?: unknown("genres", it, restricts = false) }.toSet()
+        val f = (json.optNullable("requires")?.let { json.obj("requires").optList("features") } ?: emptyList()).strings("requires.features", RejectCode.BAD_MANIFEST)
+        if (f.size > 20) reject(RejectCode.BAD_VALUE, "requires.features has ${f.size} values (max 20)")
+        val requires = f.distinctOrReject("requires.features").mapNotNull { parseEnum<Feature>(it) ?: unknown("requires.features", it, restricts = true) }.toSet()
         val talkLevel = talk.string("level").let { parseEnum<TalkLevel>(it) ?: unknown("talk.level", it, restricts = true) ?: TalkLevel.QUIET }
         val guideLength = json.obj("guide").string("length").let { parseEnum<GuideLength>(it) ?: unknown("guide.length", it, restricts = true) ?: GuideLength.SHORT }
         val sound = mood.string("sound").let { parseEnum<SoundChoice>(it) ?: unknown("mood.sound", it, restricts = false) ?: SoundChoice.AUTO }
@@ -280,17 +270,13 @@ object StationValidator {
     private fun List<String>.distinctOrReject(field: String): List<String> =
         also { if (toSet().size != size) reject(RejectCode.BAD_VALUE, "$field has duplicates") }
 
-    /** `activities`, `genres` and `requires.features` as written; what format 1 means by them (API-003 G-6). */
-    private fun writtenEcosystemValues(json: JSONObject, format: Int): Map<String, List<String>> = if (format >= 2) {
-        mapOf(
-            "activities" to json.list("activities").strings("activities", RejectCode.BAD_MANIFEST),
-            "genres" to json.optList("genres").strings("genres", RejectCode.BAD_MANIFEST),
-            "requires" to (json.optNullable("requires")?.let { json.obj("requires").optList("features") } ?: emptyList())
-                .strings("requires.features", RejectCode.BAD_MANIFEST),
-        )
-    } else {
-        mapOf("activities" to listOf(Activity.WALK.json), "genres" to emptyList(), "requires" to emptyList())
-    }
+    /** `activities`, `genres` and `requires.features` as written. */
+    private fun writtenEcosystemValues(json: JSONObject): Map<String, List<String>> = mapOf(
+        "activities" to json.list("activities").strings("activities", RejectCode.BAD_MANIFEST),
+        "genres" to json.optList("genres").strings("genres", RejectCode.BAD_MANIFEST),
+        "requires" to (json.optNullable("requires")?.let { json.obj("requires").optList("features") } ?: emptyList())
+            .strings("requires.features", RejectCode.BAD_MANIFEST),
+    )
 }
 
 /** Which kind of package a `signature.json` signs: its payload `type`, and the fields naming it and its owner. */

@@ -106,9 +106,8 @@
 
 | No. | 論点 | 決定 |
 |---|---|---|
-| P-19 | 絞り込みの情報 | `channels[]` に `activities`・`genres`・`requires`（`features` の配列）を載せる。管理システムがパッケージの `channel.json` から写す（format 1 のパッケージは `["walk"]`・`[]`・`[]`。API-003 G-6）。アプリはパッケージを取得する前に、リストの値で絞り込める（API-003 G-4）。取得したあと、パッケージの値と一致するかを確かめる |
-| P-20 | アプリごとの必要な版 | アプリごとに versionCode が違うため、`channels[].minAppVersions`・`collections[].minAppVersions`（アプリの ID → versionCode）を載せる。アプリの ID は `core-format` の一覧（最初は `sanpoguide`）。アプリは自分の ID の値を使い、値がなければ版の条件はない。`minAppVersion` には SanpoGuide の値を入れる（`minAppVersions` を読まないアプリのため） |
-| P-21 | `minAppVersions` を読まないアプリ | format 2 のパッケージは `package.format` で、format 2 を知らないアプリの一覧に出ない（API-003 G-7）。素材集の `grants.apps`（API-004）が SanpoGuide を含まないとき、管理システムはその素材集の `minAppVersion` を、どのアプリにもない版にする（宣伝の P-17 と同じやり方） |
+| P-19 | 絞り込みの情報 | `channels[]` に `activities`・`genres`・`requires`（`features` の配列）を載せる。管理システムがパッケージの `channel.json` から写す。アプリはパッケージを取得する前に、リストの値で絞り込める（API-003 G-4）。取得したあと、パッケージの値と一致するかを確かめる |
+| P-20 | アプリごとの必要な版 | アプリごとに versionCode が違うため、`channels[].minAppVersions`・`collections[].minAppVersions`（アプリの ID → versionCode）を載せる。アプリの ID は `core-format` の一覧（最初は `sanpoguide`）。アプリは自分の ID の値を使い、値がなければ版の条件はない。チャンネルの過ごし方・必要な機能が合わないアプリ、素材集の `grants.apps`（API-004）が含まないアプリは載せない（そのアプリは P-19 と `grants.apps` で使わない） |
 
 ### 全体の構成
 
@@ -249,13 +248,12 @@ flowchart LR
       "tags": ["history", "temple"],
       "regions": ["xn7"],
       "icon": { "url": "https://cdn.example.com/icons/kamakura-history-3.png", "sha256": "<hex>" },
-      "package": { "url": "https://cdn.example.com/pkg/kamakura-history-3.zip", "sha256": "<hex>", "size": 18342, "format": 2 },
+      "package": { "url": "https://cdn.example.com/pkg/kamakura-history-3.zip", "sha256": "<hex>", "size": 18342, "format": 1 },
       "activities": ["walk", "cycle"],
       "genres": ["history"],
       "requires": ["slot:guide"],
       "media": ["text", "image", "audio"],
       "resourcesSize": 4820000,
-      "minAppVersion": 12,
       "minAppVersions": { "sanpoguide": 12 },
       "approvedAt": "2026-10-02T09:00:00Z"
     }
@@ -277,7 +275,7 @@ flowchart LR
       "regions": ["xn7"],
       "grants": { "publishers": "*" },
       "package": { "url": "https://cdn.example.com/col/kamakura-audio-guide-2.zip", "sha256": "<hex>", "size": 9120, "format": 1 },
-      "minAppVersion": 14,
+      "minAppVersions": { "sanpoguide": 14 },
       "approvedAt": "2026-10-11T09:00:00Z"
     }
   ],
@@ -298,16 +296,15 @@ flowchart LR
 | `channels[].publisherChange` | object? | 運営がチャンネル提供者の鍵を移し替えた（P-9・ADR-001 C-11）ときだけ付ける。`from` は前のアカウントID、`at` は移し替えた日時、`reason` は散策者に見せる理由。移し替え後の最初の版から、少なくとも 90 日は載せ続ける |
 | `channels[].regions` | string[]? | 地域に限ったチャンネルの geohash の接頭辞。省略するとどこでも使える。アプリは一覧の並び順に使うだけで、地域の外でも使える |
 | `channels[].package.format` | int | パッケージの形式の版（API-003）。アプリが知らない版のチャンネルは一覧に出さない |
-| `channels[].minAppVersion` | int | 必要なアプリの versionCode。満たさなければ一覧に「アプリの更新が必要」と出す。SanpoGuide の値。`minAppVersions` を知るアプリはそちらを使う |
-| `channels[].minAppVersions` | object? | （P-20）アプリの ID → 必要な versionCode。自分の ID の値がなければ版の条件はない |
-| `channels[].activities` | string[]? | （P-19）パッケージの `activities`（format 1 は `["walk"]`）。省略は `["walk"]` として読む |
-| `channels[].genres` | string[]? | （P-19）パッケージの `genres` |
-| `channels[].requires` | string[]? | （P-19）パッケージの `requires.features` |
+| `channels[].minAppVersions` | object | （P-20）アプリの ID → 必要な versionCode。満たさなければ一覧に「アプリの更新が必要」と出す。自分の ID の値がなければ版の条件はない |
+| `channels[].activities` | string[] | （P-19）パッケージの `activities` |
+| `channels[].genres` | string[] | （P-19）パッケージの `genres` |
+| `channels[].requires` | string[] | （P-19）パッケージの `requires.features` |
 | `revoked[]` | object[] | 問題があって止めたチャンネル。`versions` を省略するとすべての版 |
-| `channels[].media` | string[]? | チャンネルが使う素材の種類（`text`・`image`・`audio`・`video`）。同梱の素材と、宣言した素材集の参照する素材を合わせたもの。組み込みの素材提供者の分は含めない |
-| `channels[].resourcesSize` | int? | チャンネルを選んだときに前もって取得する大きさの合計（バイト）。パッケージの外の素材のうち、きっかけで使うもの（映像を除く）と、宣言した素材集のパッケージ・素材を含む。リストに載っている素材集の版で計算する。基準で選ぶ素材（`selectors`）は含めない（取得する地域で変わるため。上限は API-004 P-6） |
+| `channels[].media` | string[] | チャンネルが使う素材の種類（`text`・`image`・`audio`・`video`）。同梱の素材と、宣言した素材集の参照する素材を合わせたもの。組み込みの素材提供者の分は含めない |
+| `channels[].resourcesSize` | int | チャンネルを選んだときに前もって取得する大きさの合計（バイト）。パッケージの外の素材のうち、きっかけで使うもの（映像を除く）と、宣言した素材集のパッケージ・素材を含む。リストに載っている素材集の版で計算する。基準で選ぶ素材（`selectors`）は含めない（取得する地域で変わるため。上限は API-004 P-6） |
 | `channels[].promotional` | bool? | 宣伝を含む（P-16）。アプリは一覧と選ぶ画面に「宣伝を含む」と出す |
-| `collections[]` | object[]? | 承認済みの素材集（P-10）。各素材集の最新の承認済みの版 1 つだけ |
+| `collections[]` | object[] | 承認済みの素材集（P-10）。空でも載せる。各素材集の最新の承認済みの版 1 つだけ |
 | `collections[].id` | string | リストの中で一意。チャンネルの `id` とは別の名前空間。書式はチャンネルの `id` と同じ。取り下げ・退会のあとも再利用しない（ADR-002 D-17） |
 | `collections[].version` | int | 審査を通るたびに増える |
 | `collections[].producer` | string | 素材提供者のアカウントID。素材集の `signature.json` の公開鍵と、`collection.json` の `producer` と一致すること |
@@ -318,10 +315,9 @@ flowchart LR
 | `collections[].grants` | object | （P-15）`collection.json` の `grants` の写し。アプリは取得後に一致を確かめ、違えば `collection_rejected` |
 | `collections[].package` | object | 素材集のパッケージ（API-004「素材集の形式」）。`format` は素材集の形式の版 |
 | `collections[].media`・`resourcesSize` | | 素材集の全体での値 |
-| `collections[].minAppVersion` | int | 必要なアプリの versionCode。満たさない素材集は、使うチャンネルの候補として「出せない」になる。SanpoGuide の値（P-20・P-21） |
-| `collections[].minAppVersions` | object? | （P-20）`channels[].minAppVersions` と同じ |
+| `collections[].minAppVersions` | object | （P-20）`channels[].minAppVersions` と同じ。満たさない素材集は、使うチャンネルの候補として「出せない」になる |
 | `collections[].promotional` | bool? | 宣伝を目的とした素材集（P-16）。基準で選ぶ対象にしない。素材を出すときは「宣伝: 素材提供者名」と示す |
-| `revokedCollections[]` | object[]? | 問題があって止めた素材集（P-11）。`versions` を省略するとすべての版。取り下げから 7 日載せる（チャンネルと同じ） |
+| `revokedCollections[]` | object[] | 問題があって止めた素材集（P-11）。空でも載せる。`versions` を省略するとすべての版。取り下げから 7 日載せる（チャンネルと同じ） |
 
 大きさの上限: リストは 1MB、パッケージは 2MB（素材集のパッケージも同じ）、アイコンは 100KB。超えたら取得を打ち切る。
 
@@ -448,15 +444,13 @@ sequenceDiagram
 | V-19 | `collections[].id` がリストの中で一意で、書式どおり。各素材集のパッケージを取得でき、SHA-256 と大きさがリストと一致する |
 | V-20 | 公開中のチャンネルが宣言した素材集が、リストの `collections[]` にあり、版が `minVersion` 以上で、利用許諾がチャンネル提供者を含む |
 | V-21 | `channels[].resourcesSize`・`media` が、パッケージと素材集から計算した値と一致する |
-| V-22 | アプリ: `collections[]` を知らないアプリが素材集を含むリストを読んでも、チャンネルの一覧と `revoked` の扱いが変わらない |
 | V-23 | アプリ: `revokedCollections` で素材集が止まり、それを使うチャンネルは使い続けられる |
 | V-24 | アプリ: `producerChange` の裏付けがある素材提供者の変更は受け入れ、裏付けのない変更は `producer_changed` で拒む |
 | V-25 | `collections[].tags`・`regions`・`grants` が、素材集のパッケージから計算した値と一致する |
 | V-26 | アプリ: 基準で選ぶ素材集の取得の要求が、今いる地域と隣の地域のものだけで、散歩中・従量制の回線では起きない |
-| V-27 | `channels[].activities`・`genres`・`requires` が、パッケージの `channel.json` の値と一致する（format 1 は `["walk"]`・`[]`・`[]`） |
+| V-27 | `channels[].activities`・`genres`・`requires` が、パッケージの `channel.json` の値と一致する |
 | V-28 | アプリ: リストの `activities`・`requires` で合わないチャンネルのパッケージを取得しない |
-| V-29 | アプリ: `minAppVersions` に自分の ID があればその値で、なければ版の条件なしで判断する。`minAppVersions` を読まないアプリは `minAppVersion` で判断する |
-| V-30 | `grants.apps` が SanpoGuide を含まない素材集の `minAppVersion` が、どのアプリにもない版になっている |
+| V-29 | アプリ: `minAppVersions` に自分の ID があればその値で、なければ版の条件なしで判断する |
 
 ## 互換性方針・移行メモ
 

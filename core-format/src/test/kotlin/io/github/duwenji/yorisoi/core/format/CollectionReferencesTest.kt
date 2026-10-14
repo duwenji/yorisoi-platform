@@ -33,12 +33,13 @@ class CollectionReferencesTest {
     private fun listed(version: Int = 2, grants: Grants = Grants.EVERYONE) = ListedCollection(
         "kamakura-audio-guide", version, producer, "鎌倉市観光協会", null, "鎌倉音声ガイド", "音声ガイド",
         listOf("text", "audio"), 1000, listOf("history"), listOf("xn7"), grants,
-        PackageRef("https://cdn.example.com/col/k.zip", "b".repeat(64), 900, 1), 14, at,
+        PackageRef("https://cdn.example.com/col/k.zip", "b".repeat(64), 900, 1), at, mapOf("sanpoguide" to 14),
     )
 
     private fun channel(publisherId: String, change: PublisherChange? = null) = ListedChannel(
         "kamakura-history", 3, publisherId, "鎌倉歴史散歩の会", change, "鎌倉歴史散歩", "歴史", null, listOf("ja"), emptyList(), emptyList(),
-        FileRef("https://cdn.example.com/i.png", "c".repeat(64)), PackageRef("https://cdn.example.com/p.zip", "d".repeat(64), 100, 1), 12, at,
+        FileRef("https://cdn.example.com/i.png", "c".repeat(64)), PackageRef("https://cdn.example.com/p.zip", "d".repeat(64), 100, 1), at,
+        emptyList(), 0, listOf("walk"), emptyList(), emptyList(), mapOf("sanpoguide" to 12),
     )
 
     private fun list(
