@@ -8,7 +8,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.time.Instant
 
-/** API-003 2.0: format 2's fields, how review and an app read unknown values, and choosing channels (V-23〜V-28). */
+/** API-003: format 2's fields, how review and an app read unknown values, and choosing channels (V-23〜V-28). */
 class FormatTwoTest {
     private class MemoryFiles(val files: Map<String, ByteArray>) : StationFiles {
         override fun list() = files.keys.toList()
@@ -187,7 +187,7 @@ class FormatTwoTest {
         assertEquals(emptyList<String>(), Compatibility.reasons(listed(listOf("walk", "boat")), walkingApp))
         assertEquals(listOf("not for walk (cycle)"), Compatibility.reasons(listed(listOf("cycle")), walkingApp))
         assertEquals(listOf("needs present:hologram"), Compatibility.reasons(listed(requires = listOf("slot:guide", "present:hologram")), walkingApp))
-        // P-20: an app's own entry; none means no requirement; an older list has only SanpoGuide's.
+        // P-20: an app's own entry; none means no requirement; a list without the map has only SanpoGuide's.
         assertEquals(14, listed(versions = mapOf("sanpoguide" to 14)).minAppVersionFor("sanpoguide"))
         assertNull(listed(versions = mapOf("cycle" to 3)).minAppVersionFor("sanpoguide"))
         assertEquals(12, listed().minAppVersionFor("sanpoguide"))

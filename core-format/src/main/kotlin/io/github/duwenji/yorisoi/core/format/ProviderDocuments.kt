@@ -87,28 +87,28 @@ class ListedChannel(
     val pkg: PackageRef,
     val minAppVersion: Int,
     val approvedAt: Instant,
-    /** The kinds of material the channel uses (API-002 1.2 P-14); empty in older lists. */
+    /** The kinds of material the channel uses (API-002 P-14); empty when the list leaves it out. */
     val media: List<String> = emptyList(),
-    /** Bytes fetched ahead when the channel is chosen, collections included (P-14); null in older lists. */
+    /** Bytes fetched ahead when the channel is chosen, collections included (P-14); null when the list leaves it out. */
     val resourcesSize: Long? = null,
-    /** API-002 1.4 P-19: as the package writes them; `["walk"]` in older lists (API-003 G-6). */
+    /** API-002 P-19: as the package writes them; `["walk"]` when the list leaves it out (API-003 G-6). */
     val activities: List<String> = listOf(Activity.WALK.json),
     val genres: List<String> = emptyList(),
     val requires: List<String> = emptyList(),
-    /** API-002 1.4 P-20: the version each app needs, by app id; null in older lists. */
+    /** API-002 P-20: the version each app needs, by app id; null when the list leaves it out. */
     val minAppVersions: Map<String, Int>? = null,
-    /** API-002 1.3 P-16: the channel carries promotion; false in older lists. */
+    /** API-002 P-16: the channel carries promotion; false when the list leaves it out. */
     val promotional: Boolean = false,
 ) {
     /** The version [appId] needs, or null if none (API-002 P-20). */
     fun minAppVersionFor(appId: String): Int? = minAppVersionFor(appId, minAppVersions, minAppVersion)
 }
 
-/** API-002 P-20: an app's own entry; without the map (an older list), [legacy] is SanpoGuide's. */
+/** API-002 P-20: an app's own entry; without the map, [legacy] is SanpoGuide's. */
 internal fun minAppVersionFor(appId: String, byApp: Map<String, Int>?, legacy: Int): Int? =
     if (byApp != null) byApp[appId] else legacy.takeIf { appId == AppIds.SANPOGUIDE }
 
-/** One entry of `collections[]` (API-002 1.2 P-10・P-15). */
+/** One entry of `collections[]` (API-002 P-10・P-15). */
 class ListedCollection(
     val id: String,
     val version: Int,
@@ -128,9 +128,9 @@ class ListedCollection(
     val pkg: PackageRef,
     val minAppVersion: Int,
     val approvedAt: Instant,
-    /** API-002 1.4 P-20; null in older lists. */
+    /** API-002 P-20; null when the list leaves it out. */
     val minAppVersions: Map<String, Int>? = null,
-    /** API-002 1.3 P-16: made to promote, so selectors never choose it (API-004); false in older lists. */
+    /** API-002 P-16: made to promote, so selectors never choose it (API-004); false when the list leaves it out. */
     val promotional: Boolean = false,
 ) {
     fun minAppVersionFor(appId: String): Int? = minAppVersionFor(appId, minAppVersions, minAppVersion)
@@ -153,7 +153,7 @@ class ChannelList(
     val sha256: String,
     val channels: List<ListedChannel>,
     val revoked: List<RevokedChannel>,
-    /** Approved collections (API-002 1.2); empty in older lists. */
+    /** Approved collections (API-002); empty when the list leaves it out. */
     val collections: List<ListedCollection> = emptyList(),
     /** Kept apart from [revoked]: collection ids are another namespace (P-11). */
     val revokedCollections: List<RevokedCollection> = emptyList(),

@@ -1,5 +1,5 @@
-// Speech (TTS with audio focus) and synthesized background sounds (RFC-002). Published with
-// the other modules (RFC-004 R-4).
+// Speech (TTS with audio focus) and synthesized background sounds. Published with
+// the other modules.
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)

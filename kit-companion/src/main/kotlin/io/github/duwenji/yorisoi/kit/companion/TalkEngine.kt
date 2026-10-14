@@ -2,7 +2,7 @@ package io.github.duwenji.yorisoi.kit.companion
 
 /**
  * The situation a [TalkEngine] decides on. The app says which of its gates are open now; how long
- * a gap is, or what counts as standing still, is the app's business (RFC-003 D-10).
+ * a gap is, or what counts as standing still, is the app's business.
  *
  * @param G the app's gates, e.g. "the small-talk gap has passed" or "not right after a channel switch"
  */
@@ -11,11 +11,11 @@ interface TalkGates<G> {
 }
 
 /**
- * One kind of thing the companion may say (RFC-003 D-11). [decide] is asked only while all of
+ * One kind of thing the companion may say. [decide] is asked only while all of
  * [gates] are open, and returns what to say, or null to let the next rule speak.
  *
  * @param safety a channel can't switch this off (ADR-003 E-6, E-13). A declaration for the app's
- *   profile and tests; the engine treats the rule like any other (RFC-003 D-13).
+ *   profile and tests; the engine treats the rule like any other.
  */
 class TalkRule<S : TalkGates<G>, D : Any, G>(
     val name: String,
@@ -25,7 +25,7 @@ class TalkRule<S : TalkGates<G>, D : Any, G>(
 )
 
 /**
- * Asks [rules] in order and takes the first decision; [nothing] when none speaks (RFC-003 D-12).
+ * Asks [rules] in order and takes the first decision; [nothing] when none speaks.
  * Holds no values and no state.
  */
 class TalkEngine<S : TalkGates<G>, D : Any, G>(val rules: List<TalkRule<S, D, G>>, private val nothing: D) {

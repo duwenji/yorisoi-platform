@@ -132,7 +132,7 @@ class CollectionValidatorTest {
         assertEquals(RejectCode.BAD_RESOURCE, code(check(signed(files(withFirst { put("tags", JSONArray(listOf("a", "b", "c", "d"))) })))))
         assertEquals(RejectCode.BAD_RESOURCE, code(check(signed(files(withFirst { put("tags", JSONArray().put("Not A Tag")) })))))
         assertEquals(RejectCode.BAD_RESOURCE, code(check(signed(files(withFirst { put("about", JSONObject().put("type", "spot").put("osm", "street/1")) })))))
-        // A spot subject carries its approximate position (API-004 1.3).
+        // A spot subject carries its approximate position (API-004).
         assertEquals(RejectCode.BAD_RESOURCE, code(check(signed(files(withFirst { getJSONObject("about").remove("lat") })))))
         assertEquals(RejectCode.BAD_RESOURCE, code(check(signed(files(withFirst { getJSONObject("about").put("lon", 190) })))))
         assertEquals(RejectCode.BAD_RESOURCE, code(check(signed(files(manifest { put("resources", JSONArray()) })))))

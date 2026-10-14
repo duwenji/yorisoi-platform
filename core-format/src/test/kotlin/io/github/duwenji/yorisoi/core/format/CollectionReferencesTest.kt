@@ -13,7 +13,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.time.Instant
 
-/** API-004 確かめる手順 3・4 (確認観点 W-07・W-08・W-13) and API-003 1.2's errors for collections. */
+/** API-004 確かめる手順 3・4 (確認観点 W-07・W-08・W-13) and API-003's errors for collections. */
 class CollectionReferencesTest {
     private val publisher = "sg1" + "p".repeat(32)
     private val formerPublisher = "sg1" + "q".repeat(32)

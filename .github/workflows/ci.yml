@@ -1,4 +1,4 @@
-# Checks every pull request (RFC-004 R-6): all modules' unit tests and lint, and that every
+# Checks every pull request: all modules' unit tests and lint, and that every
 # module can be packaged for publishing.
 name: CI
 

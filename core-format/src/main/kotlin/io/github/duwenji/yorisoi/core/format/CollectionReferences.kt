@@ -20,7 +20,7 @@ data class CollectionResolution(val statuses: Map<String, CollectionStatus>, val
     /**
      * The first reason to turn the channel away, for callers that need every reference sound: the
      * management system when a channel is submitted, and the app when it takes a third party's
-     * channel in (API-003 1.2 手順 9a). Not yet fetched collections don't count.
+     * channel in (API-003 手順 9a). Not yet fetched collections don't count.
      */
     fun rejection(): Pair<RejectCode, String>? =
         statuses.entries.firstNotNullOfOrNull { (alias, s) -> (s as? CollectionStatus.Unusable)?.let { it.code to "$alias: ${it.detail}" } }
@@ -43,7 +43,7 @@ object CollectionReferences {
      * @param publisher the channel's publisher; a grant to one of its former ids (`publisherChange`)
      *   still counts (API-004 W-13). Null for a built-in channel, which any grant to everyone allows.
      * @param packages the collections read so far, by id, at the version the list names.
-     * @param appId the app resolving, whose id a collection's `grants.apps` must hold (API-004 1.5
+     * @param appId the app resolving, whose id a collection's `grants.apps` must hold (API-004
      *   I-11); null for the management system, which reviews a channel for every app.
      */
     fun resolve(

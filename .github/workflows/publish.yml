@@ -1,4 +1,4 @@
-# Publishes every module to GitHub Packages when the tag v<version> is pushed (RFC-004 R-4).
+# Publishes every module to GitHub Packages when the tag v<version> is pushed.
 # The tag must match yorisoiVersion in gradle.properties.
 name: Publish
 

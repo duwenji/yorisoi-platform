@@ -1,15 +1,15 @@
 package io.github.duwenji.yorisoi.core.format
 
-/** What a channel is for (API-003 2.0 `activities`, ADR-003 E-24). */
+/** What a channel is for (API-003 `activities`, ADR-003 E-24). */
 enum class Activity(override val json: String) : JsonValue { WALK("walk"), CYCLE("cycle") }
 
-/** How users look for channels (API-003 2.0 `genres`). */
+/** How users look for channels (API-003 `genres`). */
 enum class Genre(override val json: String) : JsonValue {
     GENERAL("general"), HISTORY("history"), NATURE("nature"), FOOD("food"), SHOPPING("shopping"),
 }
 
 /**
- * What an app may or may not implement (API-003 2.0 `requires.features`): the prompt slots, the
+ * What an app may or may not implement (API-003 `requires.features`): the prompt slots, the
  * kinds of cue triggers, and the presentations.
  */
 enum class Feature(override val json: String) : JsonValue {

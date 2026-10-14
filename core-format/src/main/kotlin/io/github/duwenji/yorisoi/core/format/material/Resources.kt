@@ -32,7 +32,7 @@ sealed interface About {
     /**
      * [osm] is `node/…`, `way/…` or `relation/…`; with [name], a spot of the same name within 200m
      * of [lat], [lon] matches too. The position is approximate: in the spot or within 100m of it
-     * (API-004 1.3), enough for its region and for that match.
+     * (API-004), enough for its region and for that match.
      */
     data class Spot(val osm: String, val name: String?, val lat: Double, val lon: Double) : About
     data class Point(val lat: Double, val lon: Double, val radiusM: Int) : About

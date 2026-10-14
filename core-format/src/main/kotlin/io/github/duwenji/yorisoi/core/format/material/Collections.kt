@@ -55,9 +55,9 @@ data class CollectionManifest(
 data class CollectionPackage(val manifest: CollectionManifest, val resources: Resources)
 
 /**
- * What the approved list says about a collection (API-002 1.2 `collections[]`); the package must
+ * What the approved list says about a collection (API-002 `collections[]`); the package must
  * agree. A version signed before the producer moved to a new key names a former id
- * ([formerProducers], from `producerChange`), and is still the listed version (API-004 1.0 D-17).
+ * ([formerProducers], from `producerChange`), and is still the listed version (API-004 D-17).
  */
 data class CollectionListedAs(val id: String, val version: Int, val producer: String, val formerProducers: Set<String> = emptySet())
 
@@ -148,7 +148,7 @@ object CollectionValidator {
         )
     }
 
-    /** `"*"` for anyone, or 1–50 publishers' account ids; and optionally 1–20 app ids (API-004 1.5 I-11). */
+    /** `"*"` for anyone, or 1–50 publishers' account ids; and optionally 1–20 app ids (API-004 I-11). */
     private fun readGrants(g: org.json.JSONObject, strictness: Strictness): Grants {
         val publishers = when (val publishers = g.required("publishers")) {
             "*" -> null

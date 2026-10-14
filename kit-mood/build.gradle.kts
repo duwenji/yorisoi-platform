@@ -1,6 +1,6 @@
 // The mood (time of day, season, sky, place) and what follows from it: the screen's colors and
-// type, the scene drawn over a walk, and which background sound plays (RFC-002). Published with
-// the other modules (RFC-004 R-4).
+// type, the scene drawn over a walk, and which background sound plays. Published with
+// the other modules.
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)

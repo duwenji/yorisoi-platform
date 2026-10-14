@@ -23,11 +23,11 @@ enum class RejectCode(val json: String) {
     BAD_CUE("bad_cue"),
     UNSUPPORTED_RESOURCE("unsupported_resource"),
     RESOURCE_MISMATCH("resource_mismatch"),
-    /** API-003 1.2 / API-004: a reference that names nothing (an undeclared alias, an unknown producer, a missing resource). */
+    /** API-003 / API-004: a reference that names nothing (an undeclared alias, an unknown producer, a missing resource). */
     UNRESOLVED_REFERENCE("unresolved_reference"),
-    /** API-003 1.2: a collection's grants leave out this channel's publisher. */
+    /** API-003: a collection's grants leave out this channel's publisher. */
     NOT_GRANTED("not_granted"),
-    /** API-003 1.2: a declared collection isn't on the provider's list, or is older than `minVersion`. */
+    /** API-003: a declared collection isn't on the provider's list, or is older than `minVersion`. */
     COLLECTION_NOT_LISTED("collection_not_listed"),
 }
 
@@ -40,8 +40,8 @@ enum class StationOrigin { BUILT_IN, THIRD_PARTY }
 
 /**
  * What the approved channel list says about a package; the package must agree. [activities],
- * [genres] and [requires] are the list's values as written (API-002 1.4 P-19); null skips the check
- * (an older list, or a caller that doesn't have them).
+ * [genres] and [requires] are the list's values as written (API-002 P-19); null skips the check
+ * (the list leaves them out, or a caller that doesn't have them).
  */
 data class ListedAs(
     val id: String,
@@ -122,7 +122,7 @@ object StationValidator {
             if (origin == StationOrigin.THIRD_PARTY) add(SIGNATURE)
         }
         // Files under resources/ are allowed when a resource points at them; checked with the material below.
-        // A slot this app doesn't have is left unused (API-003 2.0); any other unknown file is not allowed.
+        // A slot this app doesn't have is left unused (API-003); any other unknown file is not allowed.
         paths.firstOrNull { it !in allowed && !it.startsWith(ResourceReader.RESOURCES_DIR) && !(lenient && it.startsWith(PROMPTS_DIR)) }
             ?.let { reject(RejectCode.UNEXPECTED_FILE, it) }
         if (origin == StationOrigin.THIRD_PARTY && SIGNATURE !in paths) reject(RejectCode.BAD_SIGNATURE, "no $SIGNATURE")
@@ -178,7 +178,7 @@ object StationValidator {
     }
 
     private fun readManifest(json: JSONObject, origin: StationOrigin, format: Int, lenient: Boolean): StationManifest {
-        // API-003 2.0「アプリでの知らない値」: restricting values the app doesn't know are noted, and the
+        // API-003「アプリでの知らない値」: restricting values the app doesn't know are noted, and the
         // channel isn't used (Compatibility); other unknown values are left out. Without leniency they're rejected.
         val unknownRestrictions = mutableListOf<String>()
         fun unknown(field: String, value: String, restricts: Boolean): Nothing? {
