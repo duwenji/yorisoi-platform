@@ -5,10 +5,10 @@ import io.github.duwenji.yorisoi.core.format.material.MaterialType
 import io.github.duwenji.yorisoi.core.format.material.Resources
 import org.json.JSONObject
 
-/** A third-party collection a channel uses, under a name of its own (API-003 1.2 `collections`). */
+/** A third-party collection a channel uses, under a name of its own (API-003 `collections`). */
 data class CollectionUse(val alias: String, val id: String, val minVersion: Int)
 
-/** Choose material by what it is rather than which it is (API-003 1.2 `selectors`, API-004「基準で選ぶ素材提供者」). */
+/** Choose material by what it is rather than which it is (API-003 `selectors`, API-004「基準で選ぶ素材提供者」). */
 data class Selector(
     val alias: String,
     val type: MaterialType,
@@ -24,7 +24,7 @@ data class Selector(
 /** When a cue fires (API-003「きっかけ」). */
 sealed interface Trigger {
     data class Spot(val osm: String, val name: String?) : Trigger
-    /** Any spot of these kinds (API-003 1.2, `"any": true`). */
+    /** Any spot of these kinds (API-003, `"any": true`). */
     data class AnySpot(val categories: List<SpotKind>) : Trigger
     data class Point(val lat: Double, val lon: Double, val radiusM: Int) : Trigger
     data class Event(val event: CueEvent) : Trigger

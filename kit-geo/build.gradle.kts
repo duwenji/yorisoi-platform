@@ -1,4 +1,4 @@
-// Places, routes, photos, weather and the map (RFC-002). Published with the other modules (RFC-004 R-4).
+// Places, routes, photos, weather and the map. Published with the other modules.
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)

@@ -7,9 +7,9 @@ plugins {
     alias(libs.plugins.kotlin.jvm) apply false
 }
 
-// Every module is published to GitHub Packages under one version (RFC-004 R-4): the core
+// Every module is published to GitHub Packages under one version: the core
 // libraries as JARs, the kits as AARs (kit-companion is plain JVM). The group and the module
-// names match the coordinates, so an app's composite build can stand in for them (RFC-004 R-7).
+// names match the coordinates, so an app's composite build can stand in for them.
 subprojects {
     group = "io.github.duwenji.yorisoi"
     version = providers.gradleProperty("yorisoiVersion").get()

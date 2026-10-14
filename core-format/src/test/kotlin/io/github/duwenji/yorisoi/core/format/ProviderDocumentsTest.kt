@@ -128,7 +128,7 @@ class ProviderDocumentsTest {
         val revoked = list.revoked.single()
         assertTrue(revoked.covers(2))
         assertFalse(revoked.covers(3))
-        // API-002 1.2: a collection as the channel management system signs it, and one taken off the list.
+        // API-002: a collection as the channel management system signs it, and one taken off the list.
         val collection = list.collections.single()
         assertEquals("kamakura-audio-guide", collection.id)
         assertEquals(2, collection.version)
@@ -149,12 +149,12 @@ class ProviderDocumentsTest {
         assertEquals(emptyList<String>(), kamakura.media)
         assertNull(kamakura.resourcesSize)
         assertEquals(setOf("sg1" + "a".repeat(32)), list.formerPublisherIds(kamakura.publisher))
-        // A list from before API-002 1.3 marks nothing as promotional.
+        // A list that leaves it out marks nothing as promotional.
         assertFalse(kamakura.promotional)
     }
 
     @Test
-    fun `a 1_2 list reads collections, their revocations and the channels' media`() {
+    fun `a list with collections reads them, their revocations and the channels' media`() {
         val producer = "sg1" + "c".repeat(32)
         fun collection(grants: String) = JSONObject(
             """
@@ -190,7 +190,7 @@ class ProviderDocumentsTest {
     }
 
     @Test
-    fun `a 1_3 list marks promotional channels and collections (API-002 P-16)`() {
+    fun `a list marks promotional channels and collections (API-002 P-16)`() {
         val json = listWith { body ->
             body.getJSONArray("channels").getJSONObject(0).put("promotional", true)
             body.getJSONArray("channels").getJSONObject(1).put("promotional", false)

@@ -15,7 +15,7 @@ dependencyResolutionManagement {
 rootProject.name = "yorisoi-platform"
 // The platform (ADR-003 E-2, E-28): core libraries (plain JVM) and Android kits. Each module's name
 // is its artifactId, so an app's composite build swaps the published versions for these sources
-// (RFC-004 R-7).
+//.
 include(":core-format")
 include(":core-prompt")
 include(":kit-voice")

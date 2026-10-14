@@ -3,7 +3,7 @@ package io.github.duwenji.yorisoi.kit.llm
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-/** Names the phone has already stored (RFC-002 R-8): renaming them loses every saved API key. */
+/** Names the phone has already stored: renaming them loses every saved API key. */
 class KeyCipherTest {
     @Test
     fun `api keys stay in the same Keystore entry`() {

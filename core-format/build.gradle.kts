@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 // The channel and collection package formats (API-003, API-004) and the channel list (API-002):
 // reading and checking packages, their signatures and the list. Plain JVM so the channel
-// management system's review tools run exactly the checks the apps run (ADR-003 E-3, RFC-002 R-2).
+// management system's review tools run exactly the checks the apps run (ADR-003 E-3).
 plugins {
     alias(libs.plugins.kotlin.jvm)
 }

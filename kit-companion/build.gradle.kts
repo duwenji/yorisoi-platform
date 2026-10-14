@@ -1,8 +1,8 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 // Deciding what to say now: rules in order, each behind gates the app opens and closes
-// (RFC-003 D-10〜D-14). Plain JVM: the engine holds no values, the app's rules and situation do.
-// Published with the other modules (RFC-004 R-4).
+//. Plain JVM: the engine holds no values, the app's rules and situation do.
+// Published with the other modules.
 plugins {
     alias(libs.plugins.kotlin.jvm)
 }

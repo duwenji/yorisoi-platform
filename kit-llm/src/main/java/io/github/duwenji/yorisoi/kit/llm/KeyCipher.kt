@@ -12,7 +12,7 @@ import javax.crypto.spec.GCMParameterSpec
 /** Encrypts API keys with an AES key that never leaves the Android Keystore. */
 object KeyCipher {
     private const val KEYSTORE = "AndroidKeyStore"
-    /** The Keystore entry holding the key: changing it loses every saved API key (RFC-002 R-8). */
+    /** The Keystore entry holding the key: changing it loses every saved API key. */
     internal const val ALIAS = "sanpo_api_keys"
     private const val TRANSFORMATION = "AES/GCM/NoPadding"
     private const val IV_BYTES = 12

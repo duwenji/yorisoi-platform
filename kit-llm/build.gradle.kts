@@ -1,5 +1,5 @@
-// AI services (Claude, OpenAI-compatible APIs) and the Keystore cipher for their keys (RFC-002).
-// Published with the other modules (RFC-004 R-4).
+// AI services (Claude, OpenAI-compatible APIs) and the Keystore cipher for their keys.
+// Published with the other modules.
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
