@@ -154,7 +154,7 @@ class ProviderDocumentsTest {
     }
 
     @Test
-    fun `a 1_2 list reads collections, their revocations and the channels' media`() {
+    fun `a list with collections reads them, their revocations and the channels' media`() {
         val producer = "sg1" + "c".repeat(32)
         fun collection(grants: String) = JSONObject(
             """
@@ -190,7 +190,7 @@ class ProviderDocumentsTest {
     }
 
     @Test
-    fun `a 1_3 list marks promotional channels and collections (API-002 P-16)`() {
+    fun `a list marks promotional channels and collections (API-002 P-16)`() {
         val json = listWith { body ->
             body.getJSONArray("channels").getJSONObject(0).put("promotional", true)
             body.getJSONArray("channels").getJSONObject(1).put("promotional", false)
