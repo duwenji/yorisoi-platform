@@ -58,7 +58,7 @@ data class ListedAs(
  * Covers unpacking the ZIP ([checkArchive]), the files, the publisher's signature, `channel.json`,
  * the prompt slots, and the material (resources, collections, selectors and cues; 手順 8・9 and the
  * part of 9a inside the package). Not here: the package's size and SHA-256 against the list (the
- * caller has the list), rendering the prompts ([io.github.duwenji.sanpoguide.prompt.StationPrompts]),
+ * caller has the list), rendering the prompts ([io.github.duwenji.yorisoi.sanpoguide.prompt.StationPrompts]),
  * and checking the collections a channel uses against the list (API-004 手順 3・4).
  *
  * `mediaStage` is the app stage the caller can show (API-003 M-1, [MediaStage]); a channel needing
