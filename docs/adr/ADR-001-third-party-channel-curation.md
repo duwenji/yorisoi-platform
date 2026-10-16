@@ -37,7 +37,7 @@
 - チャンネルのパッケージの形式（[API-003](../channel-package-format.md)）
 - 審査基準の具体的な中身（[channel-review-policy.md](../channel-review-policy.md)）
 - 組み込みのチャンネルの設計
-- 場所に紐づく第三者のコンテンツの配信（[TODO「第三者の媒体」](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/TODO.md#第三者の媒体広告の再生)・[API-001](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/secret-messages-api.md) の `publisher`）
+- 場所に紐づく第三者のコンテンツの配信（[API-001](../secret-messages-api.md) の `publisher`）
 
 ## 対応元ID（トレーサビリティ）
 
@@ -166,5 +166,5 @@ flowchart LR
 
 - [TODO.md「チャンネル」](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/TODO.md#チャンネル)
 - [channel-list-api.md（API-002）](../channel-list-api.md): 承認済みチャンネル・リストの形式
-- [secret-messages-api.md（API-001）](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/secret-messages-api.md): 鍵とアカウントID、D-5
+- [secret-messages-api.md（API-001）](../secret-messages-api.md): 鍵とアカウントID、D-5
 - [prompts.md](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/prompts.md): プロンプトの構成（第三者が差し替える範囲を決める元）
