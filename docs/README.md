@@ -9,6 +9,7 @@
 | [ADR-003](adr/ADR-003-companion-app-platform.md) | エコシステムの方針 |
 | [ADR-001](adr/ADR-001-third-party-channel-curation.md) | 第三者のチャンネルの審査と署名 |
 | [ADR-002](adr/ADR-002-material-producers.md) | 素材提供者 |
+| [ADR-004](adr/ADR-004-roles-of-ai-and-stakeholders.md) | 生成AI と関係者の役割 |
 | [API-001](secret-messages-api.md) | 秘密メッセージ サーバー API。OpenAPI は [api/](api/README.md) |
 | [API-002](channel-list-api.md) | 承認済みチャンネル・リスト |
 | [API-003](channel-package-format.md) | チャンネル・パッケージの形式 |
