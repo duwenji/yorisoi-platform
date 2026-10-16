@@ -477,6 +477,6 @@ sequenceDiagram
 ## 関連ドキュメント・参照リンク
 
 - [ADR-001](adr/ADR-001-third-party-channel-curation.md): 第三者のチャンネルは運営の審査と署名を経たものだけ取り込む
-- [secret-messages-api.md（API-001）](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/secret-messages-api.md): アカウントID、Ed25519、D-5
+- [secret-messages-api.md（API-001）](secret-messages-api.md): アカウントID、Ed25519、D-5
 - [ADR-002](adr/ADR-002-material-producers.md)・[material-producer-api.md（API-004）](material-producer-api.md): 素材の素材提供者と素材集
-- [TODO.md「チャンネル」「チャンネル管理システム」](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/TODO.md#チャンネル)
+- [TODO.md](TODO.md): エコシステム全体の残りの作業

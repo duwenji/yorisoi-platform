@@ -66,17 +66,8 @@ providers.gradleProperty("yorisoi.platformDir").orNull?.let { includeBuild(it) }
 1. `gradle.properties` の `yorisoiVersion` を上げる（すべてのモジュールで 1 つの版）
 2. `main` にマージしてから、タグ `v<版>` を push する。`.github/workflows/publish.yml` がテストして公開する
 
-形式や語彙を変えたときは、管理システムとアプリへの影響を契約書（`docs/` の API-002〜004）で確かめてから上げてください。
+形式や語彙を変えたときは、管理システムとアプリへの影響を契約書（`docs/` の API-001〜004）で確かめてから上げてください。
 
 ## 文書
 
-| 文書 | 内容 |
-|---|---|
-| [ADR-003](docs/adr/ADR-003-companion-app-platform.md) | エコシステムの方針 |
-| [ADR-001](docs/adr/ADR-001-third-party-channel-curation.md) | 第三者のチャンネルの審査と署名 |
-| [ADR-002](docs/adr/ADR-002-material-producers.md) | 素材提供者 |
-| [API-002](docs/channel-list-api.md) | 承認済みチャンネル・リスト |
-| [API-003](docs/channel-package-format.md) | チャンネル・パッケージの形式 |
-| [API-004](docs/material-producer-api.md) | 素材提供者 IF と素材集の形式 |
-| [channel-review-policy.md](docs/channel-review-policy.md) | 審査基準 |
-| [stakeholders.md](docs/stakeholders.md) | 関係者の呼び方 |
+エコシステム全体の文書（ADR・契約書・審査基準・関係者）は [docs/](docs/README.md) にあります。一覧、置き場所の決まり、文書の番号の呼び方もそこにあります。
