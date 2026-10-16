@@ -164,12 +164,12 @@ flowchart LR
 
 | ID | 追従タスク | 担当 | 時期 |
 |---|---|---|---|
-| T-1 | 文書を本書に合わせる: stakeholders.md（1 章に役割の分け方、4 章の課題と対応案）、ADR-002（D-2・D-28〜D-36、未決事項 No.1）、ADR-001（C-13、見直しの条件の費用の項）、審査基準（事前に確かめること、AI の一次審査、事後の対応、2.4 の削除）、API-002（`promotional`）、API-003（根拠の欄・利用者の上限との関係・宣伝の削除）、API-004（根拠に使ってよいかの項目・根拠の渡し方・宣伝の削除）、SanpoGuide の channels.md・prompts.md、yorisoi-console の文書（DES-012・利用ガイド・データモデル・管理 API） | Claude | 本書の承認後 |
+| T-1 | yorisoi-platform の文書を本書に合わせる: stakeholders.md、ADR-001（C-13、見直しの条件の費用の項）、ADR-002（D-2・D-28〜D-36、未決事項 No.1）、ADR-003（宣伝の例）、審査基準、API-002（`promotional`）、API-003（利用者の上限との関係・宣伝）、API-004（根拠） | Claude | 本書の承認後 |
 | T-2 | 通報の窓口と手順（ADR-002 T-1 と一緒に） | 開発者 | 第三者のチャンネルの公開の前 |
-| T-3 | アプリの実装（根拠・枠・上限・表示・通報の入口） | Claude | T-1 の後 |
-| T-4 | 管理システムの実装（根拠の許可と確認・AI の一次審査・通報の受け付け） | Claude | T-1 の後 |
+| T-3 | アプリの実装（根拠・枠・上限・表示・通報の入口）。SanpoGuide の channels.md・prompts.md も一緒に直す | Claude | T-1 の後 |
+| T-4 | 管理システムの実装（根拠の許可と確認・AI の一次審査・通報の受け付け）。yorisoi-console の文書も一緒に直す | Claude | T-1 の後 |
 | T-5 | 組み込みのチャンネルの CI での確認（H-13） | Claude | T-4 の後 |
-| T-6 | 宣伝の実装を削除する（H-16）: `core-format` の `promotional`、管理システムの申告・印・`promotionalMinAppVersions`（console DES-012）、SanpoGuide の宣伝の表示と設定 | Claude | T-1 の後 |
+| T-6 | 宣伝の実装を削除する（H-16）: `core-format` の `promotional`、管理システムの申告・印・`promotionalMinAppVersions`（console DES-012）、SanpoGuide の宣伝の表示と設定。各リポジトリの文書（console DES-012・利用ガイド・データモデル・管理 API、SanpoGuide の文書）も一緒に直す | Claude | T-1 の後 |
 
 見直しの条件:
 - 「サーバーの要否」の ADR で、運営が AI を中継することになったとき（H-6 ③・H-8・H-9）
