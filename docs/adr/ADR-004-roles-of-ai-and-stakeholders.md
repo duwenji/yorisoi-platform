@@ -170,7 +170,7 @@ flowchart LR
 | T-3 | アプリの実装（根拠・枠・上限・表示・通報の入口） | Claude | T-1 の後 |
 | T-4 | 管理システムの実装（根拠の許可と確認・AI の一次審査・通報の受け付け） | Claude | T-1 の後 |
 | T-5 | 組み込みのチャンネルの CI での確認（H-13） | Claude | T-4 の後 |
-| T-6 | 宣伝の区別の実装を取り除く（H-16）: `core-format` の `promotional`、管理システムの申告・印・`promotionalMinAppVersions`（ADR-003 T-13）、アプリの表示と設定（ADR-003 T-14） | Claude | T-1 の後 |
+| T-6 | 宣伝の区別の実装を取り除く（H-16）: `core-format` の `promotional`、管理システムの申告・印・`promotionalMinAppVersions`（console DES-012）、SanpoGuide の宣伝の表示と設定 | Claude | T-1 の後 |
 
 見直しの条件:
 - 「サーバーの要否」の ADR で、運営が AI を中継することになったとき（H-6 ③・H-8・H-9）
