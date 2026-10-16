@@ -96,8 +96,6 @@ class ListedChannel(
     val requires: List<String>,
     /** API-002 P-20: the version each app needs, by app id. */
     val minAppVersions: Map<String, Int>,
-    /** API-002 P-16: the channel carries promotion. */
-    val promotional: Boolean = false,
 ) {
     /** The version [appId] needs, or null if none (API-002 P-20). */
     fun minAppVersionFor(appId: String): Int? = minAppVersions[appId]
@@ -124,8 +122,6 @@ class ListedCollection(
     val approvedAt: Instant,
     /** API-002 P-20: the version each app needs, by app id. */
     val minAppVersions: Map<String, Int>,
-    /** API-002 P-16: made to promote, so selectors never choose it (API-004). */
-    val promotional: Boolean = false,
 ) {
     fun minAppVersionFor(appId: String): Int? = minAppVersions[appId]
 }
@@ -333,7 +329,6 @@ class ProviderDocuments(private val ed25519: Ed25519Verifier) {
         genres = c.getJSONArray("genres").strings(),
         requires = c.getJSONArray("requires").strings(),
         minAppVersions = versionsByApp(c.getJSONObject("minAppVersions")),
-        promotional = c.optBoolean("promotional", false),
     )
 
     private fun versionsByApp(o: JSONObject): Map<String, Int> =
@@ -359,12 +354,12 @@ class ProviderDocuments(private val ed25519: Ed25519Verifier) {
                     else -> fail(ProviderError.BAD_DOCUMENT, "grants.publishers of ${c.getString("id")}")
                 },
                 apps = g.optJSONArray("apps")?.strings()?.toSet(),
+                grounding = g.optBoolean("grounding", false),
             )
         },
         pkg = packageRef(c.getJSONObject("package")),
         approvedAt = instant(c.getString("approvedAt")),
         minAppVersions = versionsByApp(c.getJSONObject("minAppVersions")),
-        promotional = c.optBoolean("promotional", false),
     )
 
     private fun packageRef(p: JSONObject) = PackageRef(p.getString("url"), p.getString("sha256"), p.getInt("size"), p.getInt("format"))
