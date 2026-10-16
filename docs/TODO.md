@@ -8,7 +8,7 @@
 - [ ] 通報と権利の申し立ての窓口と手順（ADR-004 T-2・ADR-002 T-1）。第三者の素材集・チャンネルの公開の前に
 - [ ] 新しいアプリの雛形と、要望からプロファイル・ルール・プロンプト・組み込みのチャンネルを生成するスキル（ADR-003 T-1）
 - [ ] サイクリングのアプリ（ADR-003 T-2。T-1 の後）
-- [ ] `core-format` を ADR-004 に合わせる: `promotional` を削除し、`grants.grounding`・素材の要求の `grounding`・素材の `basedOn` を足す（ADR-004 T-3・T-6、API-004「AI の根拠」）
+- [ ] `core-format` 2.0.0 を公開する（タグ `v2.0.0`）。`promotional` の削除、`grants.grounding` と根拠のテキストの確認（ADR-004 T-6・API-004 I-13・I-15）
 - [ ] SanpoGuide と yorisoi-console を ADR-004 に合わせる（ADR-004 T-3〜T-6）。各リポジトリの文書も実装と一緒に直す
 
 ## 第三者のチャンネル

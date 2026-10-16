@@ -150,8 +150,6 @@ class ProviderDocumentsTest {
         assertEquals(0L, kamakura.resourcesSize)
         assertEquals(listOf("walk"), kamakura.activities)
         assertEquals(setOf("sg1" + "a".repeat(32)), list.formerPublisherIds(kamakura.publisher))
-        // A list that leaves it out marks nothing as promotional (an optional flag).
-        assertFalse(kamakura.promotional)
     }
 
     @Test
@@ -184,30 +182,27 @@ class ProviderDocumentsTest {
         assertFalse(c.grants.allows(producer))
         assertEquals(setOf("sg1" + "d".repeat(32)), list.formerProducerIds(producer))
         assertTrue(list.revokedCollections.single().covers(1))
-        assertFalse(c.promotional || list.channels[0].promotional)
+        // Grants that leave grounding out don't let the AI take the texts as grounds (API-004 I-13).
+        assertFalse(c.grants.grounding)
         // Grants that are neither "*" nor a list make the list unreadable.
         val badGrants = listWith { it.put("collections", JSONArray().put(collection("\"everyone\""))) }
         assertEquals(ProviderError.BAD_DOCUMENT, error { docs.channelList(badGrants, keyset, now) })
     }
 
     @Test
-    fun `a list marks promotional channels and collections (API-002 P-16)`() {
+    fun `a list copies whether a collection grounds the AI (API-004 I-13)`() {
         val json = listWith { body ->
-            body.getJSONArray("channels").getJSONObject(0).put("promotional", true)
-            body.getJSONArray("channels").getJSONObject(1).put("promotional", false)
             body.put("collections", JSONArray().put(JSONObject(
                 """
-                { "id": "shop-ads", "version": 1, "producer": "sg1${"c".repeat(32)}", "producerName": "商店街",
-                  "name": "商店街のお知らせ", "summary": "お店の紹介", "media": ["text"], "resourcesSize": 1000,
-                  "tags": ["shopping"], "grants": { "publishers": "*" }, "promotional": true,
-                  "package": { "url": "https://cdn.example.com/col/s-1.zip", "sha256": "${"0".repeat(64)}", "size": 900, "format": 1 },
+                { "id": "kamakura-notes", "version": 1, "producer": "sg1${"c".repeat(32)}", "producerName": "鎌倉市観光協会",
+                  "name": "鎌倉の資料", "summary": "寺社の由来", "media": ["text"], "resourcesSize": 1000,
+                  "tags": ["history"], "grants": { "publishers": "*", "grounding": true },
+                  "package": { "url": "https://cdn.example.com/col/n-1.zip", "sha256": "${"0".repeat(64)}", "size": 900, "format": 1 },
                   "minAppVersions": { "sanpoguide": 20 }, "approvedAt": "2026-10-11T09:00:00Z" }
                 """.trimIndent(),
             )))
         }
-        val list = docs.channelList(json, keyset, now)
-        assertEquals(listOf(true, false), list.channels.map { it.promotional })
-        assertTrue(list.collections.single().promotional)
+        assertTrue(docs.channelList(json, keyset, now).collections.single().grants.grounding)
     }
 
     @Test

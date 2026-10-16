@@ -11,6 +11,8 @@ import io.github.duwenji.yorisoi.core.format.RejectCode
 import io.github.duwenji.yorisoi.core.format.SignedKind
 import io.github.duwenji.yorisoi.core.format.StationFiles
 import io.github.duwenji.yorisoi.core.format.Strictness
+import io.github.duwenji.yorisoi.core.format.URL_PATTERN
+import io.github.duwenji.yorisoi.core.format.bool
 import io.github.duwenji.yorisoi.core.format.checkLength
 import io.github.duwenji.yorisoi.core.format.int
 import io.github.duwenji.yorisoi.core.format.list
@@ -26,9 +28,10 @@ import org.json.JSONArray
 
 /**
  * Which publishers may use a collection (API-004 `grants`, ADR-002 D-9), and in which apps (API-004
- * 1.5 I-11). Null means any.
+ * 1.5 I-11). Null means any. [grounding]: whether the AI may take its texts as grounds (API-004
+ * I-13, ADR-004 H-4).
  */
-data class Grants(val publishers: Set<String>?, val apps: Set<String>? = null) {
+data class Grants(val publishers: Set<String>?, val apps: Set<String>? = null, val grounding: Boolean = false) {
     fun allows(publisher: String): Boolean = publishers == null || publisher in publishers
 
     /** Whether the app [appId] may use the collection at all. */
@@ -123,6 +126,7 @@ object CollectionValidator {
 
         val resources = ResourceReader.read(json, files, inCollection = true)
         if (resources.items.isEmpty()) reject(RejectCode.BAD_RESOURCE, "a collection has no resources")
+        if (manifest.grants.grounding) checkGroundingTexts(resources)
         val pointed = ResourceReader.files(resources)
         paths.firstOrNull { it.startsWith(ResourceReader.RESOURCES_DIR) && it !in pointed }?.let { reject(RejectCode.UNEXPECTED_FILE, it) }
         return CollectionPackage(manifest, resources)
@@ -167,6 +171,20 @@ object CollectionValidator {
             if (strictness == Strictness.REVIEW) ids.firstOrNull { it !in AppIds.KNOWN }?.let { reject(RejectCode.BAD_VALUE, "grants.apps \"$it\"") }
             ids.toSet()
         }
-        return Grants(publishers, apps)
+        val grounding = g.optNullable("grounding")?.let { g.bool("grounding") } ?: false
+        return Grants(publishers, apps, grounding)
+    }
+
+    /**
+     * The texts a grounding collection gives the AI (API-004 I-15) follow the slots' rules
+     * (API-003 F-2), so they can't reach into the app's prompt templates or point elsewhere.
+     */
+    private fun checkGroundingTexts(resources: Resources) {
+        val texts = resources.texts.map { (id, text) -> id to text } +
+            resources.items.mapNotNull { r -> r.alt?.let { "${r.id} alt" to it } }
+        for ((where, text) in texts) {
+            if ("{{" in text) reject(RejectCode.FORBIDDEN_TEXT, "$where: \"{{\"")
+            URL_PATTERN.find(text)?.let { reject(RejectCode.FORBIDDEN_TEXT, "$where: URL \"${it.value}\"") }
+        }
     }
 }

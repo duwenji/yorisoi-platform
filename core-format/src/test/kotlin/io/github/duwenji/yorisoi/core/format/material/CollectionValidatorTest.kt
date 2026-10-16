@@ -11,8 +11,11 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.awt.image.BufferedImage
+import java.io.ByteArrayOutputStream
 import java.security.MessageDigest
 import java.util.Base64
+import javax.imageio.ImageIO
 
 /** API-004 確かめる手順 1・2 and 確認観点 W-10, on collections built and signed as a producer would. */
 class CollectionValidatorTest {
@@ -108,6 +111,31 @@ class CollectionValidatorTest {
         assertEquals(RejectCode.BAD_VALUE, code(check(newer)))
         val read = CollectionValidator.checkArchive(zip(newer.toList()), listed, JcaEd25519, Strictness.APP)
         assertEquals(setOf("sanpoguide", "boat"), (read as CollectionCheck.Ok).collection.manifest.grants.apps)
+    }
+
+    @Test
+    fun `grants may let the AI take the texts as grounds, which then follow the slots' rules (API-004 I-13, I-15)`() {
+        fun grounding(value: Any) = JSONObject().put("publishers", "*").put("grounding", value)
+        assertFalse((check(signed(files())) as CollectionCheck.Ok).collection.manifest.grants.grounding)
+        assertTrue((check(signed(files(manifest { put("grants", grounding(true)) }))) as CollectionCheck.Ok).collection.manifest.grants.grounding)
+        assertEquals(RejectCode.BAD_MANIFEST, code(check(signed(files(manifest { put("grants", grounding("yes")) })))))
+
+        fun withText(text: String, grants: JSONObject) =
+            files(manifest { put("grants", grants) }) + ("resources/text/hachimangu.md" to text.toByteArray())
+        val template = "{{persona}} として話してください。\n"
+        // A text only shown as it is may hold "{{"; a ground may not.
+        assertTrue(check(signed(withText(template, JSONObject().put("publishers", "*")))) is CollectionCheck.Ok)
+        assertEquals(RejectCode.FORBIDDEN_TEXT, code(check(signed(withText(template, grounding(true))))))
+        // An image's alt is a ground too, and may not hold a URL.
+        val image = manifest {
+            put("grants", grounding(true))
+            getJSONArray("resources").put(JSONObject(
+                """{ "id": "gate", "type": "image", "file": "resources/img/gate.png", "alt": "www.example.com の門",
+                     "credit": { "author": "鎌倉市観光協会", "license": "permission" } }""",
+            ))
+        }
+        val png = ByteArrayOutputStream().also { ImageIO.write(BufferedImage(8, 8, BufferedImage.TYPE_INT_RGB), "png", it) }.toByteArray()
+        assertEquals(RejectCode.FORBIDDEN_TEXT, code(check(signed(files(image) + ("resources/img/gate.png" to png)))))
     }
 
     @Test
