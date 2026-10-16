@@ -136,7 +136,7 @@ flowchart LR
 
 | ID | 追従タスク | 担当 | 時期 |
 |---|---|---|---|
-| T-1 | ルート鍵の作成・保管と、署名鍵（KMS）の入れ替え・失効の手順を決める | 開発者 | アプリにリストIDを内蔵する前 |
+| T-1 | ルート鍵の作成・保管と、署名鍵（KMS）の入れ替え・失効の手順を決める | 開発者 | 済み（yorisoi-console の[鍵の手順書](https://github.com/duwenji/yorisoi-console/blob/main/docs/operations/keys.md)） |
 
 見直しの条件:
 - 運営を複数にする、または審査を外部に任せることになったとき（鍵の持ち方と審査の分担を見直す）
