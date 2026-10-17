@@ -1,37 +1,3 @@
-# TODO
+# 旧パスの案内: TODO
 
-エコシステム全体で残っている作業と、決めること。アプリだけの作業は各アプリの TODO（[SanpoGuide](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/TODO.md)）、管理システムの作業は [yorisoi-console の TODO](https://github.com/duwenji/yorisoi-console/blob/main/docs/TODO.md) にある。
-
-## ADR の追従タスク
-
-- [ ] 新しいアプリの雛形と、要望からプロファイル・ルール・プロンプト・組み込みのチャンネルを生成するスキル（ADR-ECOSYSTEM-PLATFORM T-1）
-- [ ] サイクリングのアプリ（ADR-ECOSYSTEM-PLATFORM T-2。T-1 の後）
-
-## 第三者のチャンネル
-
-- [ ] 関係者ごとの対応案（[stakeholders.md](stakeholders.md) 4・5 章）を承認し、公開の前に要るもの（W-1 内蔵のリスト）を進める
-- [ ] [審査基準](channel-review-policy.md)を承認する
-- [ ] 審査にかかる期間の目安と、運営が複数になる場合（承認を 2 人にするか、権限を分けるか）
-
-決めること:
-- ADR-CHANNEL-CURATION の未決事項（第三者のチャンネルのカスタマイズ）
-
-## 位置に紐づく秘密メッセージ
-
-契約は [API-001](secret-messages-api.md)（OpenAPI は [api/](api/README.md)）。接続先は URL で設定し、API に準拠していればサーバーの実装方法・置き場所は問わない。アプリでの実装は各アプリの TODO で進める。
-
-- [ ] 準拠テスト: 任意のサーバーの URL に対して流せるテスト（API-001 の確認観点 V-01〜V-18）。Kotlin（JVM）＋ Tink を想定
-- [ ] 参照実装のサーバー（開発・テスト用。技術は自由）
-
-OpenAPI の検証: `docs/api` で `npx @redocly/cli lint sanpo-messages.openapi.yaml`
-
-決めること:
-- 位置の偽装（位置情報の偽装アプリ）で開けられることへの対策をどこまでやるか
-- 公開メッセージの不適切な投稿への対策（通報・削除）
-- 私有地・危険な場所に置かせない配慮
-
-## 共通の検討事項
-
-- **サーバーの要否**: 他人宛ての秘密メッセージはサーバーが必要。アプリはサーバーを持たず、端末と公開 API と承認済みチャンネル・リストだけで動いている。項目ごとにばらばらに決めず、1 つの判断（ADR）としてまとめて決める
-- **収益化**: 広告、有料プラン、提携。既存の広告 SDK は、位置情報を外部に送らない方針（API-003 F-10）と合わないので使わない方向
-- **公開サーバーの負荷**: `kit-geo` は Overpass・Open-Meteo の公開サーバーを使っている。散策者が増える前に利用ポリシーを確認し、自前のサーバーや商用のサービスを検討する
+旧パス `docs/TODO.md` からの案内です。エコシステム全体の作業一覧は [エコシステム TODO](work/ecosystem-todo.md) を参照してください。SanpoGuide と yorisoi-console の個別作業は、それぞれのリポジトリの TODO が正本です。

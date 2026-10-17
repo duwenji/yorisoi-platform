@@ -1,0 +1,640 @@
+# チャンネル・パッケージ形式 契約書
+
+## 文書情報
+
+| 項目 | 内容 |
+|---|---|
+| 文書ID | API-CHANNEL-PACKAGE |
+| 旧文書ID | API-003 |
+| ドキュメント種別 | API契約書 |
+| 対象システム/機能 | yorisoi エコシステムのアプリで使うチャンネル・パッケージの形式（[ADR-ECOSYSTEM-PLATFORM](../decisions/ADR-ECOSYSTEM-PLATFORM.md)。最初のアプリは SanpoGuide）。第三者が配信するパッケージと、アプリに組み込みのチャンネルで共通 |
+| 関連Skill | 020_api-contract-design |
+| 作成日 | 2026-10-03 |
+| 作成者 | Claude（開発者との検討） |
+| 承認者 | 開発者 |
+| ステータス | 承認済 |
+| 版 | 1.0 |
+
+本書はアプリ間で共有するチャンネル・パッケージ形式を定めます。SanpoGuide の画面名や固有の動作例は、共通要件と混同しないよう本文で示します。
+
+## 目的・背景
+
+[API-CHANNEL-LIST](API-CHANNEL-LIST.md) で、アプリが承認済みチャンネル・リストを取得し、各パッケージを URL と SHA-256 で取り込むところまでを決めた。本書は、そのパッケージの中身を定める。
+
+この形式は、組み込みのチャンネルにも使う。アプリが自分の組み込みのチャンネルを同じ形式・同じ確認で読み込むことで、形式の不備に開発中に気づけるようにする。また、組み込みのチャンネルを第三者のチャンネルの見本にできる。
+
+[ADR-CHANNEL-CURATION](../decisions/ADR-CHANNEL-CURATION.md) C-7 のとおり、第三者が変えられるのは語り手と話題の部分だけで、安全の案内・共通ルール・上限はアプリが必ず強制する。本書はそれを形式で保証する。つまり、**変えてよい部分だけを差し込み口（スロット）として開け、それ以外は形式の上で書けない**ようにする。
+
+## スコープ・非スコープ
+
+スコープ:
+- パッケージのファイル構成
+- `channel.json`（設定）の項目と、とりうる値・上限
+- プロンプトのスロット（差し込み口）と、アプリの固定部分との組み立て方
+- 素材（テキスト・画像・音声・映像）、きっかけ、見せ方と、その安全の決まり
+- チャンネル提供者の署名（ADR-CHANNEL-CURATION C-4）
+- アプリと審査用の道具が行う機械的な確認（ADR-CHANNEL-CURATION C-8 の「機械で確かめる項目」）
+
+非スコープ:
+- パッケージの取得・リスト・運営の署名（API-CHANNEL-LIST）
+- 人が確かめる審査の項目（[チャンネル審査ポリシー](../policies/channel-review.md)）
+- アプリの画面・保存・切り替えの設計（[channels.md](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/channels.md)）
+
+## 対応元ID（トレーサビリティ）
+
+| 対応元ID | 内容 | 対応状況 |
+|---|---|---|
+| ADR-CHANNEL-CURATION | C-4（チャンネル提供者の署名）、C-7（アプリが強制すること）、C-8（機械で確かめる項目） | 本書で形式にする |
+| API-CHANNEL-LIST | `package.format`・パッケージの大きさの上限・`hash_mismatch`・`package_rejected` | 本書が `format` を定める |
+| [エコシステム TODO「チャンネル」](../work/ecosystem-todo.md) | チャンネルが決める軸（語り手・話題・話す場面・話す量・雰囲気） | 本書で項目にする |
+| ADR-MATERIAL-PRODUCERS | D-2（同梱の素材）、D-8（参照する版）、D-11（候補の順番）、D-15（省略形）、D-17（ID だけで参照） | `collections`・`source` として形式にする |
+| API-MATERIAL-PRODUCER | 素材提供者 IF、参照の書き方、省略形の展開、確かめる手順 3・4 | 本書から参照する |
+
+## 方針・決定事項
+
+### 形式の基本
+
+| No. | 論点 | 決定 |
+|---|---|---|
+| F-1 | 変えられる範囲の決め方 | プロンプトは、アプリが用意したスロットに文章を差し込むだけにする。システムプロンプト全体の差し替えはできない。共通ルール（`shared/speech`・`shared/facts`）と安全・プライバシーの指示は、アプリの固定部分としてスロットの後ろに必ず付く |
+| F-2 | スロットに書けるもの | プレーンな文章だけ。`{{` を含めてはいけない（変数・読み込み・条件分岐は使えない）。URL も書けない。機械で確かめやすく、アプリのテンプレートに干渉できない |
+| F-3 | 設定値 | 話す量・話す場面・話題の優先・雰囲気・解説の長さを、アプリが決めた選択肢の中から選ぶ。数値を自由に書くことはできない。選択肢の範囲そのものが上限になる（話しかけの頻度は最大で「おしゃべり」、解説は最長 450 字）。AI を呼ぶ量は、さらにアプリ利用者が決めた上限の中に収まる（[ADR-AI-ROLES](../decisions/ADR-AI-ROLES.md) H-9。上限に達すると、AI の話しかけと解説は定型文と素材だけになる。止められない出来事は上限にかかわらず出す） |
+| F-4 | 止められない出来事 | 天気の急変・日の入り・施設の案内は、`channel.json` に項目自体がない（止める書き方がない） |
+| F-5 | ファイルの許可 | 決まった名前のファイル以外を含むパッケージは拒む。知らない値（列挙の外の値）も拒む |
+| F-6 | チャンネル提供者の署名 | パッケージ内の全ファイルの SHA-256 の一覧に、チャンネル提供者が Ed25519 で署名する（`signature.json`）。チャンネル提供者の公開鍵も同梱し、アプリは公開鍵から計算したアカウントIDが `channel.json` とリストの `publisher` に一致するかを確かめる。サーバーに問い合わせる必要がない |
+| F-7 | 組み込みのチャンネル | 同じ形式で、アプリのプロンプト・パック（SanpoGuide は `:prompts`）のリソース `sanpoguide/channels/{id}/` に置く。署名（`signature.json`）だけは要らない。確認はアプリの同じ処理で行い、単体テストで全組み込みチャンネルを確かめる |
+
+### エコシステム
+
+[ADR-ECOSYSTEM-PLATFORM](../decisions/ADR-ECOSYSTEM-PLATFORM.md) の E-8〜E-13・E-24・E-25（チャンネルはエコシステム共通、アプリが絞り込む）を形式にする。
+
+| No. | 論点 | 決定 |
+|---|---|---|
+| G-1 | 前提の宣言 | チャンネルは `activities`（必須）・`genres`・`requires` で、どんな過ごし方に合い、何が要るかを宣言する。チャンネルは特定のアプリに結びつかない（アプリの ID を書く項目はない。E-8） |
+| G-2 | 語彙 | 過ごし方（`activities`）・ジャンル（`genres`）・機能（`requires.features`）と、出来事・スポットの種類・背景音・見せ方などの値は、エコシステム共通の一覧として `core-format` に置く（E-9）。値を足すのは `core-format` のマイナー版で、`format` は上げない（G-3・G-5 のとおり、その値を知らないアプリでも安全側に倒れるため） |
+| G-3 | 確かめ方の 2 つの段 | **審査**（管理システムの機械審査）は、共通の一覧にない値をすべて拒む（F-5）。**アプリ**は、一覧にない値を[アプリでの知らない値](#アプリでの知らない値)の表のとおりに扱う（E-12） |
+| G-4 | 絞り込み | アプリは、チャンネルの `activities` に自分の過ごし方が入っていて、`requires.features` をすべて実装しているときだけ、そのチャンネルを使える（E-10 ①）。その上で、アプリの方針とアプリ利用者の絞り込みを当てる（E-10 ②③。アプリ側の設計） |
+| G-5 | 安全 | 止められない出来事・共通の指示・見せ方の安全（F-4・F-8）は、書く項目がなく、アプリが必ず強制する（E-13）。アプリでの知らない値の扱いは、どれも「使わない」か「チャンネルを出さない」のどちらかで、知らない値によって制限が緩むことはない |
+
+## パッケージの構成
+
+第三者のパッケージは ZIP（無圧縮・Deflate のみ）。組み込みのチャンネルは同じ構成のフォルダ。
+
+```
+channel.json                 設定（必須）
+signature.json               チャンネル提供者の署名（第三者のみ必須）
+prompts/
+├── guide/
+│   ├── persona.md           スポット解説の語り手（役割・口調）
+│   └── focus.md             スポット解説で何に重点を置くか
+└── companion/
+    ├── persona.md           散歩の友の語り手（役割・口調）
+    ├── topics.md            雑談の話題の選び方
+    └── events/              出来事ごとの追加の指示
+        ├── start.md
+        ├── revisit.md
+        ├── milestone.md
+        ├── rest.md
+        └── finish.md
+resources/                   パッケージに入れる素材（任意）
+├── text/*.md
+└── img/*.jpg・*.png・*.webp
+```
+
+- `prompts/` の下のファイルはすべて任意。ないスロットには標準のチャンネルの文章が入る
+- `events/` に置けるのは上の 5 つだけ。`weather_change`・`sunset`・`facility` は置けない（F-4）
+- `resources/` の下に置けるのは、`channel.json` の `resources` から `file` で指されたファイルだけ。指されていないファイルがあれば拒む
+- 上にないファイル・フォルダを含めない（F-5）。ファイル名は大文字・小文字を区別する
+- テキストは UTF-8（BOM なし）、改行は LF
+
+## channel.json
+
+```json
+{
+  "format": 1,
+  "id": "kamakura-history",
+  "version": 3,
+  "publisher": "sg1wxyz...",
+  "name": "鎌倉歴史散歩",
+  "summary": "鎌倉の寺社と武士の歴史を、語り部の口調で",
+  "lang": "ja",
+  "activities": ["walk", "cycle"],
+  "genres": ["history"],
+  "requires": { "features": ["slot:guide"] },
+  "greeting": "ここからは、鎌倉の歴史をたどりながら歩きましょう。",
+  "talk": {
+    "level": "normal",
+    "events": { "spot": true, "revisit": true, "milestone": true, "rest": false, "start": true, "finish": true }
+  },
+  "spots": {
+    "prefer": ["temple", "shrine", "historic", "museum"],
+    "skip": ["artwork"]
+  },
+  "guide": { "length": "long" },
+  "mood": { "tone": true, "sound": "temple" },
+  "resources": [],
+  "collections": [],
+  "selectors": [],
+  "cues": []
+}
+```
+
+| 項目 | 型 | 必須 | 内容・とりうる値 |
+|---|---|---|---|
+| `format` | int | ○ | `1` |
+| `id` | string | ○ | 英小文字・数字・`-`、3〜40 文字。リストの `channels[].id` と一致すること |
+| `version` | int | ○ | 1 以上。リストの `channels[].version` と一致すること |
+| `publisher` | string | 第三者のみ | チャンネル提供者のアカウントID（`sg1…`）。組み込みは省略 |
+| `name` | string | ○ | 1〜20 文字 |
+| `summary` | string | ○ | 1〜60 文字 |
+| `lang` | string | ○ | BCP 47。第 1 版は `ja` のみ |
+| `activities` | string[] | ○ | このチャンネルが合う過ごし方。[過ごし方](#過ごし方activities)から 1〜4 個。語り手の文章がその過ごし方に合っているかは人の審査で確かめる |
+| `genres` | string[] | 任意 | アプリ利用者が探すときの分類。[ジャンル](#ジャンルgenres)から 0〜3 個 |
+| `requires.features` | string[] | 任意 | これがないアプリでは成り立たない機能。[機能](#機能requiresfeatures)から 0〜20 個。書かない機能は、アプリが実装していなければ使われないだけ |
+| `greeting` | string | ○ | 散歩中にこのチャンネルへ切り替えたとき、そのまま読み上げる一言。1〜60 文字。AI は使わない |
+| `talk.level` | string | ○ | `quiet`（控えめ）/ `normal`（ふつう）/ `chatty`（おしゃべり）。アプリの `TalkLevel` と同じ 3 段階 |
+| `talk.events` | object | ○ | 次の 6 つの出来事で話すか（真偽値、すべて必須）。`spot`（初めてのスポットの解説）・`revisit`（再訪の一言）・`milestone`（距離・時間の区切り）・`rest`（休憩）・`start`（開始のあいさつ）・`finish`（終了の振り返り）。天気の急変・日の入り・施設の案内は項目がなく、常に話す |
+| `spots.prefer` | string[] | ○（空でもよい） | 優先して話題にするスポットの種類（下表）。最大 8 個 |
+| `spots.skip` | string[] | ○（空でもよい） | 散策中に話題にしない種類。地図と一覧には出る。`prefer` と重ねない |
+| `guide.length` | string | ○ | スポット解説の長さ。`short`（100〜150 字）/ `normal`（200〜300 字）/ `long`（300〜450 字） |
+| `mood.tone` | bool | ○ | 話し方のトーンを雰囲気に合わせるか |
+| `resources` | object[] | 任意 | 素材（[素材](#素材resources)） |
+| `cues` | object[] | 任意 | きっかけ（[きっかけ](#きっかけcues)） |
+| `collections` | object[] | 任意 | 使う第三者の素材集（[素材集の宣言](#素材集の宣言collections)） |
+| `selectors` | object[] | 任意 | 素材を選ぶ基準（[基準での選択](#基準での選択selectors)） |
+| `mood.sound` | string | ○ | 背景音の選び方。`auto`（雰囲気から選ぶ）/ `rain` / `waves` / `wind` / `birds` / `insects` / `temple`。背景音を流すか・音量・イヤホンだけかはアプリ利用者の設定のまま（チャンネルでは変えられない） |
+
+知らない項目は無視する（互換性のため）。ただし、上の項目に列挙の外の値が入っていたら拒む（F-5）。アプリは、列挙の外の値を[アプリでの知らない値](#アプリでの知らない値)の表のとおりに扱う（G-3）。
+
+### 過ごし方（activities）
+
+ADR-ECOSYSTEM-PLATFORM E-24 のとおり、実装するアプリを作ると決めた過ごし方だけを置く。
+
+| 値 | 意味 | 代表のアプリ（審査の見本。ADR-ECOSYSTEM-PLATFORM E-26） |
+|---|---|---|
+| `walk` | 散歩・散策 | SanpoGuide |
+| `cycle` | サイクリング | サイクリングの伴走のアプリ（まだない。できるまで見本は組み立ての確認だけ） |
+
+### ジャンル（genres）
+
+組み込みのチャンネルの分け方から始める。
+
+| 値 | 意味 | 組み込みのチャンネル（SanpoGuide） |
+|---|---|---|
+| `general` | 話題を絞らない | 標準・しずかに |
+| `history` | 歴史・寺社・史跡 | 歴史探訪 |
+| `nature` | 自然・季節・水辺 | 自然観察 |
+| `food` | 食・名物・食文化 | グルメの旅 |
+| `shopping` | 工芸・土産・商店街 | ショッピング |
+
+### 機能（requires.features）
+
+アプリによって実装していないことがある機能。アプリは自分が実装している機能をプロファイルに持つ（ADR-ECOSYSTEM-PLATFORM E-6 ①）。
+
+| 値 | 意味 |
+|---|---|
+| `slot:guide` | スポット解説（`prompts/guide/*` のスロットと `guide.length`） |
+| `slot:companion` | 話しかけ（`prompts/companion/*` のスロット） |
+| `trigger:spot` / `trigger:point` / `trigger:event` | きっかけの種類（[きっかけ](#きっかけcues)） |
+| `present:speak` / `present:card` / `present:notify` / `present:sheet` / `present:play` / `present:ambient` / `present:fullscreen` | 見せ方（[見せ方](#見せ方)） |
+
+### アプリでの知らない値
+
+アプリがパッケージで共通の一覧にない値（そのアプリより新しい `core-format` で足された値）を見つけたときの扱い（G-3・G-5、ADR-ECOSYSTEM-PLATFORM E-12）。制限を表す項目では、チャンネルそのものを使わない（読み落とすと、チャンネル提供者の意図より緩くなるため）。任意の項目では、その値・その部分だけを使わない。
+
+| 項目 | 知らない値があるとき |
+|---|---|
+| `activities` | その値を無視する。アプリの過ごし方が入っていなければ使わない（G-4） |
+| `genres` | その値を無視する |
+| `requires.features` | **チャンネルを使わない** |
+| `talk.level`・`guide.length` | **チャンネルを使わない**（上限を表すため） |
+| `spots.skip` | **チャンネルを使わない**（制限のため） |
+| `spots.prefer` | その値を無視する |
+| `talk.events` の知らない出来事 | その出来事を無視する（6 つの出来事は必須） |
+| `mood.sound` | `auto` として扱う |
+| `cues[].trigger` の知らない種類・出来事 | そのきっかけを使わない |
+| `cues[].present[].as` | その見せ方を飛ばす。残りがなければそのきっかけを使わない |
+| `prompts/` の下の知らないファイル | そのファイルを使わない（`prompts/` の外の知らないファイルは今どおり拒む） |
+
+審査では、これらはすべて今どおり拒む（`bad_value`・`unexpected_file`）。
+
+### スポットの種類
+
+| 値 | アプリの表示 | OSM のタグ（`OverpassClient.categoryOf`） |
+|---|---|---|
+| `shrine` | 神社 | `amenity=place_of_worship` + `religion=shinto` |
+| `temple` | 寺院 | 同 + `religion=buddhist` |
+| `church` | 教会 | 同 + `religion=christian` |
+| `worship` | 礼拝所 | 同 + そのほかの宗教 |
+| `historic` | 史跡 | `historic=*` |
+| `museum` | 博物館 | `tourism=museum` |
+| `gallery` | ギャラリー | `tourism=gallery` |
+| `viewpoint` | 展望スポット | `tourism=viewpoint` |
+| `artwork` | アート | `tourism=artwork` |
+| `attraction` | 名所 | `tourism=attraction` |
+| `park` | 公園 | `leisure=park` |
+| `garden` | 庭園 | `leisure=garden` |
+| `beach` | 海辺 | `natural=beach` |
+| `water` | 水辺 | `natural=water` |
+| `nature` | 自然 | そのほかの `natural=*`（木・山頂・湧き水） |
+| `restaurant` | 飲食店 | `amenity=restaurant` |
+| `cafe` | カフェ | `amenity=cafe` / `ice_cream` |
+| `sweets` | 菓子・パン | `shop=confectionery` / `pastry` / `bakery` / `chocolate` |
+| `food_shop` | 食品店 | `shop=deli` / `tea` / `coffee` / `alcohol` / `wine` / `seafood` / `butcher` / `greengrocer` / `cheese` / `spices` / `tofu` / `rice` |
+| `market` | 市場 | `amenity=marketplace` |
+| `crafts` | 工芸・土産 | `shop=craft` / `gift` / `antiques` / `art` |
+| `shop` | 専門店 | `shop=books` / `second_hand` / `stationery` / `fabric` / `clothes` / `shoes` / `bag` / `jewelry` / `leather` / `musical_instrument` / `music` / `toys` / `florist` / `kitchen` / `interior_decoration` |
+
+`prefer` は、散策中にどのスポットから話題にするかの順位を変える（`Poi.notability` に加点する）。検索するスポットの種類は、`restaurant` から `shop` までの 7 種類（飲食・買い物。以下「店の種類」）を除いて変わらない（Overpass への負荷を増やさないため）。
+
+店の種類は、選んでいるチャンネルの `prefer` に入っているときだけ検索に加える（どのチャンネルでも検索すると、街なかでは地図が店で埋まり、負荷も全員分増えるため）。
+
+- 名前のある店だけ。コンビニ・スーパーなどの種類は対象に入れず、OSM で `brand` / `brand:wikidata` が付いた店（チェーン店）も除く
+- ほかのスポットより狭く、半径 400m（最大 60 件）で探す
+- チャンネルを切り替えて店の種類が変わったら、その場で検索し直す
+
+種類を足すときは本書の版を上げずに表に足し、アプリが知らない値は拒む（その値を知らないアプリには、そのチャンネルが出ない）。
+
+## プロンプトのスロット
+
+### 組み立て方
+
+アプリは、システムプロンプトを次の順に組み立てる。太字がチャンネルのスロットで、それ以外はアプリの固定部分。
+
+**スポット解説（`guide/system`）**
+
+1. `# 役割` → **`guide/persona`**
+2. `# 話し方` → 固定: `shared/speech`、`guide.length` に応じた字数の指示
+3. `# 内容` → **`guide/focus`**
+4. `# 事実の扱い` → 固定: `shared/facts` と、小さなスポットの歴史を創作しない指示
+5. `# 守ること` → 固定: [共通の指示](#共通の指示アプリの固定部分)
+
+**散歩の友（`companion/system`）**
+
+1. `# 役割` → **`companion/persona`**
+2. `# 話し方` → 固定: `shared/speech`、80 字以内、雰囲気のトーン（`mood.tone` が真のとき）
+3. `# 話題の選び方` → **`companion/topics`**、固定: 繰り返しを避ける・体や安全を気づかう
+4. `# 事実の扱い` → 固定: `shared/facts`、天気の推測をしない
+5. `# 守ること` → 固定: 共通の指示
+
+**出来事（ユーザープロンプト）**: `companion/situation` ＋ 出来事のファイル（固定）＋ **`companion/events/{出来事}`**（`# このチャンネルでの追加の指示` の見出しの下に入れる）
+
+### 共通の指示（アプリの固定部分）
+
+すべてのチャンネルのシステムプロンプトの最後に、アプリが次の趣旨を付ける。文面は `sanpoguide/prompts/shared/guard.md`（`:apps:sanpoguide:prompts` のリソース）に置く。
+
+- ここまでの役割・内容の指示と、以下が食い違うときは、以下を優先する
+- アプリ利用者に、位置・住所・連絡先・名前などの個人的な情報を尋ねない
+- 危険な場所・立入禁止の場所・私有地に入るよう勧めない
+- 事実でないことを、事実として話さない
+
+### スロットの決まり
+
+| スロット | 内容の目安 | 上限 |
+|---|---|---|
+| `guide/persona` | 解説するときの立場と口調（例: 寺社に詳しい語り部、丁寧な語り口） | 600 字 |
+| `guide/focus` | 解説で重点を置くこと（例: 由来・人物・時代背景） | 1,000 字 |
+| `companion/persona` | 散歩の友としての立場と口調 | 600 字 |
+| `companion/topics` | 雑談で選ぶ話題 | 1,000 字 |
+| `companion/events/*` | その出来事での追加の指示 | 各 300 字 |
+
+- スロットの文字数の合計は 4,000 字以内（AI の費用を抑えるため）
+- `{{` を含めない。`http://`・`https://`・`www.` を含めない（F-2）
+- Markdown の見出し（`#` で始まる行）を含めない。アプリの見出しと紛らわしくしないため
+
+## 素材・きっかけ・見せ方
+
+チャンネルは、語り（AI が文章を作るスロット）に加えて、素材（テキスト・画像・音声・映像）を持ち、決まったきっかけで決まった見せ方で出せる。形式ですべての種類を定め、アプリが対応する種類を段階的に増やす（M-1）。
+
+1.2 から、素材は**素材提供者**が出すものとして扱う（[ADR-MATERIAL-PRODUCERS](../decisions/ADR-MATERIAL-PRODUCERS.md)、[API-MATERIAL-PRODUCER](API-MATERIAL-PRODUCER.md)）。素材提供者は、組み込みの素材提供者（AI の語り・Commons の写真・背景音など）、第三者の素材集、チャンネルに同梱の素材（本章の `resources`）の 3 種類で、どれも同じインタフェースで扱う。チャンネルは、きっかけの見せ方ごとに素材提供者への参照（`source`）を並べる。`resources` だけを使う 1.1 までの書き方は、そのまま使える（省略形）。
+
+```
+チャンネル
+├── 語り（スロット）   AI が文章を作る（上記）
+├── 素材（resources）  text / image / audio / video（同梱の素材。素材提供者 self）
+├── 素材集（collections） 使う第三者の素材集
+├── 基準（selectors）  素材集を指さずに、選ぶ基準で素材を集める
+├── きっかけ（cues）   どの素材提供者の素材を、いつ、どの見せ方で出すか
+└── 見せ方             speak / play / card / notify / sheet / fullscreen / ambient
+```
+
+### 素材の範囲
+
+| No. | 論点 | 決定 |
+|---|---|---|
+| M-1 | 素材を持たせるか | 持たせる。素材と見せ方の体系は形式で決め、アプリの実装は段階的に進める。アプリの第 1 段はテキストと画像、第 2 段は音声、映像はその後 |
+| M-2 | 映像を扱うか | チャンネルごとにチャンネル提供者が決める。チャンネルの承認時（審査）に確かめる |
+| M-3 | 素材を出すきっかけの範囲 | チャンネルごとにチャンネル提供者が決める（スポット・地点・出来事から選ぶ）。チャンネルの承認時に確かめる |
+| M-4 | 「第三者の媒体」との関係 | チャンネルに統合する。場所に紐づく第三者のコンテンツ（観光協会の音声ガイド、店舗の紹介、イベント告知など）は、素材ときっかけを持つチャンネルとして配信する。別の配信の仕組みは作らない |
+
+### 素材の安全と取得
+
+| No. | 論点 | 決定 |
+|---|---|---|
+| F-8 | 見せ方の安全の決まり | どの素材をどの見せ方で、どの状態（歩いている・立ち止まっている）のときに出してよいかを、[見せ方の一覧](#見せ方)のとおりアプリが強制する。チャンネルでは変えられない。M-2・M-3 でチャンネルが選べるのは、この範囲の中だけ |
+| F-9 | 素材の置き場所 | テキストと小さな画像はパッケージに入れてよい。大きな画像・音声・映像はパッケージの外（HTTPS の URL）に置き、`channel.json` に SHA-256 と大きさを書く。`channel.json` はチャンネル提供者の署名とリストのハッシュで守られるので、外の素材も改ざんを検出できる |
+| F-10 | 素材を取得する時期 | きっかけに使う素材は、チャンネルを選んだとき（またはその後の Wi-Fi のとき）にまとめて取得しておく。その場所に近づいてから取得しない（取得の要求からアプリ利用者の位置が素材の置き場所に知られるため、また圏外でも出せるようにするため）。例外は、解説の画面・全画面でアプリ利用者がタップして開く映像で、そのときに取得してよい（既定は Wi-Fi のときだけ） |
+| F-11 | 出典と代替 | 画像・音声・映像には作者とライセンス（`credit`）を必須にし、スポットの写真と同じ方式で表示する。画像には代替テキスト（`alt`）、音声・映像には書き起こし（`transcript`）を必須にする。音が聞こえない状況や、画面でしか確かめられないときのため |
+| F-12 | AI の語りとの関係 | スポットのきっかけには、AI の解説の代わりに出すか（`replace`）、AI の解説の後に出すか（`add`）を指定する。`replace` なら、そのスポットでは AI を呼ばない（費用が減る） |
+| F-13 | 話す順番 | きっかけによる出力は、AI の語りと同じ順番待ちに入る（同時に 1 つだけ）。天気の急変・日の入りの案内は常に優先し、録音の再生中でも止めて先に流す |
+
+### 素材（resources）
+
+```json
+"resources": [
+  { "id": "intro", "type": "text", "file": "resources/text/intro.md" },
+  { "id": "old-photo", "type": "image", "file": "resources/img/hachimangu-1900.jpg",
+    "alt": "明治時代の鶴岡八幡宮の本宮",
+    "credit": { "author": "不明", "license": "PD", "source": "https://commons.wikimedia.org/wiki/File:..." } },
+  { "id": "narration", "type": "audio",
+    "url": "https://cdn.example.com/kamakura/narration-hachimangu.ogg",
+    "sha256": "<hex>", "size": 2480000, "durationSec": 154, "mime": "audio/ogg",
+    "transcript": "narration-text",
+    "credit": { "author": "鎌倉歴史散歩の会", "license": "permission" } },
+  { "id": "festival", "type": "video",
+    "url": "https://cdn.example.com/kamakura/yabusame.mp4",
+    "sha256": "<hex>", "size": 31000000, "durationSec": 95, "mime": "video/mp4",
+    "poster": "old-photo", "transcript": "festival-text",
+    "credit": { "author": "鎌倉歴史散歩の会", "license": "permission" } }
+]
+```
+
+| 項目 | 内容 |
+|---|---|
+| `id` | パッケージの中で一意。英小文字・数字・`-`、1〜40 文字 |
+| `type` | `text` / `image` / `audio` / `video` |
+| `file` | パッケージの中のファイル（`resources/` の下）。`text` と `image` だけ使える |
+| `url`・`sha256`・`size` | パッケージの外の素材。HTTPS のみ。`image`・`audio`・`video` で使える。`file` とどちらか一方 |
+| `mime` | 外の素材では必須。下表の形式のみ |
+| `durationSec` | `audio`・`video` で必須 |
+| `alt` | `image` で必須。1〜120 文字 |
+| `transcript` | `audio`・`video` で必須。書き起こしの `text` 素材の `id` |
+| `poster` | `video` で任意。最初に見せる `image` 素材の `id` |
+| `credit` | `image`・`audio`・`video` で必須（`author` は 1〜80 文字、`license` は 1〜40 文字、`source` は HTTPS のみ）。`author`（必須）、`license`（必須。SPDX の識別子、`PD`（パブリックドメイン）、`permission`（権利者の許諾））、`source`（任意。画面に出すだけで、読み上げない） |
+
+| 種類 | 形式 | 1 つの上限 | アプリの対応 |
+|---|---|---|---|
+| `text` | Markdown のプレーンなテキスト（`.md`）。見出し・リンク・画像の記法は使わない | 2,000 字 | 第 1 段 |
+| `image` | JPEG・PNG・WebP。長い辺 1,600px 以下 | パッケージ内 300KB、外 1MB | 第 1 段 |
+| `audio` | Ogg（Opus・Vorbis）・AAC（`.m4a`） | 10MB・10 分 | 第 2 段 |
+| `video` | MP4（H.264・AAC） | 50MB・5 分 | 第 3 段 |
+
+- パッケージの外の素材は、1 チャンネルで合計 200MB まで。映像を除いた合計（前もって取得するもの）は 50MB まで
+- `file` は `resources/text/<名前>.md`（テキスト）か `resources/img/<名前>.jpg`・`.png`・`.webp`（画像）。それより深いフォルダは使わない
+- `mime` に書けるのは、画像 `image/jpeg`・`image/png`・`image/webp`、音声 `audio/ogg`・`audio/mp4`・`audio/aac`、映像 `video/mp4`
+- パッケージの中の画像は、ファイルの先頭から JPEG・PNG・WebP のどれかで、長い辺が 1,600px 以下であることを確かめる。テキストは UTF-8（BOM なし）・改行は LF
+- テキストの素材は、読み上げ・カードにそのまま出す（AI には渡さない。テンプレートとしても展開しない）。URL は書けない（読み上げで意味をなさないため。出典は `credit.source` に書く）
+
+### 素材集の宣言（collections）
+
+第三者の素材集（API-MATERIAL-PRODUCER「素材集の形式」）を使うときに宣言する。
+
+```json
+"collections": [
+  { "as": "kamakura", "id": "kamakura-audio-guide", "minVersion": 2 }
+]
+```
+
+| 項目 | 内容 |
+|---|---|
+| `as` | このチャンネルの中での別名。英小文字・数字・`-`、1〜20 文字。`self`・`builtin` と、`builtin:` で始まる値は使えない。重ねない |
+| `id` | 素材集の ID（リストの中で一意）。素材提供者のアカウントIDは書かない（ADR-MATERIAL-PRODUCERS D-17） |
+| `minVersion` | 使える最低の版。実際に使う版は、リスト（API-CHANNEL-LIST の `collections[]`）に載っている版 |
+
+- 1 チャンネルで 5 個まで
+- 宣言した素材集は、どれかのきっかけで参照すること。参照しない宣言があれば拒む（`bad_cue`）
+- 素材集が使えるのは、同じリストに載っていて、利用許諾（`grants`）がこのチャンネルの `publisher` を含むとき（API-MATERIAL-PRODUCER 手順 3）。組み込みのチャンネルは内蔵のリストで確かめる
+- 前もっての取得の上限（映像を除いて 50MB）は、同梱の素材と宣言した素材集の、きっかけで使う素材の合計で数える
+
+### 基準での選択（selectors）
+
+素材集・素材を指す代わりに、選ぶ基準を書く。項目・タグ・複数当たったときの順番・前もっての取得の範囲は [API-MATERIAL-PRODUCER「基準で選ぶ素材提供者」](API-MATERIAL-PRODUCER.md#基準で選ぶ素材提供者)のとおり。
+
+- 1 チャンネルで 5 個まで。別名は `collections` と合わせて重ねない
+- 宣言した基準は、どれかのきっかけの `source` で参照すること（参照しない宣言は `bad_cue`）
+- 基準の別名には `#<id>` を付けられない（`unresolved_reference`）
+- `resourcesSize`（API-CHANNEL-LIST）には入らない。前もっての取得は API-MATERIAL-PRODUCER P-6 の上限（50MB、映像を除く）で別に抑える
+
+### きっかけ（cues）
+
+```json
+"cues": [
+  { "id": "hachimangu", "trigger": { "type": "spot", "osm": "way/123456", "name": "鶴岡八幡宮" },
+    "narration": "replace", "repeat": "oncePerWalk",
+    "present": [ { "as": "speak", "resource": "intro" }, { "as": "card", "resource": "old-photo" },
+                 { "as": "sheet", "resources": ["old-photo", "festival"] } ] },
+  { "id": "kirido", "trigger": { "type": "point", "lat": 35.3251, "lon": 139.5562, "radiusM": 40 },
+    "repeat": "oncePerDay",
+    "present": [ { "as": "play", "resource": "narration" } ] },
+  { "id": "welcome", "trigger": { "type": "event", "event": "select" },
+    "present": [ { "as": "card", "resource": "old-photo" } ] },
+  { "id": "kotokuin", "trigger": { "type": "spot", "osm": "way/234567", "name": "高徳院" },
+    "present": [ { "as": "speak", "source": ["kamakura", "builtin:ai-guide", "builtin:fallback-text"] },
+                 { "as": "card", "source": ["kamakura#daibutsu-photo", "builtin:commons-photo"] } ] }
+]
+```
+
+| 項目 | 内容 |
+|---|---|
+| `trigger.type` | `spot`（スポットに近づいた）/ `point`（地点の半径内に入った）/ `event`（出来事）。どれを使うかはチャンネルが決める（M-3） |
+| `spot` | `osm`（`node/…`・`way/…`・`relation/…`）。任意で `name` を付けると、ID が違っても同じ名前で 200m 以内なら同じスポットとみなす（再訪の判定と同じ規則）。近づいたかの判定は、アプリのスポット案内と同じ（60m、広さのあるスポットは境界から）。1.2 から、`osm` の代わりに `"any": true` と `categories`（[スポットの種類](#スポットの種類)を 1〜8 個）を書くと、その種類のどのスポットでも出す（題材を問わないきっかけ） |
+| `point` | `lat`・`lon`・`radiusM`（20〜300） |
+| `event` | `select`（このチャンネルを選んだ）/ `start`（散歩の開始）/ `finish`（散歩の終了）。`start`・`finish` では、AI のあいさつ・振り返りの後に出す |
+| `narration` | `spot` だけ。`replace`（AI の解説の代わりに出す。既定）/ `add`（AI の解説の後に出す） |
+| `repeat` | `oncePerWalk`（既定）/ `oncePerDay` / `once`（その端末で 1 度だけ） |
+| `present` | 見せ方と素材の組（1〜4 個）。上から順に出す。素材は `resource`（同梱の素材 1 つ）か `source`（素材提供者への参照の候補、下表）のどちらかで指す。`sheet` は `resources`（同梱）か `sources`（参照の候補の配列を並べる）で複数の素材を並べられる |
+
+`source` の書き方（API-MATERIAL-PRODUCER「参照の書き方」）:
+
+| 書き方 | 意味 |
+|---|---|
+| 文字列 1 つ、または 1〜3 個の配列 | 並べた順に素材提供者に求め、最初に出せた素材を使う。全部出せなければ、その見せ方は飛ばす（API-MATERIAL-PRODUCER I-7） |
+| `self#<id>` | 同梱の素材（`resource: "<id>"` と同じ） |
+| `<別名>#<id>` | 宣言した素材集の素材 |
+| `<別名>` | 宣言した素材集から、きっかけの題材（スポット・地点）についての素材（`about`）を選ぶ |
+| `<基準の別名>` | `selectors` の基準に合う素材を、きっかけの題材で選ぶ（API-MATERIAL-PRODUCER「基準で選ぶ素材提供者」） |
+| `builtin:<名前>` | 組み込みの素材提供者（API-MATERIAL-PRODUCER「組み込みの素材提供者」）。題材から作る |
+
+- 見せ方と素材の組み合わせ（[見せ方](#見せ方)）は、候補ごとに確かめる。組み込みの素材提供者はその素材提供者の `types` で、素材集・同梱は素材の `type` で確かめる
+- `sheet` の `resources`・`sources` に並べられるのは 1〜10 個。`spot` のきっかけの `name` は 1〜60 文字
+- アプリの段（M-1）は、使う素材の種類と見せ方から決める（第 1 段: テキスト・画像、第 2 段: 音声と `play`・`ambient`、第 3 段: 映像）。素材集を参照する見せ方は、素材集の中身が分かるまで数えない（パッケージだけでは最低限の段になる）。管理システムは、リストに載せる素材集の中身も数えて `minAppVersions` を決める
+- `narration`（`replace`・`add`）は省略形として残す。展開の規則は API-MATERIAL-PRODUCER「省略形の展開」。`source` に `builtin:ai-guide` を書いたきっかけでは `narration` を書けない（`bad_cue`。AI の解説が二重にならないように）
+
+- きっかけは 1 チャンネルで 500 個まで。題材を問わないきっかけ（`"any": true`）は 5 個まで
+- 題材を問わないきっかけ: 1 つのスポットに、特定のスポットのきっかけと題材を問わないきっかけの両方が当たるときは、特定のスポットのきっかけだけを出す。`repeat` はスポットごとに数える。`source` の候補がすべて出せないスポットでは、きっかけがなかったものとして通常のスポット案内に戻る
+- `talk.events.spot` が偽でも、`spot` のきっかけは出す（チャンネルが明示的に置いたものなので）。ただし、話しかけの頻度の「スポット案内の間隔」は守る
+- `spot`・`point` のきっかけは、同じ場所に立ち止まっている間（2 分以上）は新しく出さない（スポット案内と同じ）
+
+### 見せ方
+
+アプリが強制する一覧（F-8）。「歩いている」は、速さが 0.5m/s 以上のとき。
+
+| 見せ方 | 使える素材 | 歩いているとき | 立ち止まっているとき | アプリの対応 |
+|---|---|---|---|---|
+| `speak`（読み上げ） | `text` | ○ | ○ | 第 1 段 |
+| `card`（発言カードに出す） | `text`（200 字まで）・`image` | ○（表示するだけ。画面は点けない） | ○ | 第 1 段 |
+| `notify`（通知） | `text`（100 字まで）・`image` | ○ | ○ | 第 1 段 |
+| `sheet`（解説の画面） | すべて | 自動では開かない。カード・通知からアプリ利用者がタップしたときだけ開く。開いても映像は自動で再生しない | 同左 | 第 1 段（`audio` は第 2 段、`video` は第 3 段） |
+| `play`（録音の再生） | `audio` | ○ | ○ | 第 2 段 |
+| `ambient`（背景音として流す） | `audio`（ループ） | ○ | ○ | 第 2 段 |
+| `fullscreen`（全画面） | `image`・`video` | **出さない** | アプリ利用者がタップしたときだけ。再生中に歩き出したら一時停止し、「立ち止まって見てください」と出す | 第 1 段（`image`）、第 3 段（`video`） |
+
+- 映像は `sheet` と `fullscreen` でしか出せない（どちらもアプリ利用者のタップが必要）。映像を使うかどうか自体はチャンネルが決める（M-2）
+- `play` は読み上げと同じく、ほかのアプリの音楽を小さくし、背景音を 2 割に下げる。天気の急変・日の入りの案内が来たら止めて先に流し、再開はしない（カードから再生し直せる）
+- `ambient` の再生は、アプリ利用者の背景音の設定（オン・オフ、音量、イヤホンのときだけ）に従う。`mood.sound` より優先する
+- 配色・絵（テーマ）を素材で変える見せ方は、まだ定めない（[未決事項](#未決事項リスク) No.6）
+
+### 審査で確かめること（素材・きっかけ）
+
+機械では確かめにくいので、チャンネルの承認時に人が確かめる（M-2・M-3。ADR-CHANNEL-CURATION C-8 の人が確かめる項目。[審査基準](../policies/channel-review.md)に含める）。
+
+1.2 から、第三者の素材集の素材そのもの（出典・ライセンス・写っているもの・書き起こし）は、素材集の審査で確かめる（ADR-MATERIAL-PRODUCERS D-7）。チャンネルの審査では、同梱の素材についての下の項目すべてと、素材集を使うきっかけの場所・見せ方・候補の組み合わせ（素材集と AI の解説が同じ場所で食い違わないか、など）を確かめる。
+
+- 映像を使う場合: 内容が散策と関係し、歩きながら見る前提になっていないか
+- きっかけの場所: `point` が車道・線路・私有地・立入禁止・危険な場所にないか。立ち止まりやすい場所か
+- 素材の出典とライセンスが正しいか。人の顔・個人の家が写っていないか
+- 書き起こし・代替テキストが中身と合っているか
+
+## signature.json（第三者のみ）
+
+```json
+{
+  "payload": "<base64url(下の JSON のバイト列)>",
+  "publisherKey": "<base64url(チャンネル提供者の Ed25519 公開鍵 32 バイト)>",
+  "sig": "<base64url(payload のバイト列への Ed25519 署名)>"
+}
+```
+
+`payload` の中身:
+
+```json
+{
+  "type": "channel-package",
+  "channel": "kamakura-history",
+  "version": 3,
+  "publisher": "sg1wxyz...",
+  "files": {
+    "channel.json": "<SHA-256 の hex>",
+    "prompts/guide/focus.md": "<SHA-256 の hex>"
+  }
+}
+```
+
+- `files` には `signature.json` 以外のすべてのファイルを載せる。載っていないファイルがある、または載っているファイルがない場合は拒む
+- アカウントIDの計算は API-SECRET-MESSAGES と同じ（`sg1` + 公開鍵の SHA-256 の base32 の先頭 32 文字）
+
+## 確認の手順
+
+アプリと審査用の道具は、同じ確認を同じ順で行う。アプリの実装を、審査用の道具でも使えるように JVM のライブラリにしておく（[channels.md](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/channels.md)）。
+
+1. 大きさ（API-CHANNEL-LIST: 2MB 以内）と SHA-256（リストの値）を確かめる
+2. ZIP を展開する。パスに `..`・絶対パス・バックスラッシュがある、展開後の合計が 2MB を超える、ファイルが 100 個を超える場合は拒む
+3. 許可されたファイル以外がないか（F-5）
+4. 第三者のみ: `signature.json` の署名、`publisherKey` から計算したアカウントIDと `channel.json` の `publisher`・リストの `publisher` の一致、`files` の一致
+5. `channel.json` の必須項目・型・列挙の値・文字数、`id`・`version`・`activities`・`genres`・`requires` がリストと一致するか。アプリは知らない値を[アプリでの知らない値](#アプリでの知らない値)のとおりに扱う
+5a. （アプリだけ）絞り込み: `activities` にアプリの過ごし方がない、`requires.features` に実装していない機能がある、制限の項目に知らない値がある、のどれかならチャンネルを使わない（拒むのではなく、一覧に出さない）
+6. スロットの文字数・合計、使ってはいけない文字列（F-2）・見出し
+7. 組み立てたシステムプロンプトに未定義の変数がないか（`PromptTemplates` で全出来事を組み立ててみる）
+8. 素材: 項目・形式・上限、`file` の存在、`transcript`・`poster` の参照先、`credit`・`alt`
+9. きっかけ: 素材の参照先、見せ方と素材の組み合わせ（[見せ方の一覧](#見せ方)）、値の範囲
+9a. 素材集: `collections`・`selectors` の項目（タグ・種類の値の範囲）、素材集がリストにあり使ってよいこと、`source` の参照がすべて解決できること（API-MATERIAL-PRODUCER の手順 3・4）。組み込みのチャンネルでは、解決できない候補だけを飛ばす
+10. アプリが対応していない素材の種類・見せ方を使っていないか（アプリだけが確かめる。審査用の道具は、使っている種類から必要なアプリの段を出す）
+11. パッケージの外の素材: チャンネルを選んだときに取得し、`size` と SHA-256 を確かめる（合わなければその素材を使わず、その素材を使うきっかけを出さない）
+
+1〜10 のどこかで失敗したら、パッケージ全体を拒む（`package_rejected`。理由のコードを下表から付ける）。11 の失敗は、その素材とそれを使うきっかけだけを無効にする。
+
+素材集の取得・確認（API-MATERIAL-PRODUCER の手順 1・2）は、チャンネルとは別に行う。取り込んだあとで素材集が取り下げられた・使えなくなったときは、チャンネルを拒まず、その素材集を参照する候補だけを「出せない」にする（ADR-MATERIAL-PRODUCERS D-12）。
+
+## エラー表
+
+API-CHANNEL-LIST の `package_rejected` の詳細の理由。審査用の道具は同じコードで結果を出す。
+
+| エラーコード | 発生条件 |
+|---|---|
+| `bad_archive` | ZIP として読めない。パスが不正。展開後の大きさ・ファイル数の上限を超えた |
+| `unexpected_file` | 許可されていないファイルがある |
+| `bad_signature` | 署名が合わない。`files` とパッケージの中身が一致しない |
+| `publisher_mismatch` | 公開鍵から計算したアカウントIDが `channel.json`・リストと違う |
+| `unsupported_format` | `format` を知らない |
+| `bad_manifest` | `channel.json` が読めない。必須項目がない。型が違う。`id`・`version` がリストと違う |
+| `bad_value` | 列挙の外の値、文字数の上限超え、`prefer` と `skip` の重なり |
+| `slot_too_long` | スロットの文字数・合計の上限超え |
+| `forbidden_text` | スロットに `{{`・URL・見出しがある |
+| `render_failed` | 組み立てたプロンプトにエラーがある |
+| `bad_resource` | 素材の項目・形式・上限の違反、必須の `credit`・`alt`・`transcript` がない、参照先がない |
+| `bad_cue` | きっかけの値の範囲の違反、素材の参照先がない、見せ方と素材の組み合わせが一覧にない |
+| `unsupported_resource` | アプリがまだ対応していない素材の種類・見せ方を使っている（API-CHANNEL-LIST の `minAppVersions` で案内する） |
+| `resource_mismatch` | パッケージの外の素材の大きさ・SHA-256 が合わない（パッケージ全体ではなく、その素材とそれを使うきっかけだけを無効にする） |
+| `unresolved_reference` | `source` の参照が解決できない。宣言していない別名、知らない `builtin:`、素材集のその版にない素材の ID（API-MATERIAL-PRODUCER） |
+| `not_granted` | 素材集の利用許諾が、このチャンネル提供者を含まない（API-MATERIAL-PRODUCER） |
+| `collection_not_listed` | 宣言した素材集が、同じリストにない・`minVersion` より古い（取り込み時。取り込んだ後なら候補だけを無効にする） |
+
+## 確認観点
+
+| No. | 観点 |
+|---|---|
+| V-01 | 組み込みのチャンネルがすべて確認を通る（単体テスト） |
+| V-02 | 標準のチャンネルで組み立てたプロンプトが、チャンネル導入前の `guide/system`・`companion/system` と同じ内容になる（共通の指示の追加分を除く） |
+| V-03 | 許可されていないファイル、`events/weather_change.md` などを含むパッケージを拒む |
+| V-04 | 列挙の外の値（例: `talk.level: "nonstop"`、`spots.prefer: ["casino"]`）を拒む |
+| V-05 | スロットの `{{`・URL・見出し・文字数超えを拒む |
+| V-06 | 署名の改ざん、`files` の過不足、公開鍵とアカウントIDの不一致を拒む |
+| V-07 | ZIP のパスの細工（`../`）、展開後の大きさの超過を拒む |
+| V-08 | どのチャンネルでも、天気の急変・日の入り・施設の案内が話される（`talk.events` をすべて偽にしても） |
+| V-09 | どのチャンネルでも、システムプロンプトの最後に共通の指示（`shared/guard`）が付く |
+| V-10 | 見せ方と素材の組み合わせが一覧にないもの（例: `play` に `video`、`card` に `video`）を拒む |
+| V-11 | 歩いているとき、`fullscreen` が出ない。再生中に歩き出すと映像が一時停止する |
+| V-12 | `sheet`・`fullscreen` はアプリ利用者のタップでしか開かず、映像は自動で再生されない |
+| V-13 | きっかけの素材は、その場所に近づく前に取得されている（近づいたときに通信しない） |
+| V-14 | 天気の急変・日の入りの案内が、録音の再生より先に流れる |
+| V-15 | `credit`・`alt`・`transcript` がない素材を拒む。`credit` が画面に表示される |
+| V-16 | 外の素材のハッシュが合わないとき、その素材とそれを使うきっかけだけが無効になる |
+| V-17 | `source` の候補が上から試され、最初に出せたものが使われる。全部出せないときは、その見せ方だけが飛ばされる |
+| V-18 | 宣言していない別名・知らない `builtin:`・素材集にない素材の ID を拒む（`unresolved_reference`） |
+| V-19 | `builtin:ai-guide` を `source` に書いたきっかけに `narration` があると拒む |
+| V-20 | `resources`・`resource`・`narration` だけを使うチャンネルが、素材集に対応したアプリでも同じに動く（API-MATERIAL-PRODUCER W-01） |
+| V-21 | `selectors` と題材を問わないきっかけで、`categories` の種類のスポットに近づいたとき、基準に合う素材が出る。合う素材がなければ通常のスポット案内になる |
+| V-22 | 特定のスポットのきっかけがあるスポットでは、題材を問わないきっかけを出さない |
+| V-24 | 審査: 一覧にない `activities`・`genres`・`requires.features` の値を拒む。`activities` がない・空のものを拒む |
+| V-25 | アプリ: `activities` に自分の過ごし方がないチャンネル、実装していない機能を `requires` に書いたチャンネルが一覧に出ない |
+| V-26 | アプリ: 知らない値が `talk.level`・`guide.length`・`spots.skip`・`requires` にあるチャンネルは出ない。`genres`・`spots.prefer`・`talk.events`・きっかけ・見せ方の知らない値は、その部分だけ使われずにチャンネルは出る |
+| V-27 | アプリ: 知らない値をどう扱っても、天気の急変・日の入り・施設の案内と共通の指示はなくならない（V-08・V-09） |
+
+## 互換性方針・移行メモ
+
+- 形式の版は `format`（API-CHANNEL-LIST のリストの `package.format` と同じ値）。互換性のない変更で上げる
+- 語彙の値を足すのは `core-format` のマイナー版で、`format` は上げない（G-2・G-3）
+- 項目の追加は互換性のある変更。その項目を知らないアプリは無視する。ただし、安全に関わる項目（止められない出来事など）を、無視されると危ない形で足してはいけない。その場合は `format` を上げる
+- スポットの種類・背景音の値を足すのは互換性のある変更として扱う。その値を知らないアプリはパッケージを拒むので、そのチャンネルはそのアプリに出ない。チャンネル提供者には API-CHANNEL-LIST の必要な版で案内してもらう
+- スロットを足すのは互換性のある変更（知らないアプリは `unexpected_file` で拒むので、同じく必要な版で案内する）
+- 素材の種類・見せ方・きっかけの種類は形式ですべて定める。アプリが対応していない種類を使うチャンネルは `unsupported_resource` で拒み、そのアプリの一覧には出ない（API-CHANNEL-LIST の必要な版で案内する）。管理システムは、使っている種類から必要な版を自動で決める
+- 見せ方の安全の決まり（F-8）を緩める変更は、互換性のある変更として扱わない。審査基準と本書の版を上げてから行う
+- `source` だけの `present` は、素材集に対応していないアプリでは素材の参照がないとして拒まれる（`bad_cue`）。管理システムは、`collections`・`source` を使うチャンネルの必要な版を、素材集に対応したアプリの版にする
+
+## 制約
+
+- 機械の確認で防げるのは形式まで。スロットの文章の意味（不適切な語り口）は、人の審査（ADR-CHANNEL-CURATION C-8）と共通の指示に頼る
+- 共通の指示を後ろに付けても、AI がスロットの指示に引きずられる可能性は残る
+- 第 1 版は日本語のチャンネルだけ
+- 「歩いている」の判定は GPS の速さに頼るので、信号待ちなどで立ち止まった直後に全画面を開けることがある
+- 素材の中身（映像・音声の内容、写っているもの）は機械では確かめられず、人の審査に頼る
+
+## 未決事項・リスク
+
+| No. | 内容 | 決める時期 |
+|---|---|---|
+| 1 | 定型文（AI を使えないとき）のスロットを開けるか。今は開けず、標準の定型文を使う | 要望が出たとき |
+| 2 | スロットの上限（各 600〜1,000 字、合計 4,000 字）が妥当か | 第三者のチャンネルが増えたとき |
+| 3 | 配色・絵（テーマ）を素材で変える見せ方を加えるか | アプリの第 2 段以降 |
+| 4 | きっかけに時間の条件（時刻・季節・期間）を付けるか | チャンネル提供者の要望が出たとき |
+| 5 | 素材の大きさの上限（画像 1MB、音声 10MB・10 分、映像 50MB・5 分、合計 200MB）が妥当か | アプリの第 2 段の前 |
+| 6 | チャンネル提供者が特定のアプリを除外する書き方を足すか（ADR-ECOSYSTEM-PLATFORM E-25 で入れないと決めた。要望が出たら `excludeApps` を検討） | 要望が出たとき |
+
+## 関連ドキュメント・参照リンク
+
+- [API-CHANNEL-LIST.md（API-CHANNEL-LIST）](API-CHANNEL-LIST.md): リスト・取得・運営の署名
+- [ADR-CHANNEL-CURATION](../decisions/ADR-CHANNEL-CURATION.md): C-4・C-7・C-8
+- [ADR-MATERIAL-PRODUCERS](../decisions/ADR-MATERIAL-PRODUCERS.md): 素材の素材提供者の切り出し
+- [API-MATERIAL-PRODUCER.md（API-MATERIAL-PRODUCER）](API-MATERIAL-PRODUCER.md): 素材提供者 IF・参照の書き方・省略形の展開・素材集の形式
+- [channels.md](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/channels.md): アプリ側の設計（組み込みのチャンネル・カスタマイズ・切り替え）
+- [prompts.md](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/prompts.md): SanpoGuide のプロンプトの構成

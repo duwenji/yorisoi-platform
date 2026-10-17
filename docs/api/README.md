@@ -2,7 +2,7 @@
 
 [sanpo-messages.openapi.yaml](sanpo-messages.openapi.yaml) は、位置に紐づく秘密メッセージのサーバー API を OpenAPI 3.1 で書いたもの。サーバーを作る人とアプリを作る人が、同じ定義を見て実装するためのファイル。
 
-- **正本は契約書** [../secret-messages-api.md](../secret-messages-api.md)（API-001）。判断の理由・暗号方式・配信の判定規則は契約書にある。食い違いがあれば契約書に合わせてこのファイルを直す
+- **契約の正本**は[契約一覧](../contracts/README.md)にある各契約です。秘密メッセージ API の判断の理由・暗号方式・配信の判定規則は[API-SECRET-MESSAGES](../contracts/API-SECRET-MESSAGES.md)を参照してください。OpenAPI と食い違いがあれば契約本文に合わせて OpenAPI を直します
 - サーバーは、この API に準拠していれば実装方法（言語・フレームワーク・データベース）も置き場所も問わない。アプリは設定の URL だけで接続先を選ぶ
 
 ## フォルダーの中身
@@ -88,7 +88,7 @@ Envelope
 ```mermaid
 sequenceDiagram
     autonumber
-    actor U as 散策者
+    actor U as アプリ利用者
     participant App as アプリ
     participant S as サーバー
     U->>App: 設定で URL を入力して保存
@@ -237,7 +237,7 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     autonumber
-    actor U as 散策者
+    actor U as アプリ利用者
     participant App as アプリ
     participant S as サーバー
     App->>S: GET /.well-known/sanpo-messages
