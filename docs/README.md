@@ -16,6 +16,7 @@
 | [API-004](material-producer-api.md) | 素材提供者 IF と素材集の形式 |
 | [channel-review-policy.md](channel-review-policy.md) | 審査基準 |
 | [stakeholders.md](stakeholders.md) | 関係者の呼び方と、チャンネルという考え方 |
+| [manual/](manual/README.md) | 散策ガイドの運用操作説明書（散策者・チャンネル提供者・素材提供者・運営ごと） |
 
 ## 置き場所
 
