@@ -350,7 +350,7 @@ flowchart LR
 
 - 最初の `admin` は、サーバーの設定（環境変数など）でアカウントIDを指定する
 - 第 1 版の役割は `member` だけ。`publisher`・`admin` と役割の付与は第 2 版で加える
-- `promo` は受信フィルターの既定で受け取らない（受け手が明示的に許可したときだけ）。アプリでは「広告」と表示し、ガイドの解説と区別する（[ADR-002](adr/ADR-002-material-producers.md) D-29〜D-36 の宣伝と同じ考え方）
+- `promo` は受信フィルターの既定で受け取らない（受け手が明示的に許可したときだけ）。アプリでは「広告」と表示し、ガイドの解説と区別する（[ADR-MATERIAL-PRODUCERS](decisions/ADR-MATERIAL-PRODUCERS.md) D-29〜D-36 の宣伝と同じ考え方）
 
 ### 認証
 
