@@ -11,17 +11,6 @@
 | `ADR-MATERIAL-PRODUCERS` | ADR-002 | [素材提供者](ADR-MATERIAL-PRODUCERS.md) | 素材提供者、素材集、利用許諾 |
 | `ADR-AI-ROLES` | ADR-004 | [生成 AI の役割と責任](ADR-AI-ROLES.md) | 根拠・演出・実演・枠・考査、費用、審査 |
 
-## 旧ファイルパス
-
-既存の番号付きファイルへのリンクは、移動元に残した案内ページから canonical 文書へ進めます。
-
-| 旧 ID | 旧パス | Canonical 文書 |
-|---|---|---|
-| ADR-001 | [`adr/ADR-001-third-party-channel-curation.md`](../adr/ADR-001-third-party-channel-curation.md) | [ADR-CHANNEL-CURATION](ADR-CHANNEL-CURATION.md) |
-| ADR-002 | [`adr/ADR-002-material-producers.md`](../adr/ADR-002-material-producers.md) | [ADR-MATERIAL-PRODUCERS](ADR-MATERIAL-PRODUCERS.md) |
-| ADR-003 | [`adr/ADR-003-companion-app-platform.md`](../adr/ADR-003-companion-app-platform.md) | [ADR-ECOSYSTEM-PLATFORM](ADR-ECOSYSTEM-PLATFORM.md) |
-| ADR-004 | [`adr/ADR-004-roles-of-ai-and-stakeholders.md`](../adr/ADR-004-roles-of-ai-and-stakeholders.md) | [ADR-AI-ROLES](ADR-AI-ROLES.md) |
-
 ## 文書の呼び方
 
-このリポジトリでは canonical ID を使います。履歴・既存の外部資料に旧番号が出てくる場合は、上の対応表で読み替えてください。別のリポジトリの番号付き文書を指す場合は、リポジトリ名を併記します。
+このリポジトリでは canonical ID を使います。履歴・既存の外部資料に旧番号が出てくる場合は、上の一覧で読み替えてください。別のリポジトリの番号付き文書を指す場合は、リポジトリ名を併記します。

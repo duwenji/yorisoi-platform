@@ -6,7 +6,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** Eating and shopping spots, searched only for channels that prefer them (docs/channel-package-format.md「スポットの種類」). */
+/** Eating and shopping spots, searched only for channels that prefer them (docs/contracts/API-CHANNEL-PACKAGE.md「スポットの種類」). */
 class OverpassShopsTest {
     private val client = OverpassClient()
 

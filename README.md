@@ -2,13 +2,13 @@
 
 付き添いアプリのエコシステム **yorisoi**（寄り添い）の共通パッケージです。場所と状況に応じて AI が語りかけるアプリ（付き添いアプリ）が共通に使う部品を置いています。最初のアプリは [SanpoGuide](https://github.com/duwenji/yorisoi-sanpoguide)、管理システムは [yorisoi-console](https://github.com/duwenji/yorisoi-console) です。
 
-方針は [ADR-003](docs/adr/ADR-003-companion-app-platform.md) にあります。
+方針は [ADR-ECOSYSTEM-PLATFORM](docs/decisions/ADR-ECOSYSTEM-PLATFORM.md) にあります。
 
 ## モジュール
 
 | モジュール | 種類 | 中身 |
 |---|---|---|
-| `core-format` | JVM | チャンネル・素材集の形式（API-003・API-004）、その確認と署名、承認済みチャンネル・リスト（API-002）、エコシステム共通の語彙。使う側で org.json が要る（Android には入っている） |
+| `core-format` | JVM | チャンネル・素材集の形式（API-CHANNEL-PACKAGE・API-MATERIAL-PRODUCER）、その確認と署名、承認済みチャンネル・リスト（API-CHANNEL-LIST）、エコシステム共通の語彙。使う側で org.json が要る（Android には入っている） |
 | `core-prompt` | JVM | プロンプトのテンプレート（Mustache の一部） |
 | `kit-companion` | JVM | いま何を話すかの判定のエンジン（ルールの並びとゲート） |
 | `kit-voice` | Android | 読み上げ（オーディオフォーカス）と背景音の合成 |
@@ -66,7 +66,7 @@ providers.gradleProperty("yorisoi.platformDir").orNull?.let { includeBuild(it) }
 1. `gradle.properties` の `yorisoiVersion` を上げる（すべてのモジュールで 1 つの版）
 2. `main` にマージしてから、タグ `v<版>` を push する。`.github/workflows/publish.yml` がテストして公開する
 
-形式や語彙を変えたときは、管理システムとアプリへの影響を契約書（`docs/` の API-001〜004）で確かめてから上げてください。
+形式や語彙を変えたときは、管理システムとアプリへの影響を契約書（[`docs/contracts/`](docs/contracts/README.md)）で確かめてから上げてください。
 
 ## 文書
 
