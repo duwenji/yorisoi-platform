@@ -1,6 +1,7 @@
 package io.github.duwenji.yorisoi.kit.voice
 
 import android.content.Context
+import android.content.Intent
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
@@ -18,6 +19,9 @@ import java.util.concurrent.atomic.AtomicInteger
  *
  * While it talks it holds transient, "may duck" audio focus, so music the user is listening to
  * gets quieter instead of playing over the voice, and comes back when the queue is done.
+ *
+ * When the phone's engine has no Japanese voice, it would read in its own language; [japaneseMissing]
+ * says so, and [installVoiceDataIntent] opens the engine's screen for adding one.
  */
 class Speaker(context: Context) : TextToSpeech.OnInitListener {
     private val tts = TextToSpeech(context.applicationContext, this)
@@ -41,9 +45,16 @@ class Speaker(context: Context) : TextToSpeech.OnInitListener {
     /** True from the start of the first queued line until the last one ends (for ducking our own background sound). */
     val speaking: StateFlow<Boolean> = _speaking.asStateFlow()
 
+    private val _japaneseMissing = MutableStateFlow(false)
+    /** True when there is no engine, or the engine has no Japanese voice (its data is not installed). */
+    val japaneseMissing: StateFlow<Boolean> = _japaneseMissing.asStateFlow()
+
     override fun onInit(status: Int) {
-        if (status != TextToSpeech.SUCCESS) return
-        tts.language = Locale.JAPAN
+        if (status != TextToSpeech.SUCCESS) {
+            _japaneseMissing.value = true
+            return
+        }
+        useJapanese()
         tts.setAudioAttributes(attributes)
         tts.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
             override fun onStart(utteranceId: String?) = Unit
@@ -55,6 +66,15 @@ class Speaker(context: Context) : TextToSpeech.OnInitListener {
         ready = true
         pending.forEach { enqueue(it) }
         pending.clear()
+    }
+
+    /** Checks the Japanese voice again, e.g. back from installing it. */
+    fun recheck() {
+        if (ready) useJapanese()
+    }
+
+    private fun useJapanese() {
+        _japaneseMissing.value = tts.setLanguage(Locale.JAPAN) < TextToSpeech.LANG_AVAILABLE
     }
 
     fun speak(text: String) {
@@ -87,5 +107,11 @@ class Speaker(context: Context) : TextToSpeech.OnInitListener {
         inFlight.clear()
         audio.abandonAudioFocusRequest(focus)
         _speaking.value = false
+    }
+
+    companion object {
+        /** The engine's screen for downloading voice data; not every engine has one. */
+        fun installVoiceDataIntent(): Intent = Intent(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA)
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     }
 }
