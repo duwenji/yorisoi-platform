@@ -10,6 +10,7 @@
 | `ADR-CHANNEL-CURATION` | ADR-001 | [第三者チャンネルの審査と署名](ADR-CHANNEL-CURATION.md) | 承認・署名・取り下げ |
 | `ADR-MATERIAL-PRODUCERS` | ADR-002 | [素材提供者](ADR-MATERIAL-PRODUCERS.md) | 素材提供者、素材集、利用許諾 |
 | `ADR-AI-ROLES` | ADR-004 | [生成 AI の役割と責任](ADR-AI-ROLES.md) | 根拠・演出・実演・枠・考査、費用、審査 |
+| `ADR-AI-RELAY` | — | [運営による AI の中継](ADR-AI-RELAY.md)（草案） | 運営の AI と自分のキー、無料の上限、Bedrock |
 
 ## 文書の呼び方
 
