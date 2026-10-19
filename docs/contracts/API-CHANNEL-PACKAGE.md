@@ -157,7 +157,7 @@ resources/                   パッケージに入れる素材（任意）
 | `spots.prefer` | string[] | ○（空でもよい） | 優先して話題にするスポットの種類（下表）。最大 8 個 |
 | `spots.skip` | string[] | ○（空でもよい） | 散策中に話題にしない種類。地図と一覧には出る。`prefer` と重ねない |
 | `guide.length` | string | ○ | スポット解説の長さ。`short`（100〜150 字）/ `normal`（200〜300 字）/ `long`（300〜450 字） |
-| `mood.tone` | bool | ○ | 話し方のトーンを雰囲気に合わせるか |
+| `mood.tone` | bool | ○ | スポット解説と話しかけの話し方のトーンを雰囲気に合わせるか |
 | `resources` | object[] | 任意 | 素材（[素材](#素材resources)） |
 | `cues` | object[] | 任意 | きっかけ（[きっかけ](#きっかけcues)） |
 | `collections` | object[] | 任意 | 使う第三者の素材集（[素材集の宣言](#素材集の宣言collections)） |
@@ -264,7 +264,7 @@ ADR-ECOSYSTEM-PLATFORM E-24 のとおり、実装するアプリを作ると決�
 **スポット解説（`guide/system`）**
 
 1. `# 役割` → **`guide/persona`**
-2. `# 話し方` → 固定: `shared/speech`、`guide.length` に応じた字数の指示
+2. `# 話し方` → 固定: `shared/speech`（雰囲気のトーンを含む。依頼に雰囲気を渡すのは `mood.tone` が真のとき）、`guide.length` に応じた字数の指示
 3. `# 内容` → **`guide/focus`**
 4. `# 事実の扱い` → 固定: `shared/facts` と、小さなスポットの歴史を創作しない指示
 5. `# 守ること` → 固定: [共通の指示](#共通の指示アプリの固定部分)
@@ -272,7 +272,7 @@ ADR-ECOSYSTEM-PLATFORM E-24 のとおり、実装するアプリを作ると決�
 **散歩の友（`companion/system`）**
 
 1. `# 役割` → **`companion/persona`**
-2. `# 話し方` → 固定: `shared/speech`、80 字以内、雰囲気のトーン（`mood.tone` が真のとき）
+2. `# 話し方` → 固定: `shared/speech`（雰囲気のトーンを含む。状況に雰囲気を渡すのは `mood.tone` が真のとき）、80 字以内
 3. `# 話題の選び方` → **`companion/topics`**、固定: 繰り返しを避ける・体や安全を気づかう
 4. `# 事実の扱い` → 固定: `shared/facts`、天気の推測をしない
 5. `# 守ること` → 固定: 共通の指示
