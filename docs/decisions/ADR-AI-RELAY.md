@@ -11,7 +11,7 @@
 | 作成日 | 2026-10-19 |
 | 作成者 | Claude（開発者との検討） |
 | 承認者 | 開発者 |
-| ステータス | 草案 |
+| ステータス | 承認済 |
 
 ## 目的・背景
 
@@ -77,7 +77,7 @@ ADR-AI-ROLES は、運営が AI を中継する案（案 D）を、位置や題�
 
 | No. | 論点 | 決定 |
 |---|---|---|
-| R-9 | 汎用の AI として使わせない | ① 1 回の入力の長さと出力の上限（`max_tokens`）を中継で決める。出力の上限は、いちばん長い解説の長さ（`guide.length`）に収まる値にする ② 送られたプロンプトはそのまま AI に渡すが、R-2 の回数と ① の長さで、散策の語り以外に使っても得にならない量に抑える ③ AWS WAF で送信元ごとの要求の回数を制限する |
+| R-9 | 汎用の AI として使わせない | ① 1 回の入力の長さと出力の上限（`max_tokens`）を中継で決める。出力の上限は、いちばん長い解説の長さ（`guide.length`）に収まる値にする（値は [API-AI-RELAY](../contracts/API-AI-RELAY.md)） ② 送られたプロンプトはそのまま AI に渡すが、R-2 の回数と ① の長さで、散策の語り以外に使っても得にならない量に抑える ③ AWS WAF で送信元ごとの要求の回数を制限する |
 | R-10 | 全体の費用の上限 | 運営の AI 全体で 1 か月の予算を決める。AWS Budgets で予算の 80% で運営に知らせ、100% で中継を止める（Lambda の同時実行数を 0 にする）。止まっている間、アプリは AI を使えないときと同じく定型文で続け、設定で自分のキーに切り替えられることを知らせる |
 
 ### 情報の扱い
@@ -162,11 +162,11 @@ flowchart LR
 
 | ID | 追従タスク | 担当 | 時期 |
 |---|---|---|---|
-| T-1 | yorisoi-platform の文書を本書に合わせる: ADR-AI-ROLES（H-8・制約・案 D の評価）、[関係者と共通用語](../overview/roles-and-vocabulary.md)、[関係者の課題と対応案](../overview/stakeholder-needs.md) W-3、[SanpoGuide 手引き](../apps/sanpoguide/manual/README.md)（散策者・チャンネル提供者の手引きの API キーの説明）、[エコシステム TODO](../work/ecosystem-todo.md) | Claude | 本書の承認後 |
-| T-2 | 中継の API 契約 API-AI-RELAY（トークンの発行、呼び出し、エラー、上限の返し方） | Claude | 本書の承認後 |
+| T-1 | yorisoi-platform の方針の文書を本書に合わせる: ADR-AI-ROLES（H-8・H-9・制約・案 D の評価）、[関係者と共通用語](../overview/roles-and-vocabulary.md)、[関係者の課題と対応案](../overview/stakeholder-needs.md) W-3、[エコシステム TODO](../work/ecosystem-todo.md) | Claude | 本書の承認後 |
+| T-2 | 中継の API 契約 [API-AI-RELAY](../contracts/API-AI-RELAY.md)（トークンの発行、呼び出し、エラー、上限の返し方） | Claude | 本書の承認後 |
 | T-3 | 中継の実装と配備（yorisoi-console の `infra/` に別スタック）。console ADR-001 に運営の AI を足す | Claude | T-2 の後 |
 | T-4 | `kit-llm` とアプリの実装 | Claude | T-2 の後 |
-| T-5 | SanpoGuide のプライバシーポリシー・Play のデータ セーフティ・ストアの説明・architecture.md を改める | Claude | T-4 と一緒に |
+| T-5 | アプリの動きを説明する文書を改める: SanpoGuide のプライバシーポリシー・Play のデータ セーフティ・ストアの説明・architecture.md、[SanpoGuide 手引き](../apps/sanpoguide/manual/README.md)（散策者・チャンネル提供者の手引きの API キーと費用の説明） | Claude | T-4 と一緒に |
 | T-6 | 開発用・本番用のアカウントで、Claude Haiku 5.5 のクロスリージョン推論のクォータ（1 分あたりのトークン数。初めは 0）の引き上げを Service Quotas で申請する。Anthropic のモデルのユースケースの申告を、アカウントごとに済ませる | 開発者 | T-3 の前 |
 | T-7 | 運営の AI 全体の 1 か月の予算を決める（R-10） | 開発者 | 本番に出す前 |
 
@@ -189,7 +189,6 @@ flowchart LR
 |---|---|---|
 | 1 | クォータの引き上げが認められる量。モデルは Haiku 5.5 だけとし、Haiku 4.5 では代えない（費用が約 10 倍）。認められるまで、中継で AI を呼ぶ確認と本番への公開は待つ | T-6 |
 | 2 | 運営の AI 全体の 1 か月の予算 | T-7 |
-| 3 | 1 回の入力の長さと出力の上限の値 | T-2 |
 
 リスク:
 - Play Integrity は、改造された端末やエミュレータでは通らないことがある。通らないアプリ利用者は自分のキーを使うしかない
