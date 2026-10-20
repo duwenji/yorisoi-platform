@@ -23,13 +23,16 @@ enum class Provider(
     }
 }
 
+/** What a call is for; the operator's relay counts them apart (API-AI-RELAY `kind`). */
+enum class Purpose { GUIDE, CHAT }
+
 /** A text-generation backend. */
 interface LlmClient {
-    suspend fun generate(system: String, user: String): String
+    suspend fun generate(system: String, user: String, purpose: Purpose = Purpose.CHAT): String
 }
 
 /** A failure with a message that can be shown to the user as-is. */
-class GuideException(message: String, cause: Throwable? = null) : Exception(message, cause)
+open class GuideException(message: String, cause: Throwable? = null) : Exception(message, cause)
 
 internal fun messageForStatus(status: Int, detail: String?): String = when (status) {
     401 -> "APIキーが正しくありません"

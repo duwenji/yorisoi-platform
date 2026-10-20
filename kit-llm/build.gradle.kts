@@ -5,7 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
 }
 
-description = "AI services (Claude, OpenAI-compatible APIs) and the Keystore cipher for their keys."
+description = "AI services (Claude, OpenAI-compatible APIs, the operator's relay) and the Keystore cipher for their keys."
 
 android {
     namespace = "io.github.duwenji.yorisoi.kit.llm"
@@ -32,4 +32,6 @@ dependencies {
     implementation(libs.anthropic.java)
 
     testImplementation(libs.junit)
+    testImplementation(libs.json)
+    testImplementation(libs.okhttp.mockwebserver)
 }
