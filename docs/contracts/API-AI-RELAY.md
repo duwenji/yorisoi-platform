@@ -42,7 +42,7 @@ ADR-AI-RELAY で、アプリ利用者がキーを用意しなくても、1 台�
 | 対応元ID | 内容 | 対応状況 |
 |---|---|---|
 | ADR-AI-RELAY R-2・R-14 | 1 台の端末につき 1 日の上限まで、サーバーで数える。上限は運営が変える | [回数の数え方](#回数の数え方) |
-| ADR-AI-RELAY R-5 | Bedrock の Claude Haiku（運営が 4.5 と 5.5 から選ぶ） | [AI の呼び方](#ai-の呼び方中継の内部) |
+| ADR-AI-RELAY R-5 | Bedrock のモデル（運営が DeepSeek V3.2 と Claude Haiku 4.5 から選ぶ） | [AI の呼び方](#ai-の呼び方中継の内部) |
 | ADR-AI-RELAY R-7 | Play Integrity とインストール ID、24 時間のトークン | [セッション](#post-v1session) |
 | ADR-AI-RELAY R-9 | 入力と出力の長さの上限 | [長さの上限](#長さの上限) |
 | ADR-AI-RELAY R-10 | 予算を超えたら止める | エラー `relay_paused` |
@@ -77,7 +77,7 @@ sequenceDiagram
     loop 散策中
         A->>R: POST /v1/generate（system・user）
         R->>R: 回数・長さを確かめる
-        R->>B: Claude Haiku（運営が選んだもの）
+        R->>B: 運営が選んだモデル
         B-->>R: 出力
         R-->>A: text・残りの回数
         A->>A: 出力の確認（H-6 ③）
@@ -102,7 +102,7 @@ sequenceDiagram
 
 ### AI の呼び方（中継の内部）
 
-- 運営が選んだモデルの Bedrock の jp 推論プロファイル（ap-northeast-1）。Claude Haiku 4.5（`jp.anthropic.claude-haiku-4-5-20251001-v1:0`）か Claude Haiku 5.5（`jp.anthropic.claude-haiku-5-5`）。モデルを変えても、この契約（入出力・エラー・数え方）は変わらない
+- 運営が選んだ Bedrock のモデルを、ap-northeast-1 から Converse API で呼ぶ。DeepSeek V3.2（`deepseek.v3.2`、東京で処理）か Claude Haiku 4.5（`jp.anthropic.claude-haiku-4-5-20251001-v1:0`、東京・大阪で処理）。モデルを変えても、この契約（入出力・エラー・数え方）は変わらない
 - `max_tokens` は 1,024。考える過程（thinking）は使わない
 - 出力のテキストのブロックをつないで、前後の空白を取って返す
 

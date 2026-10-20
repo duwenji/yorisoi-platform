@@ -11,7 +11,7 @@
 
 [ADR-AI-RELAY](../decisions/ADR-AI-RELAY.md)・[API-AI-RELAY](../contracts/API-AI-RELAY.md)。
 
-- [ ] Bedrock の Claude Haiku 5.5 のクォータの引き上げ（開発用は 1 回目が認められず、申請し直す）と、本番用のアカウントでのユースケースの申告（T-6）。認められたら中継のモデルを Haiku 5.5 に切り替える
+- [ ] 中継のモデルを Claude Haiku 4.5 に切り替えることがあれば、その前にアカウントで Anthropic のユースケースを申告する（T-6）
 - [ ] 中継の実装と配備（yorisoi-console の `infra/` に別スタック。T-3）
 - [ ] `kit-llm` とアプリの実装（T-4）と、アプリの文書・手引き・プライバシーポリシー・Play の申告の改訂（T-5）
 - [ ] 運営の AI 全体の 1 か月の予算を決める（T-7。本番に出す前）
