@@ -19,7 +19,7 @@ class OpenAiCompatibleClient(
     private val model: String,
 ) : LlmClient {
 
-    override suspend fun generate(system: String, user: String): String = withContext(Dispatchers.IO) {
+    override suspend fun generate(system: String, user: String, purpose: Purpose): String = withContext(Dispatchers.IO) {
         val body = JSONObject()
             .put("model", model)
             .put(

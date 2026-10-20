@@ -17,7 +17,7 @@ class ClaudeClient(apiKey: String, private val model: String) : LlmClient {
         .apiKey(apiKey)
         .build()
 
-    override suspend fun generate(system: String, user: String): String = withContext(Dispatchers.IO) {
+    override suspend fun generate(system: String, user: String, purpose: Purpose): String = withContext(Dispatchers.IO) {
         val params = MessageCreateParams.builder()
             .model(model)
             .maxTokens(4000L)

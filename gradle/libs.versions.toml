@@ -36,6 +36,7 @@ play-services-location = { module = "com.google.android.gms:play-services-locati
 play-services-code-scanner = { module = "com.google.android.gms:play-services-code-scanner", version.ref = "playServicesCodeScanner" }
 osmdroid-android = { module = "org.osmdroid:osmdroid-android", version.ref = "osmdroid" }
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
+okhttp-mockwebserver = { module = "com.squareup.okhttp3:mockwebserver", version.ref = "okhttp" }
 anthropic-java = { module = "com.anthropic:anthropic-java", version.ref = "anthropic" }
 tink-android = { module = "com.google.crypto.tink:tink-android", version.ref = "tink" }
 json = { module = "org.json:json", version.ref = "json" }
