@@ -10,6 +10,7 @@
 | `API-CHANNEL-LIST` | [承認済みチャンネル・リスト](API-CHANNEL-LIST.md) | チャンネル管理システムとアプリ | `API-002` |
 | `API-CHANNEL-PACKAGE` | [チャンネル・パッケージ形式](API-CHANNEL-PACKAGE.md) | チャンネル提供者・アプリ・審査ツール | `API-003` |
 | `API-MATERIAL-PRODUCER` | [素材提供者インタフェース](API-MATERIAL-PRODUCER.md) | 素材提供者と、素材を利用するチャンネル・アプリ | `API-004` |
+| `API-AI-RELAY` | [運営の AI 中継](API-AI-RELAY.md) | アプリと運営の AI の中継 | — |
 
 各契約はエコシステム共通の境界を定めます。画面や運用など特定アプリに限る説明は、契約本文でその範囲を示します。
 

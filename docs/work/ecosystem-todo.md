@@ -7,6 +7,15 @@
 - [ ] 新しいアプリの雛形と、要望からプロファイル・ルール・プロンプト・組み込みのチャンネルを生成するスキル（ADR-ECOSYSTEM-PLATFORM T-1）
 - [ ] サイクリングのアプリ（ADR-ECOSYSTEM-PLATFORM T-2。T-1 の後）
 
+## 運営の AI（中継）
+
+[ADR-AI-RELAY](../decisions/ADR-AI-RELAY.md)・[API-AI-RELAY](../contracts/API-AI-RELAY.md)。
+
+- [ ] 中継のモデルを Claude Haiku 4.5 に切り替えることがあれば、その前にアカウントで Anthropic のユースケースを申告する（T-6）
+- [ ] 中継の実装と配備（yorisoi-console の `infra/` に別スタック。T-3）
+- [ ] `kit-llm` とアプリの実装（T-4）と、アプリの文書・手引き・プライバシーポリシー・Play の申告の改訂（T-5）
+- [ ] 運営の AI 全体の 1 か月の予算を決める（T-7。本番に出す前）
+
 ## 第三者のチャンネル
 
 - [ ] 関係者ごとの対応案（[関係者の課題と対応案](../overview/stakeholder-needs.md)）を承認し、公開の前に要るもの（W-1 内蔵のリスト）を進める
