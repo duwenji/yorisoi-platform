@@ -21,6 +21,10 @@ android {
     buildFeatures {
         compose = true
     }
+    // android.util.Log is a stub in local unit tests; let it do nothing.
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
 }
 
 kotlin {

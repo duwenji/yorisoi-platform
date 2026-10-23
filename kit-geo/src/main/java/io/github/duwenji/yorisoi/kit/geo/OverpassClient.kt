@@ -26,6 +26,10 @@ class OverpassClient(
 ) {
     /** [shops]: eating and shopping kinds to add (`SpotKind.onlyWhenPreferred`); none by default. */
     suspend fun search(lat: Double, lon: Double, radiusM: Int = 600, shops: Set<SpotKind> = emptySet()): NearbyResult =
+        parse(fetch(lat, lon, radiusM, shops))
+
+    /** The answer as it came, for [SpotCache]; read it with [parse]. */
+    internal suspend fun fetch(lat: Double, lon: Double, radiusM: Int = 600, shops: Set<SpotKind> = emptySet()): String =
         withContext(Dispatchers.IO) {
             val query = query(lat, lon, radiusM, shops)
 
@@ -44,7 +48,7 @@ class OverpassClient(
                         if (res.isSuccessful) {
                             val body = res.body!!.string()
                             Log.i(TAG, "OK ${elapsed(startedAt)}ms ${body.length}B $endpoint")
-                            return@withContext parse(body)
+                            return@withContext body
                         }
                         lastError = IOException("Overpass API error: HTTP ${res.code}")
                         Log.w(TAG, "HTTP ${res.code} after ${elapsed(startedAt)}ms $endpoint")
