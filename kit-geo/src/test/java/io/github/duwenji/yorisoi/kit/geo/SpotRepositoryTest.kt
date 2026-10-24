@@ -7,6 +7,7 @@ import okhttp3.Protocol
 import okhttp3.Response
 import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Rule
@@ -126,6 +127,37 @@ class SpotRepositoryTest {
         up = true
         spots.search(36.0, 139.0, forceRefresh = true)
         assertEquals(SpotSource.NETWORK, spots.source)
+    }
+
+    @Test
+    fun `a shorter freshness asks again sooner`() = runBlocking {
+        spots.search(35.0, 139.0)
+        clock += 2 * 24 * 60 * 60 * 1000
+        asked = 0
+        val oneDay = SpotRepository(OverpassClient(http), cache = cache, now = { clock }, freshMs = { 24 * 60 * 60 * 1000L })
+        oneDay.search(35.0, 139.0)
+        assertEquals(1, asked)
+        assertEquals(SpotSource.NETWORK, oneDay.source)
+    }
+
+    @Test
+    fun `with the cache turned off, answers are neither used nor kept`() {
+        runBlocking { spots.search(35.0, 139.0) }
+        asked = 0
+        val off = SpotRepository(OverpassClient(http), cache = cache, now = { clock }, useCache = { false })
+        runBlocking { off.search(35.0, 139.0) }
+        assertEquals(1, asked)
+        runBlocking { off.search(36.0, 139.0) }
+        assertNull(cache.find(36.0, 139.0, emptySet(), 300.0, SpotCache.MAX_AGE_MS))
+
+        up = false
+        try {
+            runBlocking { off.search(35.004, 139.0) }
+            fail("the search should have failed")
+        } catch (e: IOException) {
+            // Nor is the kept answer from 450m away shown instead.
+        }
+        assertEquals(SpotSource.NETWORK, off.source)
     }
 
     @Test
