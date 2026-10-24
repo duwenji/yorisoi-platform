@@ -1,0 +1,18 @@
+{
+  "format": 1,
+  "id": "standard",
+  "version": 1,
+  "name": "標準",
+  "summary": "見どころを案内します",
+  "lang": "ja",
+  "activities": ["walk", "cycle"],
+  "genres": ["general"],
+  "greeting": "出発しましょう。",
+  "talk": {
+    "level": "normal",
+    "events": { "spot": true, "revisit": true, "milestone": true, "rest": true, "start": true, "finish": true }
+  },
+  "spots": { "prefer": [], "skip": [] },
+  "guide": { "length": "normal" },
+  "mood": { "tone": true, "sound": "auto" }
+}

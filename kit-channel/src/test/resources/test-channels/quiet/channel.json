@@ -1,0 +1,18 @@
+{
+  "format": 1,
+  "id": "quiet",
+  "version": 2,
+  "name": "しずかに",
+  "summary": "大事なお知らせだけ",
+  "lang": "ja",
+  "activities": ["walk", "cycle"],
+  "genres": ["general"],
+  "greeting": "静かにいきます。",
+  "talk": {
+    "level": "quiet",
+    "events": { "spot": false, "revisit": false, "milestone": false, "rest": false, "start": true, "finish": true }
+  },
+  "spots": { "prefer": [], "skip": [] },
+  "guide": { "length": "short" },
+  "mood": { "tone": true, "sound": "auto" }
+}
