@@ -12,7 +12,7 @@
 | `core-prompt` | JVM | プロンプトのテンプレート（Mustache の一部） |
 | `kit-companion` | JVM | いま何を話すかの判定のエンジン（ルールの並びとゲート） |
 | `kit-voice` | Android | 読み上げ（オーディオフォーカス）と背景音の合成 |
-| `kit-llm` | Android | AI の接続（Claude・OpenAI 互換・運営の AI の中継）と鍵の暗号化 |
+| `kit-llm` | Android | AI の接続（Claude・OpenAI 互換・運営の AI の中継）と鍵の暗号化、自分のキーの 1 日の呼び出しの数、使わない返事（連絡先を含む）の判定 |
 | [`kit-geo`](kit-geo/README.md) | Android | スポット・ルート・写真・天気・地図。スポット検索のキャッシュ |
 | `kit-mood` | Android | 雰囲気（時間帯・季節・空模様・場所）と、配色・絵・背景音 |
 

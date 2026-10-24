@@ -5,7 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
 }
 
-description = "AI services (Claude, OpenAI-compatible APIs, the operator's relay) and the Keystore cipher for their keys."
+description = "AI services (Claude, OpenAI-compatible APIs, the operator's relay), the Keystore cipher for their keys, the daily count of calls and the check of replies."
 
 android {
     namespace = "io.github.duwenji.yorisoi.kit.llm"
@@ -28,6 +28,9 @@ kotlin {
 
 dependencies {
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.play.services)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.play.integrity)
     implementation(libs.okhttp)
     implementation(libs.anthropic.java)
 
