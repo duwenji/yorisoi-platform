@@ -8,9 +8,11 @@ import org.json.JSONObject
 import java.io.IOException
 import java.util.Locale
 import java.util.concurrent.TimeUnit
+import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.hypot
 import kotlin.math.roundToInt
+import kotlin.math.sin
 
 /**
  * A way to a spot. [points] run from the user to the spot; [onPaths] is false for the
@@ -68,6 +70,21 @@ object RouteGeometry {
         val (x, y) = project(b, a.lat)
         val (x0, y0) = project(a, a.lat)
         return hypot(x - x0, y - y0)
+    }
+
+    /** The direction from [a] to [b], in degrees clockwise from north (0 until 360). */
+    fun bearingDeg(a: LatLon, b: LatLon): Double {
+        val (x, y) = project(b, a.lat)
+        val (x0, y0) = project(a, a.lat)
+        return (Math.toDegrees(atan2(x - x0, y - y0)) + 360.0) % 360.0
+    }
+
+    /** The point [distanceM] from [from] towards [bearingDeg] (degrees clockwise from north). */
+    fun destination(from: LatLon, bearingDeg: Double, distanceM: Double): LatLon {
+        val rad = Math.toRadians(bearingDeg)
+        val dLat = distanceM * cos(rad) / EARTH_RADIUS_M
+        val dLon = distanceM * sin(rad) / (EARTH_RADIUS_M * cos(Math.toRadians(from.lat)))
+        return LatLon(from.lat + Math.toDegrees(dLat), from.lon + Math.toDegrees(dLon))
     }
 
     /** How far [p] is from the nearest point of the line through [points]. */

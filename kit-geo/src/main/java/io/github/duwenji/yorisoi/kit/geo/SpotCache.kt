@@ -24,11 +24,14 @@ class SpotCache(
         }
     }
 
-    /** The nearest answer within [withinM] of the point, for these [shops], no older than [maxAgeMs]. */
+    /**
+     * The nearest answer within [withinM] of the point, for these [shops] and with traffic signals
+     * or not as [signals] says, no older than [maxAgeMs].
+     */
     @Synchronized
-    fun find(lat: Double, lon: Double, shops: Set<SpotKind>, withinM: Double, maxAgeMs: Long): Entry? {
+    fun find(lat: Double, lon: Double, shops: Set<SpotKind>, withinM: Double, maxAgeMs: Long, signals: Boolean = false): Entry? {
         val here = LatLon(lat, lon)
-        val key = shopsKey(shops)
+        val key = key(shops, signals)
         val oldest = now() - maxAgeMs
         return entries()
             .filter { it.shops == key && it.entry.fetchedAt >= oldest }
@@ -38,12 +41,12 @@ class SpotCache(
             ?.first
     }
 
-    /** Keeps an answer, replacing older ones for the same shops within [replaceWithinM], then trims. */
+    /** Keeps an answer, replacing older ones for the same shops (and signals) within [replaceWithinM], then trims. */
     @Synchronized
-    fun put(lat: Double, lon: Double, shops: Set<SpotKind>, body: String, replaceWithinM: Double) {
+    fun put(lat: Double, lon: Double, shops: Set<SpotKind>, body: String, replaceWithinM: Double, signals: Boolean = false) {
         if (!dir.isDirectory && !dir.mkdirs()) return
         val here = LatLon(lat, lon)
-        val key = shopsKey(shops)
+        val key = key(shops, signals)
         val fetchedAt = now()
         val name = String.format(Locale.ROOT, "%d_%.5f_%.5f_%s%s", fetchedAt, lat, lon, key, SUFFIX)
         val tmp = File(dir, "$name.tmp")
@@ -94,8 +97,8 @@ class SpotCache(
         Stored(Entry(LatLon(lat, lon), fetchedAt, f), parts[3], f)
     }
 
-    private fun shopsKey(shops: Set<SpotKind>): String =
-        if (shops.isEmpty()) "none" else shops.map { it.name }.sorted().joinToString("-")
+    private fun key(shops: Set<SpotKind>, signals: Boolean): String =
+        (if (shops.isEmpty()) "none" else shops.map { it.name }.sorted().joinToString("-")) + if (signals) "+signals" else ""
 
     companion object {
         /** Answers this new are used as they are, without asking Overpass. */

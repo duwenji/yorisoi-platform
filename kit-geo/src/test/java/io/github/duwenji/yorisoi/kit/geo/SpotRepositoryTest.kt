@@ -1,12 +1,15 @@
 package io.github.duwenji.yorisoi.kit.geo
 
+import android.location.Location
 import kotlinx.coroutines.runBlocking
+import okhttp3.FormBody
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
 import okhttp3.Response
 import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
@@ -26,12 +29,15 @@ class SpotRepositoryTest {
     private var up = true
     private var answer = "鶴岡八幡宮"
     private var asked = 0
+    private var lastQuery: String? = null
 
     private val http = OkHttpClient.Builder().addInterceptor { chain ->
         asked++
+        lastQuery = (chain.request().body as? FormBody)?.value(0)
         val builder = Response.Builder().request(chain.request()).protocol(Protocol.HTTP_1_1)
         if (up) {
-            val body = """{"elements":[{"type":"node","id":1,"lat":35.0,"lon":139.0,"tags":{"name":"$answer","historic":"yes"}}]}"""
+            val signal = if (lastQuery.orEmpty().contains("traffic_signals")) """,{"type":"node","id":2,"lat":35.001,"lon":139.0,"tags":{"highway":"traffic_signals"}}""" else ""
+            val body = """{"elements":[{"type":"node","id":1,"lat":35.0,"lon":139.0,"tags":{"name":"$answer","historic":"yes"}}$signal]}"""
             builder.code(200).message("OK").body(body.toResponseBody("application/json".toMediaType())).build()
         } else {
             builder.code(504).message("Gateway Timeout").body("".toResponseBody(null)).build()
@@ -158,6 +164,27 @@ class SpotRepositoryTest {
             // Nor is the kept answer from 450m away shown instead.
         }
         assertEquals(SpotSource.NETWORK, off.source)
+    }
+
+    @Test
+    fun `an app that moves fast can search around a point ahead`() = runBlocking {
+        val ahead = SpotRepository(OverpassClient(http), now = { clock }, searchCenter = { LatLon(35.01, 139.02) })
+        ahead.onLocation(Location("test"))
+        assertTrue(lastQuery.orEmpty().contains("around:600,35.01,139.02"))
+    }
+
+    @Test
+    fun `traffic signals are searched only when asked for, and kept apart`() = runBlocking {
+        spots.search(35.0, 139.0)
+        assertFalse(lastQuery.orEmpty().contains("traffic_signals"))
+        assertTrue(spots.trafficSignals.value.isEmpty())
+        // The answer kept without signals doesn't do for an app that wants them.
+        asked = 0
+        val withSignals = SpotRepository(OverpassClient(http), cache = cache, now = { clock }, signals = true)
+        withSignals.search(35.0, 139.0)
+        assertEquals(1, asked)
+        assertEquals(listOf(LatLon(35.001, 139.0)), withSignals.trafficSignals.value)
+        assertEquals(listOf("鶴岡八幡宮"), names(withSignals))
     }
 
     @Test

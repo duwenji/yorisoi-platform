@@ -33,6 +33,14 @@ class SpotCacheTest {
     }
 
     @Test
+    fun `an answer with traffic signals is kept apart from one without`() {
+        cache.put(35.0, 139.0, emptySet(), "plain", replaceWithinM = 150.0)
+        cache.put(35.0, 139.0, emptySet(), "signals", replaceWithinM = 150.0, signals = true)
+        assertEquals("plain", cache.find(35.0, 139.0, emptySet(), 300.0, SpotCache.FRESH_MS)?.body())
+        assertEquals("signals", cache.find(35.0, 139.0, emptySet(), 300.0, SpotCache.FRESH_MS, signals = true)?.body())
+    }
+
+    @Test
     fun `an old answer is found only when old ones will do`() {
         cache.put(35.0, 139.0, emptySet(), "old", replaceWithinM = 150.0)
         clock += SpotCache.FRESH_MS + 1
