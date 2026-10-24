@@ -12,8 +12,8 @@ import org.json.JSONObject
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
-/** What one search found: spots to guide, and amenities for the map. */
-data class NearbyResult(val spots: List<Poi>, val facilities: List<Facility>)
+/** What one search found: spots to guide, amenities for the map, and traffic signals when asked for. */
+data class NearbyResult(val spots: List<Poi>, val facilities: List<Facility>, val signals: List<LatLon> = emptyList())
 
 /** Searches OpenStreetMap (Overpass API) for walk-worthy spots and walk amenities around a point. */
 class OverpassClient(
@@ -24,14 +24,17 @@ class OverpassClient(
         .readTimeout(30, TimeUnit.SECONDS)
         .build(),
 ) {
-    /** [shops]: eating and shopping kinds to add (`SpotKind.onlyWhenPreferred`); none by default. */
-    suspend fun search(lat: Double, lon: Double, radiusM: Int = 600, shops: Set<SpotKind> = emptySet()): NearbyResult =
-        parse(fetch(lat, lon, radiusM, shops))
+    /**
+     * [shops]: eating and shopping kinds to add (`SpotKind.onlyWhenPreferred`); none by default.
+     * [signals]: also the traffic signals, for apps that keep quiet near them (a cyclist's); not by default.
+     */
+    suspend fun search(lat: Double, lon: Double, radiusM: Int = 600, shops: Set<SpotKind> = emptySet(), signals: Boolean = false): NearbyResult =
+        parse(fetch(lat, lon, radiusM, shops, signals))
 
     /** The answer as it came, for [SpotCache]; read it with [parse]. */
-    internal suspend fun fetch(lat: Double, lon: Double, radiusM: Int = 600, shops: Set<SpotKind> = emptySet()): String =
+    internal suspend fun fetch(lat: Double, lon: Double, radiusM: Int = 600, shops: Set<SpotKind> = emptySet(), signals: Boolean = false): String =
         withContext(Dispatchers.IO) {
-            val query = query(lat, lon, radiusM, shops)
+            val query = query(lat, lon, radiusM, shops, signals)
 
             // Public Overpass servers are often busy (429/504); fall through to the next mirror.
             var lastError: IOException? = null
@@ -61,7 +64,7 @@ class OverpassClient(
             throw lastError!!
         }
 
-    internal fun query(lat: Double, lon: Double, radiusM: Int, shops: Set<SpotKind>): String {
+    internal fun query(lat: Double, lon: Double, radiusM: Int, shops: Set<SpotKind>, signals: Boolean = false): String {
         val around = "around:$radiusM,$lat,$lon"
         // Benches and vending machines are everywhere; only the close ones matter.
         val closeAround = "around:${minOf(radiusM, CLOSE_RADIUS_M)},$lat,$lon"
@@ -90,7 +93,8 @@ class OverpassClient(
             out center 40;
         """.trimIndent()
 
-        return if (shops.isEmpty()) query else query + "\n" + shopQuery(lat, lon, radiusM, shops)
+        val withShops = if (shops.isEmpty()) query else query + "\n" + shopQuery(lat, lon, radiusM, shops)
+        return if (signals) "$withShops\nnode($around)[\"highway\"=\"traffic_signals\"];\nout $SIGNAL_LIMIT;" else withShops
     }
 
     /**
@@ -109,10 +113,15 @@ class OverpassClient(
         val elements = JSONObject(json).getJSONArray("elements")
         val result = LinkedHashMap<String, Poi>()
         val facilities = mutableListOf<Facility>()
+        val signals = mutableListOf<LatLon>()
         for (i in 0 until elements.length()) {
             val e = elements.getJSONObject(i)
             val tagsJson = e.optJSONObject("tags") ?: continue
             val tags = tagsJson.keys().asSequence().associateWith { tagsJson.getString(it) }
+            if (tags["highway"] == "traffic_signals" && e.has("lat")) {
+                signals += LatLon(e.getDouble("lat"), e.getDouble("lon"))
+                continue
+            }
             FacilityKind.of(tags["amenity"])?.let { kind ->
                 facilityOf(e, kind, tags)?.let { f ->
                     // A toilet is often mapped both as a node and its building; keep one.
@@ -143,7 +152,7 @@ class OverpassClient(
                 else -> seen
             }
         }
-        return NearbyResult(result.values.toList(), facilities)
+        return NearbyResult(result.values.toList(), facilities, signals)
     }
 
     /** Nodes carry their position; ways and relations get a `center` from `out center`. */
@@ -222,6 +231,9 @@ class OverpassClient(
         private const val CLOSE_RADIUS_M = 250
         private const val SAME_FACILITY_M = 20f
         private const val SHOP_RADIUS_M = 400
+
+        /** A busy town has a few hundred signals within 600m. */
+        private const val SIGNAL_LIMIT = 300
         private const val SHOP_LIMIT = 60
 
         /** The `shop=*` values of each kind; chains' kinds (convenience, supermarket, ...) are in none. */

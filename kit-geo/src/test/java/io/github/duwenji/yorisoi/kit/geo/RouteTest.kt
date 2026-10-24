@@ -6,6 +6,18 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class RouteTest {
+    @Test
+    fun `a point some way off in a direction, and the direction back to it`() {
+        val from = LatLon(35.0, 139.0)
+        val north = RouteGeometry.destination(from, 0.0, 111.2)
+        assertEquals(35.001, north.lat, 0.00001)
+        assertEquals(139.0, north.lon, 0.00001)
+        val east = RouteGeometry.destination(from, 90.0, 300.0)
+        assertEquals(300.0, RouteGeometry.distanceM(from, east), 0.5)
+        assertEquals(90.0, RouteGeometry.bearingDeg(from, east), 0.1)
+        assertEquals(225.0, RouteGeometry.bearingDeg(from, RouteGeometry.destination(from, 225.0, 500.0)), 0.1)
+    }
+
     // Roughly 111 m per 0.001° of latitude; at 35°N, 0.001° of longitude is about 91 m.
     private val a = LatLon(35.0, 139.0)
     private val b = LatLon(35.0, 139.002)

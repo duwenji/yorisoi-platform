@@ -49,4 +49,20 @@ class OverpassShopsTest {
         assertEquals(35.2, restaurant.lat, 0.0)
         assertEquals(139.2, restaurant.lon, 0.0)
     }
+
+    @Test
+    fun `traffic signals are asked for only when wanted, and come apart from the spots`() {
+        assertFalse(client.query(35.0, 139.0, 600, emptySet()).contains("traffic_signals"))
+        assertTrue(client.query(35.0, 139.0, 600, emptySet(), signals = true).trimEnd().endsWith("node(around:600,35.0,139.0)[\"highway\"=\"traffic_signals\"];\nout 300;"))
+        val found = client.parse(
+            """
+            {"elements": [
+              {"type": "node", "id": 1, "lat": 35.1, "lon": 139.1, "tags": {"highway": "traffic_signals"}},
+              {"type": "node", "id": 2, "lat": 35.2, "lon": 139.2, "tags": {"name": "鶴岡八幡宮", "historic": "yes"}}
+            ]}
+            """.trimIndent(),
+        )
+        assertEquals(listOf(LatLon(35.1, 139.1)), found.signals)
+        assertEquals(listOf("鶴岡八幡宮"), found.spots.map { it.name })
+    }
 }

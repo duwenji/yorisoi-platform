@@ -32,6 +32,9 @@ enum class SpotSource {
  * neither reading nor keeping answers; [freshMs] is how new an answer must be to use it without
  * asking, up to [SpotCache.MAX_AGE_MS]. After a failed search, the next waits a while
  * ([RETRY_DELAYS_MS]) rather than asking again at the next location.
+ *
+ * [searchCenter] is where to search from a location: the location itself, or a point ahead of it
+ * for an app that moves fast (a cyclist's). [signals] adds the traffic signals to the search.
  */
 class SpotRepository(
     private val overpass: OverpassClient,
@@ -40,6 +43,8 @@ class SpotRepository(
     private val now: () -> Long = System::currentTimeMillis,
     private val useCache: () -> Boolean = { true },
     private val freshMs: () -> Long = { SpotCache.FRESH_MS },
+    private val searchCenter: (Location) -> LatLon = { LatLon(it.latitude, it.longitude) },
+    private val signals: Boolean = false,
 ) {
     private val _location = MutableStateFlow<Location?>(null)
     val location: StateFlow<Location?> = _location.asStateFlow()
@@ -49,6 +54,11 @@ class SpotRepository(
 
     private val _facilities = MutableStateFlow<List<Facility>>(emptyList())
     val facilities: StateFlow<List<Facility>> = _facilities.asStateFlow()
+
+    private val _signals = MutableStateFlow<List<LatLon>>(emptyList())
+
+    /** The traffic signals around the answer shown; always empty unless the repository was made with `signals`. */
+    val trafficSignals: StateFlow<List<LatLon>> = _signals.asStateFlow()
 
     /** Where the spots shown came from; null before the first search. */
     @Volatile
@@ -78,7 +88,8 @@ class SpotRepository(
      */
     suspend fun onLocation(location: Location, forceRefresh: Boolean = false) {
         _location.value = location
-        search(location.latitude, location.longitude, forceRefresh)
+        val center = searchCenter(location)
+        search(center.lat, center.lon, forceRefresh)
     }
 
     /** Searches again where the user is, if the channel's shops changed (a switch of channel). */
@@ -93,7 +104,7 @@ class SpotRepository(
         val cache = cache?.takeIf { useCache() }
         if (!forceRefresh && shown != null && shops == lastShops && RouteGeometry.distanceM(shown, here) <= REFETCH_DISTANCE_M) return@withLock
         if (!forceRefresh) {
-            cache?.find(lat, lon, shops, REFETCH_DISTANCE_M, freshMs().coerceIn(0L, SpotCache.MAX_AGE_MS))?.let { kept ->
+            cache?.find(lat, lon, shops, REFETCH_DISTANCE_M, freshMs().coerceIn(0L, SpotCache.MAX_AGE_MS), signals)?.let { kept ->
                 if (show(kept, SpotSource.CACHE)) {
                     shownAt = kept.center
                     lastShops = shops
@@ -105,12 +116,12 @@ class SpotRepository(
                 return@withLock
             }
         }
-        val stale = cache?.find(lat, lon, shops, REFETCH_DISTANCE_M, SpotCache.MAX_AGE_MS)?.takeIf { show(it, SpotSource.STALE) }
+        val stale = cache?.find(lat, lon, shops, REFETCH_DISTANCE_M, SpotCache.MAX_AGE_MS, signals)?.takeIf { show(it, SpotSource.STALE) }
         try {
-            val body = overpass.fetch(lat, lon, shops = shops)
+            val body = overpass.fetch(lat, lon, shops = shops, signals = signals)
             show(overpass.parse(body), SpotSource.NETWORK)
             shownKept = null
-            cache?.put(lat, lon, shops, body, replaceWithinM = REPLACE_DISTANCE_M)
+            cache?.put(lat, lon, shops, body, replaceWithinM = REPLACE_DISTANCE_M, signals = signals)
             shownAt = here
             lastShops = shops
             failures = 0
@@ -127,7 +138,7 @@ class SpotRepository(
 
     /** Shows the nearest kept answer that still covers the point, if any. */
     private fun showFallback(cache: SpotCache, lat: Double, lon: Double, shops: Set<SpotKind>) {
-        cache.find(lat, lon, shops, FALLBACK_DISTANCE_M, SpotCache.MAX_AGE_MS)?.let { show(it, SpotSource.FALLBACK) }
+        cache.find(lat, lon, shops, FALLBACK_DISTANCE_M, SpotCache.MAX_AGE_MS, signals)?.let { show(it, SpotSource.FALLBACK) }
     }
 
     /** False when the kept answer can't be read; the cache then just didn't have it. */
@@ -146,6 +157,7 @@ class SpotRepository(
     private fun show(found: NearbyResult, from: SpotSource) {
         _spots.value = found.spots
         _facilities.value = found.facilities
+        _signals.value = found.signals
         source = from
         updates++
     }
