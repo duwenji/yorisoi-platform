@@ -46,7 +46,8 @@ enum class Strictness { REVIEW, APP }
  */
 object AppIds {
     const val SANPOGUIDE = "sanpoguide"
-    val KNOWN: Set<String> = setOf(SANPOGUIDE)
+    const val CYCLEGUIDE = "cycleguide"
+    val KNOWN: Set<String> = setOf(SANPOGUIDE, CYCLEGUIDE)
 }
 
 /**

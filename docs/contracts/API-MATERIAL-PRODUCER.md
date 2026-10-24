@@ -61,7 +61,7 @@ IF は、アプリの中のコード（Kotlin の `interface`）と、チャン�
 | I-7 | 候補の順番 | チャンネルは 1 つの見せ方に参照を 1〜3 個並べる。アプリは上から「出す」を呼び、最初の `ready` を使う。全部 `none`/`unavailable` なら、その見せ方は飛ばす |
 | I-8 | チャンネルからの指示 | 素材提供者は受け付ける指示（`params`）を記述に宣言する。チャンネルは宣言された指示だけを渡せる。値は列挙か、API-CHANNEL-PACKAGE のスロットと同じ決まり（プレーンな文章、上限あり）に従う |
 | I-9 | 省略形 | `channel.json` のスロット・`guide.length`・`mood.tone`・`mood.sound`・`cues[].narration`・`present[].resource` は省略形として残し、アプリが[展開の規則](#省略形の展開)で参照と指示に直す |
-| I-11 | 使ってよいアプリ | 素材集はアプリをまたいで使える（ADR-ECOSYSTEM-PLATFORM E-14）。`grants.apps`（任意）に、使ってよいアプリの ID（`core-format` の一覧。最初は `sanpoguide`）を 1〜20 個書ける。書かなければすべてのアプリ。アプリは自分の ID が含まれない素材集を使わない（`not_granted` と同じ扱い）。古いアプリへの備えは API-CHANNEL-LIST P-21 |
+| I-11 | 使ってよいアプリ | 素材集はアプリをまたいで使える（ADR-ECOSYSTEM-PLATFORM E-14）。`grants.apps`（任意）に、使ってよいアプリの ID（`core-format` の一覧。`sanpoguide`・`cycleguide`）を 1〜20 個書ける。書かなければすべてのアプリ。アプリは自分の ID が含まれない素材集を使わない（`not_granted` と同じ扱い）。古いアプリへの備えは API-CHANNEL-LIST P-21 |
 | I-12 | タグと題材 | [タグ](#タグ)の一覧はエコシステム共通で、`core-format` に置く（ADR-ECOSYSTEM-PLATFORM E-15。値は変えない）。素材の題材（`about`）はスポットと地点だけで、アプリの出来事を題材にする書き方はない（ADR-ECOSYSTEM-PLATFORM E-16）。素材の方針（P-1・P-2）はアプリが緩められない |
 | I-10 | 基準で選ぶ | チャンネルが書いた基準（`selectors`）ごとに、アプリが「選択の素材提供者」を 1 つ作る。記述は `trust=reviewed`・`fetch=prefetch`・`exposure=none`・`generated=false`（P-1 のまま）。詳細は[基準で選ぶ素材提供者](#基準で選ぶ素材提供者) |
 | I-13 | 根拠に使ってよいか | 素材提供者は素材集の `grants.grounding`（真偽値。省略は偽）で、AI の根拠に使ってよいかを決める。真の素材集だけを根拠にする（ADR-AI-ROLES H-4） |

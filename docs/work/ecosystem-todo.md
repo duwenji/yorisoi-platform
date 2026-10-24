@@ -4,8 +4,8 @@
 
 ## ADR の追従タスク
 
-- [ ] 新しいアプリの雛形と、要望からプロファイル・ルール・プロンプト・組み込みのチャンネルを生成するスキル（ADR-ECOSYSTEM-PLATFORM T-1）
-- [ ] サイクリングのアプリ（ADR-ECOSYSTEM-PLATFORM T-2。T-1 の後）
+- [ ] CycleGuide（ADR-ECOSYSTEM-PLATFORM T-2。要件は [yorisoi-cycleguide の要件定義](https://github.com/duwenji/yorisoi-cycleguide/blob/main/docs/requirements.md)）
+- [ ] 新しいアプリの雛形と、要望からプロファイル・ルール・プロンプト・組み込みのチャンネルを生成するスキル（ADR-ECOSYSTEM-PLATFORM T-1。T-2 の後）
 
 ## 運営の AI（中継）
 
