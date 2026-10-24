@@ -46,7 +46,7 @@ flowchart LR
 | アプリの版         | 1.0.0                                                                                                                                                                 |
 | 組み込みチャンネル | 6 本（標準・歴史探訪・自然観察・グルメの旅・ショッピング・しずかに）                                                                                                  |
 | Google Play        | 公開の準備中（[TODO](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/TODO.md#google-play-での公開)）                                                      |
-| 第三者チャンネル   | 本番のリストはまだない。設定の「配信されているチャンネル・リスト」は**開発者モードのときだけ**出る                                                              |
+| 第三者チャンネル   | 本番のリストはまだない。設定の「チャンネル・リストと試用チケット」は**開発者モードのときだけ**出る                                                              |
 | 素材               | 文字と画像（第 1 段）まで。音声・映像は未対応                                                                                                                         |
 | 管理システム       | 開発用だけ稼働（運営の画面 https://d32w19p7au8cu2.cloudfront.net、公開 URL https://d32t2reyxml47d.cloudfront.net、リスト ID `sc1363urrzsrhjuxasgz5pnxkcf5mcieqhv`） |
 
