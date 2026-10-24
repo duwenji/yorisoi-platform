@@ -100,7 +100,7 @@
 | No. | 論点 | 決定 |
 |---|---|---|
 | P-19 | 絞り込みの情報 | `channels[]` に `activities`・`genres`・`requires`（`features` の配列）を載せる。管理システムがパッケージの `channel.json` から写す。アプリはパッケージを取得する前に、リストの値で絞り込める（API-CHANNEL-PACKAGE G-4）。取得したあと、パッケージの値と一致するかを確かめる |
-| P-20 | アプリごとの必要な版 | アプリごとに versionCode が違うため、`channels[].minAppVersions`・`collections[].minAppVersions`（アプリの ID → versionCode）を載せる。アプリの ID は `core-format` の一覧（最初は `sanpoguide`）。アプリは自分の ID の値を使い、値がなければ版の条件はない。チャンネルの過ごし方・必要な機能が合わないアプリ、素材集の `grants.apps`（API-MATERIAL-PRODUCER）が含まないアプリは載せない（そのアプリは P-19 と `grants.apps` で使わない） |
+| P-20 | アプリごとの必要な版 | アプリごとに versionCode が違うため、`channels[].minAppVersions`・`collections[].minAppVersions`（アプリの ID → versionCode）を載せる。アプリの ID は `core-format` の一覧（`sanpoguide`・`cycleguide`）。アプリは自分の ID の値を使い、値がなければ版の条件はない。チャンネルの過ごし方・必要な機能が合わないアプリ、素材集の `grants.apps`（API-MATERIAL-PRODUCER）が含まないアプリは載せない（そのアプリは P-19 と `grants.apps` で使わない） |
 
 ### 全体の構成
 

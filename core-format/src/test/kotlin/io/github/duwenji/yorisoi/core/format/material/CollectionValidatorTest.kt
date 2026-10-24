@@ -106,6 +106,7 @@ class CollectionValidatorTest {
         assertFalse(forSanpo.allowsApp("cycle"))
         assertTrue((check(signed(files())) as CollectionCheck.Ok).collection.manifest.grants.allowsApp("cycle"))
         assertEquals(RejectCode.BAD_VALUE, code(check(signed(files(manifest { put("grants", grants()) })))))
+        assertTrue(check(signed(files(manifest { put("grants", grants("sanpoguide", "cycleguide")) }))) is CollectionCheck.Ok)
         // Review knows every app; an app reads ids of apps newer than itself.
         val newer = signed(files(manifest { put("grants", grants("sanpoguide", "boat")) }))
         assertEquals(RejectCode.BAD_VALUE, code(check(newer)))

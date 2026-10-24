@@ -173,7 +173,7 @@ ADR-ECOSYSTEM-PLATFORM E-24 のとおり、実装するアプリを作ると決�
 | 値 | 意味 | 代表のアプリ（審査の見本。ADR-ECOSYSTEM-PLATFORM E-26） |
 |---|---|---|
 | `walk` | 散歩・散策 | SanpoGuide |
-| `cycle` | サイクリング | サイクリングの伴走のアプリ（まだない。できるまで見本は組み立ての確認だけ） |
+| `cycle` | サイクリング | CycleGuide（作成中。できるまで見本は組み立ての確認だけ） |
 
 ### ジャンル（genres）
 
