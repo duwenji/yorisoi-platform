@@ -14,7 +14,7 @@ enum class SpotSource {
     /** Overpass, just now. */
     NETWORK,
 
-    /** A kept answer from nearby, new enough to use without asking ([SpotCache.FRESH_MS]). */
+    /** A kept answer from nearby, new enough to use without asking ([SpotRepository]'s `freshMs`). */
     CACHE,
 
     /** An older kept answer from nearby, shown while asking Overpass again. */
@@ -28,7 +28,9 @@ enum class SpotSource {
  * Current location, nearby spots and amenities, shared by the UI and the walk service.
  * [shops] gives the eating and shopping kinds the channel in use adds to the search.
  * With a [cache], answers from nearby are used instead of asking the public Overpass servers
- * again, and are what's shown when they fail. After a failed search, the next waits a while
+ * again, and are what's shown when they fail. [useCache] turns it off for now (the user's choice),
+ * neither reading nor keeping answers; [freshMs] is how new an answer must be to use it without
+ * asking, up to [SpotCache.MAX_AGE_MS]. After a failed search, the next waits a while
  * ([RETRY_DELAYS_MS]) rather than asking again at the next location.
  */
 class SpotRepository(
@@ -36,6 +38,8 @@ class SpotRepository(
     private val shops: () -> Set<SpotKind> = { emptySet() },
     private val cache: SpotCache? = null,
     private val now: () -> Long = System::currentTimeMillis,
+    private val useCache: () -> Boolean = { true },
+    private val freshMs: () -> Long = { SpotCache.FRESH_MS },
 ) {
     private val _location = MutableStateFlow<Location?>(null)
     val location: StateFlow<Location?> = _location.asStateFlow()
@@ -86,9 +90,10 @@ class SpotRepository(
         val here = LatLon(lat, lon)
         val shops = shops()
         val shown = shownAt
+        val cache = cache?.takeIf { useCache() }
         if (!forceRefresh && shown != null && shops == lastShops && RouteGeometry.distanceM(shown, here) <= REFETCH_DISTANCE_M) return@withLock
         if (!forceRefresh) {
-            cache?.find(lat, lon, shops, REFETCH_DISTANCE_M, SpotCache.FRESH_MS)?.let { kept ->
+            cache?.find(lat, lon, shops, REFETCH_DISTANCE_M, freshMs().coerceIn(0L, SpotCache.MAX_AGE_MS))?.let { kept ->
                 if (show(kept, SpotSource.CACHE)) {
                     shownAt = kept.center
                     lastShops = shops
@@ -96,7 +101,7 @@ class SpotRepository(
                 }
             }
             if (now() < retryAt) {
-                showFallback(lat, lon, shops)
+                cache?.let { showFallback(it, lat, lon, shops) }
                 return@withLock
             }
         }
@@ -115,14 +120,14 @@ class SpotRepository(
             failures++
             // The answer shown is no longer good here; search again once the wait is over.
             shownAt = null
-            if (stale == null) showFallback(lat, lon, shops)
+            if (stale == null) cache?.let { showFallback(it, lat, lon, shops) }
             throw e
         }
     }
 
     /** Shows the nearest kept answer that still covers the point, if any. */
-    private fun showFallback(lat: Double, lon: Double, shops: Set<SpotKind>) {
-        cache?.find(lat, lon, shops, FALLBACK_DISTANCE_M, SpotCache.MAX_AGE_MS)?.let { show(it, SpotSource.FALLBACK) }
+    private fun showFallback(cache: SpotCache, lat: Double, lon: Double, shops: Set<SpotKind>) {
+        cache.find(lat, lon, shops, FALLBACK_DISTANCE_M, SpotCache.MAX_AGE_MS)?.let { show(it, SpotSource.FALLBACK) }
     }
 
     /** False when the kept answer can't be read; the cache then just didn't have it. */
