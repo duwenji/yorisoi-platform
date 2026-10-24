@@ -18,6 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
@@ -25,6 +26,7 @@ import io.github.duwenji.yorisoi.kit.geo.R
 import io.github.duwenji.yorisoi.kit.geo.Facility
 import io.github.duwenji.yorisoi.kit.geo.FacilityKind
 import io.github.duwenji.yorisoi.kit.geo.LatLon
+import io.github.duwenji.yorisoi.kit.geo.Poi
 import org.osmdroid.events.DelayedMapListener
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
@@ -58,10 +60,13 @@ fun facilityColor(kind: FacilityKind) = when (kind) {
 }
 
 /**
- * Map showing the user's position (with the way they face, [heading]), nearby spots and
- * amenities, the way already [walked] on this walk, and the way to the spot being guided to. Pans to [focus] when it changes.
+ * Map showing the user's position (with the way they face, [heading]), nearby spots in their
+ * [SpotGroup] colors and amenities, the way already [walked] on this walk, and the way to the
+ * spot being guided to. Pans to [focus] when it changes.
  * [onViewportChanged] reports the area on screen (zoom, north, south, east, west) once the
  * map settles, for attributions that depend on it.
+ * The [selected] spot is drawn larger and on top, the others faded, and the map pans to it when
+ * it changes. Each change of [recenterRequests] pans back to the user's position.
  */
 @Composable
 fun SpotMap(
@@ -76,10 +81,11 @@ fun SpotMap(
     onSpotClick: (SpotItem) -> Unit,
     onViewportChanged: (zoom: Int, north: Double, south: Double, east: Double, west: Double) -> Unit,
     modifier: Modifier = Modifier,
+    selected: Poi? = null,
+    recenterRequests: Int = 0,
 ) {
     val context = LocalContext.current
     val density = context.resources.displayMetrics.density
-    val spotIcon = remember { ContextCompat.getDrawable(context, R.drawable.spot_dot) }
     val meIcon = remember { ContextCompat.getDrawable(context, R.drawable.me_dot) }
     val facilityIcons = remember { FacilityKind.entries.associateWith { ContextCompat.getDrawable(context, facilityDot(it)) } }
     val reportViewport by rememberUpdatedState(onViewportChanged)
@@ -142,14 +148,21 @@ fun SpotMap(
             markers.spots = spots.map { item ->
                 val id = item.poi.id
                 Marker(map).apply {
+                    this.id = id
                     position = GeoPoint(item.poi.lat, item.poi.lon)
-                    icon = spotIcon
                     setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
                     // Looked up on tap, so the sheet gets the current distance and visit count.
                     setOnMarkerClickListener { _, _ -> markers.spotsById[id]?.let(markers.onSpotClick); true }
                 }
             }
             markers.spotIds = spotIds
+        }
+        // Colors and the highlight change without the places changing.
+        val selectedId = selected?.id
+        markers.spots.forEach { marker ->
+            val item = markers.spotsById[marker.id] ?: return@forEach
+            marker.icon = markers.spotIcon(context, SpotGroup.of(item.poi.category), marker.id == selectedId)
+            marker.alpha = if (selectedId == null || marker.id == selectedId) 1f else FADED_ALPHA
         }
 
         map.overlays.clear()
@@ -185,7 +198,8 @@ fun SpotMap(
             line.setPoints(route.route.points.map { GeoPoint(it.lat, it.lon) })
             map.overlays += line
         }
-        map.overlays += markers.spots
+        // The selected spot last, so no other marker covers it.
+        map.overlays += markers.spots.sortedBy { it.id == selectedId }
         if (location != null) {
             val me = markers.me ?: Marker(map).apply {
                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
@@ -195,7 +209,9 @@ fun SpotMap(
             me.position = GeoPoint(location.latitude, location.longitude)
             map.overlays += me
             val last = centeredAt[0]
-            if (last == null || last.distanceTo(location) > 150f) {
+            val asked = recenterRequests != markers.recenterRequests
+            markers.recenterRequests = recenterRequests
+            if (asked || last == null || last.distanceTo(location) > 150f) {
                 map.controller.animateTo(GeoPoint(location.latitude, location.longitude))
                 centeredAt[0] = location
             }
@@ -203,6 +219,10 @@ fun SpotMap(
         if (focus != null && focus != focusedOn[0]) {
             map.controller.animateTo(GeoPoint(focus.lat, focus.lon))
             focusedOn[0] = focus
+        }
+        if (selectedId != markers.selectedId) {
+            selected?.let { map.controller.animateTo(GeoPoint(it.lat, it.lon)) }
+            markers.selectedId = selectedId
         }
         // Google's attribution changes with the area and comes with its logo; the screen draws both.
         if (tiles !is MapTiles.Google) map.overlays += copyright
@@ -223,7 +243,14 @@ private class MapMarkers {
     var walked: Polyline? = null
     var walkedPoints: List<LatLon>? = null
     var tiles: MapTiles? = null
+    var selectedId: String? = null
+    var recenterRequests = 0
     private val headingIcons = HashMap<Int, Drawable>()
+    private val spotIcons = HashMap<Pair<SpotGroup, Boolean>, Drawable>()
+
+    /** A spot's dot in its group's color; made on first use. */
+    fun spotIcon(context: Context, group: SpotGroup, selected: Boolean): Drawable =
+        spotIcons.getOrPut(group to selected) { drawSpotIcon(context, group.color.toArgb(), selected) }
 
     /** The position dot with a beam toward [degrees]; one per [HEADING_STEP] degrees, made on first use. */
     fun headingIcon(context: Context, degrees: Float): Drawable {
@@ -233,6 +260,8 @@ private class MapMarkers {
 }
 
 private const val HEADING_STEP = 5
+/** The other spots while one is selected: still there to tap, but behind it. */
+private const val FADED_ALPHA = 0.45f
 /** Wait until panning or zooming pauses before asking for the attribution of the new area. */
 private const val VIEWPORT_SETTLE_MS = 600L
 
@@ -246,6 +275,19 @@ private fun reportViewportOf(
 private const val ROUTE_COLOR = 0xCC1E88E5.toInt()
 /** The way walked: apart from the blue of the way ahead and the position dot. */
 private const val WALKED_COLOR = 0xB3D81B60.toInt()
+
+/** A filled circle with a white rim: 16dp, or 26dp with a thicker rim when [selected]. */
+private fun drawSpotIcon(context: Context, color: Int, selected: Boolean): Drawable {
+    val d = context.resources.displayMetrics.density
+    val size = ((if (selected) 26 else 16) * d).roundToInt()
+    val rim = (if (selected) 3 else 2) * d
+    val c = size / 2f
+    val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+    val canvas = Canvas(bitmap)
+    canvas.drawCircle(c, c, c, Paint(Paint.ANTI_ALIAS_FLAG).apply { this.color = android.graphics.Color.WHITE })
+    canvas.drawCircle(c, c, c - rim, Paint(Paint.ANTI_ALIAS_FLAG).apply { this.color = color })
+    return BitmapDrawable(context.resources, bitmap)
+}
 
 /** Same dot as `me_dot`, with a fading beam behind it. Canvas rotation is clockwise, like compass degrees. */
 private fun drawHeadingIcon(context: Context, degrees: Float): Drawable {
