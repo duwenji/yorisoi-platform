@@ -31,6 +31,7 @@ import org.osmdroid.events.DelayedMapListener
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
+import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.CopyrightOverlay
@@ -67,6 +68,8 @@ fun facilityColor(kind: FacilityKind) = when (kind) {
  * map settles, for attributions that depend on it.
  * The [selected] spot is drawn larger and on top, the others faded, and the map pans to it when
  * it changes. Each change of [recenterRequests] pans back to the user's position.
+ * With [fitWalked], the map shows the whole of [walked] each time it changes, as when looking
+ * back on a walk with no [location].
  */
 @Composable
 fun SpotMap(
@@ -83,6 +86,7 @@ fun SpotMap(
     modifier: Modifier = Modifier,
     selected: Poi? = null,
     recenterRequests: Int = 0,
+    fitWalked: Boolean = false,
 ) {
     val context = LocalContext.current
     val density = context.resources.displayMetrics.density
@@ -184,6 +188,10 @@ fun SpotMap(
             }
             // Under the way ahead, which matters more while walking.
             map.overlays += track
+            if (fitWalked && walked !== markers.fittedTo) {
+                fitTo(map, walked, density)
+                markers.fittedTo = walked
+            }
         }
         if (route != null) {
             val line = markers.route ?: Polyline(map).apply {
@@ -242,6 +250,7 @@ private class MapMarkers {
     var route: Polyline? = null
     var walked: Polyline? = null
     var walkedPoints: List<LatLon>? = null
+    var fittedTo: List<LatLon>? = null
     var tiles: MapTiles? = null
     var selectedId: String? = null
     var recenterRequests = 0
@@ -264,6 +273,20 @@ private const val HEADING_STEP = 5
 private const val FADED_ALPHA = 0.45f
 /** Wait until panning or zooming pauses before asking for the attribution of the new area. */
 private const val VIEWPORT_SETTLE_MS = 600L
+
+/** Zooms [map] to show all of [points], once it has a size. */
+private fun fitTo(map: MapView, points: List<LatLon>, density: Float) {
+    val box = BoundingBox.fromGeoPointsSafe(points.map { GeoPoint(it.lat, it.lon) })
+    val border = (FIT_BORDER_DP * density).roundToInt()
+    if (map.isLayoutOccurred) {
+        map.zoomToBoundingBox(box, false, border)
+    } else {
+        map.addOnFirstLayoutListener { _, _, _, _, _ -> map.zoomToBoundingBox(box, false, border) }
+    }
+}
+
+/** Room around the way when the map fits it, so its ends aren't on the edge. */
+private const val FIT_BORDER_DP = 32
 
 private fun reportViewportOf(
     map: MapView, report: (zoom: Int, north: Double, south: Double, east: Double, west: Double) -> Unit,
