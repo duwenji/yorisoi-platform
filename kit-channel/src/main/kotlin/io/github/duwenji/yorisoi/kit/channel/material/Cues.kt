@@ -110,17 +110,21 @@ data class Shown(val presentAs: PresentAs, val items: List<Material>)
  * Turns a cue into material (API-003「きっかけ」`present`): each item's candidates are asked in
  * order and the first that gives something the presentation can show is used (API-004 I-7); a
  * presentation with nothing is left out. `narration: add` puts the AI's narration first
- * (API-004「省略形の展開」). Presentations of a later app [stage] are left out too.
+ * (API-004「省略形の展開」). Presentations of a later app [stage] are left out too, and those
+ * the app doesn't show ([shows]): their material isn't made, so no AI is asked for a card a
+ * cycling app never shows.
  */
 class CuePresenter(
     private val builtIns: Producers,
     private val stage: Int,
     private val log: MaterialLog = { _, _ -> },
+    private val shows: Set<PresentAs> = PresentAs.entries.toSet(),
 ) {
     suspend fun present(fire: CueFire, station: Station, context: MaterialContext): List<Shown> {
         val materials = station.materials ?: return emptyList()
         val own = producersOf(station, materials)
         return expand(fire.cue).mapNotNull { p ->
+            if (p.presentAs !in shows) return@mapNotNull null
             val accepts = p.presentAs.types.filter { p.presentAs.stageOf(it) <= stage }.toSet()
             if (accepts.isEmpty()) return@mapNotNull null
             val items = p.items.mapNotNull { candidates -> first(candidates, p.presentAs, accepts, fire.subject, context, own) }
