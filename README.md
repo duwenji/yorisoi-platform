@@ -10,7 +10,7 @@
 |---|---|---|
 | `core-format` | JVM | チャンネル・素材集の形式（API-CHANNEL-PACKAGE・API-MATERIAL-PRODUCER）、その確認と署名、承認済みチャンネル・リスト（API-CHANNEL-LIST）、エコシステム共通の語彙。使う側で org.json が要る（Android には入っている） |
 | `core-prompt` | JVM | プロンプトのテンプレート（Mustache の一部） |
-| `kit-companion` | JVM | いま何を話すかの判定のエンジン（ルールの並びとゲート） |
+| `kit-companion` | JVM | いま何を話すかの判定のエンジン（ルールの並びとゲート）、開発者モードの記録（`SessionRecorder`。使う側で org.json が要る） |
 | `kit-channel` | JVM | アプリの中のチャンネル（利用者の変更を重ねた設定値とスロット）、チャンネルの一覧と使っているチャンネル、組み込みのチャンネルの読み込み、第三者のチャンネルの素材。使う側で org.json が要る |
 | `kit-voice` | Android | 読み上げ（オーディオフォーカス）と背景音の合成 |
 | `kit-llm` | Android | AI の接続（Claude・OpenAI 互換・運営の AI の中継）と鍵の暗号化、自分のキーの 1 日の呼び出しの数、使わない返事（連絡先を含む）の判定 |
