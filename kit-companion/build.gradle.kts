@@ -7,7 +7,7 @@ plugins {
     alias(libs.plugins.kotlin.jvm)
 }
 
-description = "Deciding what to say now: rules in order, each behind gates the app opens and closes."
+description = "Deciding what to say now (rules in order, each behind gates the app opens and closes), and the developer's record of a session. Requires org.json on the classpath for the record."
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17
@@ -21,5 +21,9 @@ kotlin {
 }
 
 dependencies {
+    // The session record writes JSON lines with org.json, which Android ships; others add it.
+    compileOnly(libs.json)
+
     testImplementation(libs.junit)
+    testImplementation(libs.json)
 }
