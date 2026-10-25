@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 // Channels in an app: a channel ready to use with the user's changes, the list of channels and the
 // one in use, the built-in channels read from resources, what a third party's channel can show,
 // third-party channels from the lists the user added (remote), the outside material they fetch
-// ahead (material), and reports on a channel (report).
+// ahead and the producers that make material for a cue (material), and reports on a channel (report).
 // Plain JVM: the app's prompt pack reads its built-in channels through here, and the channel
 // management system's review tools use the pack. Published with the other modules.
 plugins {
