@@ -26,12 +26,20 @@ class SpotCache(
 
     /**
      * The nearest answer within [withinM] of the point, for these [shops] and with traffic signals
-     * or not as [signals] says, no older than [maxAgeMs].
+     * or not as [signals] says and the amenities [facilities], no older than [maxAgeMs].
      */
     @Synchronized
-    fun find(lat: Double, lon: Double, shops: Set<SpotKind>, withinM: Double, maxAgeMs: Long, signals: Boolean = false): Entry? {
+    fun find(
+        lat: Double,
+        lon: Double,
+        shops: Set<SpotKind>,
+        withinM: Double,
+        maxAgeMs: Long,
+        signals: Boolean = false,
+        facilities: Set<FacilityKind> = FacilityKind.WALK,
+    ): Entry? {
         val here = LatLon(lat, lon)
-        val key = key(shops, signals)
+        val key = key(shops, signals, facilities)
         val oldest = now() - maxAgeMs
         return entries()
             .filter { it.shops == key && it.entry.fetchedAt >= oldest }
@@ -41,12 +49,20 @@ class SpotCache(
             ?.first
     }
 
-    /** Keeps an answer, replacing older ones for the same shops (and signals) within [replaceWithinM], then trims. */
+    /** Keeps an answer, replacing older ones for the same search within [replaceWithinM], then trims. */
     @Synchronized
-    fun put(lat: Double, lon: Double, shops: Set<SpotKind>, body: String, replaceWithinM: Double, signals: Boolean = false) {
+    fun put(
+        lat: Double,
+        lon: Double,
+        shops: Set<SpotKind>,
+        body: String,
+        replaceWithinM: Double,
+        signals: Boolean = false,
+        facilities: Set<FacilityKind> = FacilityKind.WALK,
+    ) {
         if (!dir.isDirectory && !dir.mkdirs()) return
         val here = LatLon(lat, lon)
-        val key = key(shops, signals)
+        val key = key(shops, signals, facilities)
         val fetchedAt = now()
         val name = String.format(Locale.ROOT, "%d_%.5f_%.5f_%s%s", fetchedAt, lat, lon, key, SUFFIX)
         val tmp = File(dir, "$name.tmp")
@@ -97,8 +113,11 @@ class SpotCache(
         Stored(Entry(LatLon(lat, lon), fetchedAt, f), parts[3], f)
     }
 
-    private fun key(shops: Set<SpotKind>, signals: Boolean): String =
-        (if (shops.isEmpty()) "none" else shops.map { it.name }.sorted().joinToString("-")) + if (signals) "+signals" else ""
+    /** A walker's amenities add nothing, so the answers kept before other kinds could be asked for still match. */
+    private fun key(shops: Set<SpotKind>, signals: Boolean, facilities: Set<FacilityKind>): String =
+        (if (shops.isEmpty()) "none" else shops.map { it.name }.sorted().joinToString("-")) +
+            (if (signals) "+signals" else "") +
+            (if (facilities == FacilityKind.WALK) "" else "+" + facilities.map { it.name }.sorted().joinToString("-"))
 
     companion object {
         /** Answers this new are used as they are, without asking Overpass. */

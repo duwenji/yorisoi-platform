@@ -27,14 +27,28 @@ class OverpassClient(
     /**
      * [shops]: eating and shopping kinds to add (`SpotKind.onlyWhenPreferred`); none by default.
      * [signals]: also the traffic signals, for apps that keep quiet near them (a cyclist's); not by default.
+     * [facilities]: the amenities to search; a walker's by default.
      */
-    suspend fun search(lat: Double, lon: Double, radiusM: Int = 600, shops: Set<SpotKind> = emptySet(), signals: Boolean = false): NearbyResult =
-        parse(fetch(lat, lon, radiusM, shops, signals))
+    suspend fun search(
+        lat: Double,
+        lon: Double,
+        radiusM: Int = 600,
+        shops: Set<SpotKind> = emptySet(),
+        signals: Boolean = false,
+        facilities: Set<FacilityKind> = FacilityKind.WALK,
+    ): NearbyResult = parse(fetch(lat, lon, radiusM, shops, signals, facilities))
 
     /** The answer as it came, for [SpotCache]; read it with [parse]. */
-    internal suspend fun fetch(lat: Double, lon: Double, radiusM: Int = 600, shops: Set<SpotKind> = emptySet(), signals: Boolean = false): String =
+    internal suspend fun fetch(
+        lat: Double,
+        lon: Double,
+        radiusM: Int = 600,
+        shops: Set<SpotKind> = emptySet(),
+        signals: Boolean = false,
+        facilities: Set<FacilityKind> = FacilityKind.WALK,
+    ): String =
         withContext(Dispatchers.IO) {
-            val query = query(lat, lon, radiusM, shops, signals)
+            val query = query(lat, lon, radiusM, shops, signals, facilities)
 
             // Public Overpass servers are often busy (429/504); fall through to the next mirror.
             var lastError: IOException? = null
@@ -64,14 +78,18 @@ class OverpassClient(
             throw lastError!!
         }
 
-    internal fun query(lat: Double, lon: Double, radiusM: Int, shops: Set<SpotKind>, signals: Boolean = false): String {
+    internal fun query(
+        lat: Double,
+        lon: Double,
+        radiusM: Int,
+        shops: Set<SpotKind>,
+        signals: Boolean = false,
+        facilities: Set<FacilityKind> = FacilityKind.WALK,
+    ): String {
         val around = "around:$radiusM,$lat,$lon"
         // Benches and vending machines are everywhere; only the close ones matter.
         val closeAround = "around:${minOf(radiusM, CLOSE_RADIUS_M)},$lat,$lon"
-        val open = """["access"!~"^(private|no)$"]"""
-        // Machines that sell nothing a walker needs (tickets, parking, cigarettes, ...).
-        val usefulVending = """["vending"!~"ticket|parking|cigarette|excrement|condom|newspaper|fuel|photo"]"""
-        val query = """
+        val spots = """
             [out:json][timeout:25];
             (
               nwr($around)["name"]["historic"];
@@ -81,17 +99,13 @@ class OverpassClient(
               nwr($around)["name"]["natural"~"^(tree|peak|spring|water|beach)$"];
             );
             out tags geom 80;
-            nwr($around)["amenity"="toilets"]$open;
-            out center 40;
-            nwr($around)["amenity"="drinking_water"]$open;
-            out center 40;
-            nwr($around)["amenity"="shelter"]$open;
-            out center 40;
-            nwr($closeAround)["amenity"="bench"];
-            out center 40;
-            nwr($closeAround)["amenity"="vending_machine"]$usefulVending;
-            out center 40;
         """.trimIndent()
+        // One output per kind, so a street full of benches can't crowd out the toilets.
+        val query = spots + FacilityKind.entries.filter { it in facilities }.joinToString("") { kind ->
+            val area = if (kind.near) closeAround else around
+            val statements = kind.filters.map { "nwr($area)$it;" }
+            "\n" + (statements.singleOrNull() ?: statements.joinToString("", "(", ");")) + "\nout center 40;"
+        }
 
         val withShops = if (shops.isEmpty()) query else query + "\n" + shopQuery(lat, lon, radiusM, shops)
         return if (signals) "$withShops\nnode($around)[\"highway\"=\"traffic_signals\"];\nout $SIGNAL_LIMIT;" else withShops
@@ -122,7 +136,7 @@ class OverpassClient(
                 signals += LatLon(e.getDouble("lat"), e.getDouble("lon"))
                 continue
             }
-            FacilityKind.of(tags["amenity"])?.let { kind ->
+            FacilityKind.of(tags)?.let { kind ->
                 facilityOf(e, kind, tags)?.let { f ->
                     // A toilet is often mapped both as a node and its building; keep one.
                     if (facilities.none { it.kind == kind && it.distanceFrom(f.lat, f.lon) < SAME_FACILITY_M }) facilities += f

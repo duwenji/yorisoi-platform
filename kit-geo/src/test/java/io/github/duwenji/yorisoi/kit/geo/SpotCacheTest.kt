@@ -41,6 +41,17 @@ class SpotCacheTest {
     }
 
     @Test
+    fun `an answer with other amenities is kept apart, a walker's matches the answers kept before`() {
+        val cyclist = setOf(FacilityKind.TOILETS, FacilityKind.BICYCLE_SHOP)
+        cache.put(35.0, 139.0, emptySet(), "walker", replaceWithinM = 150.0)
+        cache.put(35.0, 139.0, emptySet(), "cyclist", replaceWithinM = 150.0, facilities = cyclist)
+        assertEquals("walker", cache.find(35.0, 139.0, emptySet(), 300.0, SpotCache.FRESH_MS, facilities = FacilityKind.WALK)?.body())
+        assertEquals("cyclist", cache.find(35.0, 139.0, emptySet(), 300.0, SpotCache.FRESH_MS, facilities = cyclist)?.body())
+        // Kept before amenities could be chosen: the name has no amenities in it.
+        assertEquals(1, folder.root.resolve("spots").listFiles()!!.count { it.name.endsWith("_none.json") })
+    }
+
+    @Test
     fun `an old answer is found only when old ones will do`() {
         cache.put(35.0, 139.0, emptySet(), "old", replaceWithinM = 150.0)
         clock += SpotCache.FRESH_MS + 1
