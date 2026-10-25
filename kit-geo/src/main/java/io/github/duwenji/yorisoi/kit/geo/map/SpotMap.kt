@@ -46,6 +46,10 @@ fun facilityDot(kind: FacilityKind) = when (kind) {
     FacilityKind.VENDING_MACHINE -> R.drawable.facility_vending_dot
     FacilityKind.SHELTER -> R.drawable.facility_shelter_dot
     FacilityKind.BENCH -> R.drawable.facility_bench_dot
+    FacilityKind.BICYCLE_PARKING -> R.drawable.facility_bicycle_parking_dot
+    FacilityKind.CONVENIENCE_STORE -> R.drawable.facility_convenience_dot
+    FacilityKind.BICYCLE_SHOP -> R.drawable.facility_bicycle_shop_dot
+    FacilityKind.BICYCLE_PUMP -> R.drawable.facility_bicycle_pump_dot
 }
 
 /**
@@ -58,6 +62,10 @@ fun facilityColor(kind: FacilityKind) = when (kind) {
     FacilityKind.VENDING_MACHINE -> Color(0xFFEF6C00)
     FacilityKind.SHELTER -> Color(0xFF6A1B9A)
     FacilityKind.BENCH -> Color(0xFF8D6E63)
+    FacilityKind.BICYCLE_PARKING -> Color(0xFF455A64)
+    FacilityKind.CONVENIENCE_STORE -> Color(0xFF2E7D32)
+    FacilityKind.BICYCLE_SHOP -> Color(0xFFC62828)
+    FacilityKind.BICYCLE_PUMP -> Color(0xFFAD1457)
 }
 
 /**

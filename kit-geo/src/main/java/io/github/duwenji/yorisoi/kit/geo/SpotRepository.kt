@@ -34,7 +34,8 @@ enum class SpotSource {
  * ([RETRY_DELAYS_MS]) rather than asking again at the next location.
  *
  * [searchCenter] is where to search from a location: the location itself, or a point ahead of it
- * for an app that moves fast (a cyclist's). [signals] adds the traffic signals to the search.
+ * for an app that moves fast (a cyclist's). [signals] adds the traffic signals to the search, and
+ * [facilityKinds] are the amenities searched (a walker's by default).
  */
 class SpotRepository(
     private val overpass: OverpassClient,
@@ -45,6 +46,7 @@ class SpotRepository(
     private val freshMs: () -> Long = { SpotCache.FRESH_MS },
     private val searchCenter: (Location) -> LatLon = { LatLon(it.latitude, it.longitude) },
     private val signals: Boolean = false,
+    private val facilityKinds: Set<FacilityKind> = FacilityKind.WALK,
 ) {
     private val _location = MutableStateFlow<Location?>(null)
     val location: StateFlow<Location?> = _location.asStateFlow()
@@ -104,7 +106,7 @@ class SpotRepository(
         val cache = cache?.takeIf { useCache() }
         if (!forceRefresh && shown != null && shops == lastShops && RouteGeometry.distanceM(shown, here) <= REFETCH_DISTANCE_M) return@withLock
         if (!forceRefresh) {
-            cache?.find(lat, lon, shops, REFETCH_DISTANCE_M, freshMs().coerceIn(0L, SpotCache.MAX_AGE_MS), signals)?.let { kept ->
+            cache?.find(lat, lon, shops, REFETCH_DISTANCE_M, freshMs().coerceIn(0L, SpotCache.MAX_AGE_MS), signals, facilityKinds)?.let { kept ->
                 if (show(kept, SpotSource.CACHE)) {
                     shownAt = kept.center
                     lastShops = shops
@@ -116,12 +118,12 @@ class SpotRepository(
                 return@withLock
             }
         }
-        val stale = cache?.find(lat, lon, shops, REFETCH_DISTANCE_M, SpotCache.MAX_AGE_MS, signals)?.takeIf { show(it, SpotSource.STALE) }
+        val stale = cache?.find(lat, lon, shops, REFETCH_DISTANCE_M, SpotCache.MAX_AGE_MS, signals, facilityKinds)?.takeIf { show(it, SpotSource.STALE) }
         try {
-            val body = overpass.fetch(lat, lon, shops = shops, signals = signals)
+            val body = overpass.fetch(lat, lon, shops = shops, signals = signals, facilities = facilityKinds)
             show(overpass.parse(body), SpotSource.NETWORK)
             shownKept = null
-            cache?.put(lat, lon, shops, body, replaceWithinM = REPLACE_DISTANCE_M, signals = signals)
+            cache?.put(lat, lon, shops, body, replaceWithinM = REPLACE_DISTANCE_M, signals = signals, facilities = facilityKinds)
             shownAt = here
             lastShops = shops
             failures = 0
@@ -138,7 +140,7 @@ class SpotRepository(
 
     /** Shows the nearest kept answer that still covers the point, if any. */
     private fun showFallback(cache: SpotCache, lat: Double, lon: Double, shops: Set<SpotKind>) {
-        cache.find(lat, lon, shops, FALLBACK_DISTANCE_M, SpotCache.MAX_AGE_MS, signals)?.let { show(it, SpotSource.FALLBACK) }
+        cache.find(lat, lon, shops, FALLBACK_DISTANCE_M, SpotCache.MAX_AGE_MS, signals, facilityKinds)?.let { show(it, SpotSource.FALLBACK) }
     }
 
     /** False when the kept answer can't be read; the cache then just didn't have it. */
