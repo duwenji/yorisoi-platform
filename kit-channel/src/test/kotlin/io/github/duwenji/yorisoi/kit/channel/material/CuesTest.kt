@@ -222,6 +222,24 @@ class CuesTest {
     }
 
     @Test
+    fun `an app that only speaks makes no material for the other presentations`() {
+        val station = station(JSONArray().put(cue("both", spotTrigger, speak("self#intro"), card("builtin:ai-guide"))))
+        val asked = mutableListOf<String>()
+        class Counting(override val descriptor: ProducerDescriptor) : Producer {
+            override suspend fun produce(request: MaterialRequest): MaterialResult {
+                asked += descriptor.id
+                return MaterialResult.Ready(Material(MaterialType.TEXT, Content.Text("AI"), descriptor.id))
+            }
+        }
+        val fire = CueFinder(Memory()).spot(station.id, station.materials!!.media, hachimangu, emptySet(), day1)!!
+        val speakOnly = CuePresenter(Producers(listOf(Counting(BuiltInProducers.AI_GUIDE))), stage = 1, shows = setOf(PresentAs.SPEAK))
+        val shown = runBlocking { speakOnly.present(fire, station, MaterialContext(station)) }
+        assertEquals(listOf(PresentAs.SPEAK), shown.map { it.presentAs })
+        assertEquals("源頼朝が今の場所に移しました。", text(shown.single().items.single()))
+        org.junit.Assert.assertTrue("the card's AI is never asked", asked.isEmpty())
+    }
+
+    @Test
     fun `material about a point is chosen by where it is`() {
         val station = station(JSONArray().put(cue("near", JSONObject().put("type", "point").put("lat", 35.3263).put("lon", 139.5566).put("radiusM", 50), card("kamakura"))))
         val fire = CueFinder(Memory()).point(station.id, station.materials!!.media, 35.3263, 139.5566, emptySet(), day1)!!
