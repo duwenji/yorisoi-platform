@@ -164,7 +164,14 @@ class RelayClient(
         /** A token this close to expiring is renewed first, so a walk doesn't stall on it. */
         private val SESSION_MARGIN: Duration = Duration.ofMinutes(5)
         private val JSON = "application/json".toMediaType()
-        private val defaultHttp: OkHttpClient = OkHttpClient.Builder().callTimeout(60, TimeUnit.SECONDS).build()
+        /**
+         * The relay answers once the model has written the whole line, which can take longer than
+         * OkHttp's 10 s read timeout; the relay gives up at 28 s (the Lambda's timeout).
+         */
+        internal val defaultHttp: OkHttpClient = OkHttpClient.Builder()
+            .readTimeout(30, TimeUnit.SECONDS)
+            .callTimeout(60, TimeUnit.SECONDS)
+            .build()
 
         /** The Integrity request hash: base64url of SHA-256 over `{installId}.{nonce}` (API-AI-RELAY). */
         fun requestHash(installId: String, nonce: String): String =
