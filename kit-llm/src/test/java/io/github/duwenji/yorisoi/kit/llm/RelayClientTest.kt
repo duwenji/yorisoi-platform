@@ -76,6 +76,11 @@ class RelayClientTest {
     }
 
     @Test
+    fun `waits for the relay as long as the relay waits for the model`() {
+        assertTrue(RelayClient.defaultHttp.readTimeoutMillis >= 28_000)
+    }
+
+    @Test
     fun `keeps the session for the next call`() = runBlocking {
         server.enqueue(challenge())
         server.enqueue(session())
