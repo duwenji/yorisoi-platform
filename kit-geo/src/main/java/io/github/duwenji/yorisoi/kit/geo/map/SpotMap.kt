@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.DashPathEffect
 import android.graphics.Paint
+import android.graphics.Path
 import android.graphics.RadialGradient
 import android.graphics.RectF
 import android.graphics.Shader
@@ -34,8 +35,10 @@ import org.osmdroid.events.ZoomEvent
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
+import org.osmdroid.views.Projection
 import org.osmdroid.views.overlay.CopyrightOverlay
 import org.osmdroid.views.overlay.Marker
+import org.osmdroid.views.overlay.Overlay
 import org.osmdroid.views.overlay.Polyline
 import kotlin.math.roundToInt
 
@@ -78,6 +81,8 @@ fun facilityColor(kind: FacilityKind) = when (kind) {
  * it changes. Each change of [recenterRequests] pans back to the user's position.
  * With [fitWalked], the map shows the whole of [walked] each time it changes, as when looking
  * back on a walk with no [location].
+ * With [up], the map turns so that bearing (degrees clockwise from north) is at the top, and a
+ * small arrow shows north; null keeps north up.
  */
 @Composable
 fun SpotMap(
@@ -95,6 +100,7 @@ fun SpotMap(
     selected: Poi? = null,
     recenterRequests: Int = 0,
     fitWalked: Boolean = false,
+    up: Float? = null,
 ) {
     val context = LocalContext.current
     val density = context.resources.displayMetrics.density
@@ -119,6 +125,7 @@ fun SpotMap(
         }
     }
     val copyright = remember { CopyrightOverlay(context) }
+    val north = remember { NorthArrowOverlay(density) }
     val markers = remember { MapMarkers() }
     // Recenter only when the user has moved noticeably, so panning isn't constantly undone.
     val centeredAt = remember { arrayOfNulls<Location>(1) }
@@ -130,6 +137,9 @@ fun SpotMap(
     }
 
     AndroidView(factory = { mapView }, modifier = modifier) { map ->
+        // osmdroid turns the map counterclockwise by its orientation.
+        val orientation = up?.let { -it } ?: 0f
+        if (orientation != map.mapOrientation) map.mapOrientation = orientation
         if (tiles != markers.tiles) {
             map.setTileSource(tiles.tileSource())
             markers.tiles = tiles
@@ -220,6 +230,8 @@ fun SpotMap(
             val me = markers.me ?: Marker(map).apply {
                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
                 setInfoWindow(null)
+                // Turns with the map, so the beam drawn from north still points the way faced.
+                isFlat = true
             }.also { markers.me = it }
             me.icon = heading?.let { markers.headingIcon(context, it) } ?: meIcon
             me.position = GeoPoint(location.latitude, location.longitude)
@@ -242,7 +254,38 @@ fun SpotMap(
         }
         // Google's attribution changes with the area and comes with its logo; the screen draws both.
         if (tiles !is MapTiles.Google) map.overlays += copyright
+        if (up != null) map.overlays += north
         map.invalidate()
+    }
+}
+
+/** An arrow at the top right pointing north, for a map turned away from north up. */
+private class NorthArrowOverlay(private val density: Float) : Overlay() {
+    private val disc = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xD9FFFFFF.toInt() }
+    // So the disc stands out on pale tiles.
+    private val rim = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = 0xFF9E9E9E.toInt()
+        style = Paint.Style.STROKE
+        strokeWidth = density
+    }
+    private val tip = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFC62828.toInt() }
+    private val tail = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFF9E9E9E.toInt() }
+
+    override fun draw(canvas: Canvas, projection: Projection) {
+        val r = 16 * density
+        val cx = projection.width - 8 * density - r
+        val cy = 8 * density + r
+        // Undo the map's turn, to draw on the screen as it is.
+        projection.save(canvas, false, false)
+        canvas.save()
+        canvas.rotate(projection.orientation, cx, cy)
+        canvas.drawCircle(cx, cy, r, disc)
+        canvas.drawCircle(cx, cy, r, rim)
+        val w = r * 0.36f
+        canvas.drawPath(Path().apply { moveTo(cx, cy - r * 0.7f); lineTo(cx + w, cy); lineTo(cx - w, cy); close() }, tip)
+        canvas.drawPath(Path().apply { moveTo(cx, cy + r * 0.7f); lineTo(cx + w, cy); lineTo(cx - w, cy); close() }, tail)
+        canvas.restore()
+        projection.restore(canvas, false)
     }
 }
 
