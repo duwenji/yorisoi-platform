@@ -65,6 +65,15 @@ class FrequentWayTest {
     }
 
     @Test
+    fun `a part of a trip is the points between two distances along it`() {
+        val line = (0..20).map { RouteGeometry.destination(start, 90.0, it * 100.0) }
+        assertEquals(2000.0, FrequentWayFinder.distances(line).last(), 1.0)
+        val part = FrequentWayFinder.section(line, 150.0, 1850.0)
+        assertEquals(17, part.size)
+        assertEquals(line[2], part.first())
+    }
+
+    @Test
     fun `a way is named after the spot nearest its middle`() {
         val way = trip(0.0, 1000.0).points
         val middle = RouteGeometry.destination(start, 90.0, 500.0)
