@@ -158,6 +158,40 @@ class SpotRepositoryTest {
         assertFalse(spots.search(35.001, 139.0))
     }
 
+    /** A way 2km east from 35.0, 139.0. */
+    private val way = listOf(LatLon(35.0, 139.0), RouteGeometry.destination(LatLon(35.0, 139.0), 90.0, 2000.0))
+
+    @Test
+    fun `a way is searched ahead every 500m, and kept without being shown`() = runBlocking {
+        assertEquals(5, spots.prefetch(listOf(way), pauseMs = 0))
+        assertEquals(5, asked)
+        assertTrue(spots.spots.value.isEmpty())
+        // Riding along it later: the kept answers do, with no asking.
+        asked = 0
+        spots.search(way[1].lat, way[1].lon)
+        assertEquals(0, asked)
+        assertEquals(SpotSource.CACHE, spots.source)
+        // Fresh answers aren't asked for again; another way is, without the gap between the two.
+        val other = listOf(LatLon(35.1, 139.0), RouteGeometry.destination(LatLon(35.1, 139.0), 90.0, 500.0))
+        assertEquals(2, spots.prefetch(listOf(way, other), pauseMs = 0))
+    }
+
+    @Test
+    fun `searching ahead stops at the limit, and at the first failure`() = runBlocking {
+        assertEquals(2, spots.prefetch(listOf(way), maxSearches = 2, pauseMs = 0))
+        up = false
+        asked = 0
+        assertEquals(1, spots.prefetch(listOf(way), pauseMs = 0))
+        // The three servers, once.
+        assertEquals(3, asked)
+    }
+
+    @Test
+    fun `without a cache nothing is searched ahead`() = runBlocking {
+        assertEquals(0, SpotRepository(OverpassClient(http), now = { clock }).prefetch(listOf(way), pauseMs = 0))
+        assertEquals(0, asked)
+    }
+
     @Test
     fun `a refresh asks even with a kept answer, and even while waiting`() = runBlocking {
         spots.search(35.0, 139.0)

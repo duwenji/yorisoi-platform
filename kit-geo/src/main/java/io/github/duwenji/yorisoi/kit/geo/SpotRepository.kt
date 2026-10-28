@@ -2,6 +2,7 @@ package io.github.duwenji.yorisoi.kit.geo
 
 import android.location.Location
 import io.github.duwenji.yorisoi.core.format.SpotKind
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -153,6 +154,39 @@ class SpotRepository(
         }
     }
 
+    /**
+     * Searches ahead of time along each of [ways], in order (REQ-FREQUENT-WAYS F-6, F-8), keeping
+     * the answers without showing them: one search every [spacingM], skipping where a kept answer
+     * is fresh, at most [maxSearches] in all, [pauseMs] apart. Stops at the first failure: the
+     * servers are busy. Does nothing without a cache. Returns how many searches it made.
+     */
+    suspend fun prefetch(
+        ways: List<List<LatLon>>,
+        spacingM: Double = PREFETCH_SPACING_M,
+        maxSearches: Int = PREFETCH_MAX_SEARCHES,
+        pauseMs: Long = PREFETCH_PAUSE_MS,
+    ): Int {
+        val cache = cache?.takeIf { useCache() } ?: return 0
+        val shops = shops()
+        val fresh = freshMs().coerceIn(0L, SpotCache.MAX_AGE_MS)
+        var searches = 0
+        for (center in ways.flatMap { FrequentWayFinder.resample(it, spacingM) }) {
+            if (searches >= maxSearches) break
+            if (cache.find(center.lat, center.lon, shops, REFETCH_DISTANCE_M, fresh, signals, facilityKinds) != null) continue
+            if (searches > 0) delay(pauseMs)
+            searches++
+            val body = try {
+                overpass.fetch(center.lat, center.lon, shops = shops, signals = signals, facilities = facilityKinds)
+            } catch (e: IOException) {
+                break
+            }
+            fetchLock.withLock {
+                cache.put(center.lat, center.lon, shops, body, replaceWithinM = REPLACE_DISTANCE_M, signals = signals, facilities = facilityKinds)
+            }
+        }
+        return searches
+    }
+
     /** Shows the nearest kept answer that still covers the point, if any. */
     private fun showFallback(cache: SpotCache, lat: Double, lon: Double, shops: Set<SpotKind>) {
         cache.find(lat, lon, shops, FALLBACK_DISTANCE_M, SpotCache.MAX_AGE_MS, signals, facilityKinds)?.let { show(it, SpotSource.FALLBACK) }
@@ -187,6 +221,11 @@ class SpotRepository(
 
         /** A kept answer searched 600m around its centre; past that it has nothing for here. */
         private const val FALLBACK_DISTANCE_M = 600.0
+
+        /** Searches ahead of time along a way: a kept answer covers 300m around its centre, so 500m apart leaves no gap. */
+        const val PREFETCH_SPACING_M = 500.0
+        const val PREFETCH_MAX_SEARCHES = 20
+        const val PREFETCH_PAUSE_MS = 10_000L
 
         /** How long to wait before asking Overpass again, after one failed search, two, and more. */
         internal val RETRY_DELAYS_MS = longArrayOf(30_000, 60_000, 120_000, 300_000)
