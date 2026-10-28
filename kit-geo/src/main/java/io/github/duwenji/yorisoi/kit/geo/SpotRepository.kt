@@ -31,7 +31,8 @@ enum class SpotSource {
  * again, and are what's shown when they fail. [useCache] turns it off for now (the user's choice),
  * neither reading nor keeping answers; [freshMs] is how new an answer must be to use it without
  * asking, up to [SpotCache.MAX_AGE_MS]. After a failed search, the next waits a while
- * ([RETRY_DELAYS_MS]) rather than asking again at the next location.
+ * ([retryDelaysMs], by default [RETRY_DELAYS_MS]) rather than asking again at the next location;
+ * an app that moves fast waits less, as it soon leaves the kept answers behind.
  *
  * [searchCenter] is where to search from a location: the location itself, or a point ahead of it
  * for an app that moves fast (a cyclist's). [signals] adds the traffic signals to the search, and
@@ -47,6 +48,7 @@ class SpotRepository(
     private val searchCenter: (Location) -> LatLon = { LatLon(it.latitude, it.longitude) },
     private val signals: Boolean = false,
     private val facilityKinds: Set<FacilityKind> = FacilityKind.WALK,
+    private val retryDelaysMs: LongArray = RETRY_DELAYS_MS,
 ) {
     private val _location = MutableStateFlow<Location?>(null)
     val location: StateFlow<Location?> = _location.asStateFlow()
@@ -72,6 +74,11 @@ class SpotRepository(
     var updates: Int = 0
         private set
 
+    /** Where Overpass was last asked about, whether it answered or not; null before the first time. */
+    @Volatile
+    var searchedAt: LatLon? = null
+        private set
+
     private val fetchLock = Mutex()
 
     /** The centre of the answer shown, while it is good: from Overpass, or kept and fresh. */
@@ -87,11 +94,12 @@ class SpotRepository(
      * Updates the location, re-querying spots only after moving [REFETCH_DISTANCE_M] from the
      * answer shown or when the channel now wants other shops. [forceRefresh] asks Overpass even
      * when the answer shown, or a kept one, would do, and even while waiting after a failure.
+     * True when the spots shown were replaced by this call, not by another one at the same time.
      */
-    suspend fun onLocation(location: Location, forceRefresh: Boolean = false) {
+    suspend fun onLocation(location: Location, forceRefresh: Boolean = false): Boolean {
         _location.value = location
         val center = searchCenter(location)
-        search(center.lat, center.lon, forceRefresh)
+        return search(center.lat, center.lon, forceRefresh)
     }
 
     /** Searches again where the user is, if the channel's shops changed (a switch of channel). */
@@ -99,26 +107,33 @@ class SpotRepository(
         _location.value?.let { onLocation(it) }
     }
 
-    internal suspend fun search(lat: Double, lon: Double, forceRefresh: Boolean = false) = fetchLock.withLock {
+    internal suspend fun search(lat: Double, lon: Double, forceRefresh: Boolean = false): Boolean = fetchLock.withLock {
+        val before = updates
+        searchAt(lat, lon, forceRefresh)
+        updates != before
+    }
+
+    private suspend fun searchAt(lat: Double, lon: Double, forceRefresh: Boolean) {
         val here = LatLon(lat, lon)
         val shops = shops()
         val shown = shownAt
         val cache = cache?.takeIf { useCache() }
-        if (!forceRefresh && shown != null && shops == lastShops && RouteGeometry.distanceM(shown, here) <= REFETCH_DISTANCE_M) return@withLock
+        if (!forceRefresh && shown != null && shops == lastShops && RouteGeometry.distanceM(shown, here) <= REFETCH_DISTANCE_M) return
         if (!forceRefresh) {
             cache?.find(lat, lon, shops, REFETCH_DISTANCE_M, freshMs().coerceIn(0L, SpotCache.MAX_AGE_MS), signals, facilityKinds)?.let { kept ->
                 if (show(kept, SpotSource.CACHE)) {
                     shownAt = kept.center
                     lastShops = shops
-                    return@withLock
+                    return
                 }
             }
             if (now() < retryAt) {
                 cache?.let { showFallback(it, lat, lon, shops) }
-                return@withLock
+                return
             }
         }
         val stale = cache?.find(lat, lon, shops, REFETCH_DISTANCE_M, SpotCache.MAX_AGE_MS, signals, facilityKinds)?.takeIf { show(it, SpotSource.STALE) }
+        searchedAt = here
         try {
             val body = overpass.fetch(lat, lon, shops = shops, signals = signals, facilities = facilityKinds)
             show(overpass.parse(body), SpotSource.NETWORK)
@@ -129,7 +144,7 @@ class SpotRepository(
             failures = 0
             retryAt = 0L
         } catch (e: IOException) {
-            retryAt = now() + RETRY_DELAYS_MS[minOf(failures, RETRY_DELAYS_MS.lastIndex)]
+            retryAt = now() + retryDelaysMs[minOf(failures, retryDelaysMs.lastIndex)]
             failures++
             // The answer shown is no longer good here; search again once the wait is over.
             shownAt = null
