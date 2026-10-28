@@ -122,6 +122,43 @@ class SpotRepositoryTest {
     }
 
     @Test
+    fun `an app that moves fast can wait less after a failure`() {
+        val quick = SpotRepository(OverpassClient(http), cache = cache, now = { clock }, retryDelaysMs = longArrayOf(20_000))
+        up = false
+        repeat(3) {
+            try {
+                runBlocking { quick.search(35.0 + it * 0.0001, 139.0) }
+                fail("the search should have failed")
+            } catch (e: IOException) {
+                // Every server gave up.
+            }
+            clock += 20_000
+        }
+        // Asked again every 20 seconds, where a walker would wait 30 seconds, then a minute.
+        assertEquals(9, asked)
+    }
+
+    @Test
+    fun `a failure tells how each server gave up, and where it was asked`() {
+        up = false
+        try {
+            runBlocking { spots.search(35.0, 139.0) }
+            fail("the search should have failed")
+        } catch (e: IOException) {
+            assertTrue(e.message!!, e.message!!.contains("overpass-api.de HTTP 504"))
+            assertTrue(e.message!!, e.message!!.contains("maps.mail.ru HTTP 504"))
+        }
+        assertEquals(LatLon(35.0, 139.0), spots.searchedAt)
+    }
+
+    @Test
+    fun `a search tells whether it replaced the spots shown`() = runBlocking {
+        assertTrue(spots.search(35.0, 139.0))
+        // Near the answer shown: nothing searched, nothing replaced.
+        assertFalse(spots.search(35.001, 139.0))
+    }
+
+    @Test
     fun `a refresh asks even with a kept answer, and even while waiting`() = runBlocking {
         spots.search(35.0, 139.0)
         asked = 0

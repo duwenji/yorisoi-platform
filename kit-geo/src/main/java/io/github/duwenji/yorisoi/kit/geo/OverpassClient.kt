@@ -51,6 +51,7 @@ class OverpassClient(
             val query = query(lat, lon, radiusM, shops, signals, facilities)
 
             // Public Overpass servers are often busy (429/504); fall through to the next mirror.
+            val failures = mutableListOf<String>()
             var lastError: IOException? = null
             for (endpoint in ENDPOINTS) {
                 // Logged to measure how long searches take and how often a server gives up.
@@ -68,14 +69,17 @@ class OverpassClient(
                             return@withContext body
                         }
                         lastError = IOException("Overpass API error: HTTP ${res.code}")
+                        failures += "${request.url.host} HTTP ${res.code} ${elapsed(startedAt)}ms"
                         Log.w(TAG, "HTTP ${res.code} after ${elapsed(startedAt)}ms $endpoint")
                     }
                 } catch (e: IOException) {
                     lastError = e
+                    failures += "${request.url.host} ${e.javaClass.simpleName} ${elapsed(startedAt)}ms"
                     Log.w(TAG, "${e.javaClass.simpleName} after ${elapsed(startedAt)}ms $endpoint")
                 }
             }
-            throw lastError!!
+            // Every server's failure, so that a log tells which gave up and how.
+            throw IOException("Overpass API error: ${failures.joinToString(", ")}", lastError)
         }
 
     internal fun query(
