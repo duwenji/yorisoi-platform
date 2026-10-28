@@ -10,6 +10,7 @@
 | 関係者の呼び方、役割、共通用語を確認する | [関係者と共通用語](overview/roles-and-vocabulary.md) |
 | 関係者の課題と未承認の対応案を確認する | [関係者の課題と対応案](overview/stakeholder-needs.md) |
 | 設計方針と決定の根拠を読む | [ADR 一覧](decisions/README.md) |
+| 複数のアプリにまたがる機能の要件を読む | [よく通る道](requirements/REQ-FREQUENT-WAYS.md) |
 | システム境界の形式・動作を確認する | [API 契約一覧](contracts/README.md) |
 | チャンネル審査の基準を確認する | [審査ポリシー](policies/channel-review.md) |
 | SanpoGuide の操作・試用・運用手順を読む | [SanpoGuide 手引き](apps/sanpoguide/manual/README.md) |

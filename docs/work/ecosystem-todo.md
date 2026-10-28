@@ -25,6 +25,16 @@
 決めること:
 - ADR-CHANNEL-CURATION の未決事項（第三者のチャンネルのカスタマイズ）
 
+## よく通る道
+
+要件は [REQ-FREQUENT-WAYS](../requirements/REQ-FREQUENT-WAYS.md)（承認済み）。
+
+- [ ] 設計: kit-geo の `FrequentWay`（形・保存・見つけ方・道に沿った前もっての取得）。未決の U-1〜U-4 を決める
+- [ ] kit-geo の実装と公開
+- [ ] CycleGuide: 画面・話・振り返り。要件の F-16 を書き直す（X-3）
+- [ ] SanpoGuide: 画面・話・振り返り（再訪の判定との関係は U-4）
+- [ ] 両アプリのプライバシーポリシーの「端末内の記録」を書き足す（N-2）
+
 ## 位置に紐づく秘密メッセージ
 
 契約は [API-SECRET-MESSAGES](../contracts/API-SECRET-MESSAGES.md)（OpenAPI は [api/](../api/README.md)）。接続先は URL で設定し、API に準拠していればサーバーの実装方法・置き場所は問わない。アプリでの実装は各アプリの TODO で進める。
