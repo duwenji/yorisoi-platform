@@ -140,6 +140,21 @@ class FrequentWayFinder(
             return out
         }
 
+        /** How far along [points] each point is. */
+        fun distances(points: List<LatLon>): List<Double> {
+            var total = 0.0
+            return points.mapIndexed { i, p ->
+                if (i > 0) total += RouteGeometry.distanceM(points[i - 1], p)
+                total
+            }
+        }
+
+        /** The part of [points] from [fromM] to [toM] along it (REQ-FREQUENT-WAYS F-16). */
+        fun section(points: List<LatLon>, fromM: Double, toM: Double): List<LatLon> {
+            val along = distances(points)
+            return points.filterIndexed { i, _ -> along[i] in fromM..toM }
+        }
+
         /** The length of the line through [points]. */
         fun lengthM(points: List<LatLon>): Double = points.zipWithNext().sumOf { (a, b) -> RouteGeometry.distanceM(a, b) }
 
