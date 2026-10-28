@@ -155,13 +155,13 @@ class SpotRepository(
     }
 
     /**
-     * Searches ahead of time along [points] (REQ-FREQUENT-WAYS F-6, F-8), keeping the answers
-     * without showing them: one search every [spacingM], skipping where a kept answer is fresh,
-     * at most [maxSearches], [pauseMs] apart. Stops at the first failure: the servers are busy.
-     * Does nothing without a cache. Returns how many searches it made.
+     * Searches ahead of time along each of [ways], in order (REQ-FREQUENT-WAYS F-6, F-8), keeping
+     * the answers without showing them: one search every [spacingM], skipping where a kept answer
+     * is fresh, at most [maxSearches] in all, [pauseMs] apart. Stops at the first failure: the
+     * servers are busy. Does nothing without a cache. Returns how many searches it made.
      */
     suspend fun prefetch(
-        points: List<LatLon>,
+        ways: List<List<LatLon>>,
         spacingM: Double = PREFETCH_SPACING_M,
         maxSearches: Int = PREFETCH_MAX_SEARCHES,
         pauseMs: Long = PREFETCH_PAUSE_MS,
@@ -170,7 +170,7 @@ class SpotRepository(
         val shops = shops()
         val fresh = freshMs().coerceIn(0L, SpotCache.MAX_AGE_MS)
         var searches = 0
-        for (center in FrequentWayFinder.resample(points, spacingM)) {
+        for (center in ways.flatMap { FrequentWayFinder.resample(it, spacingM) }) {
             if (searches >= maxSearches) break
             if (cache.find(center.lat, center.lon, shops, REFETCH_DISTANCE_M, fresh, signals, facilityKinds) != null) continue
             if (searches > 0) delay(pauseMs)
