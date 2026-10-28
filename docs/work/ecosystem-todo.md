@@ -29,8 +29,8 @@
 
 要件は [REQ-FREQUENT-WAYS](../requirements/REQ-FREQUENT-WAYS.md)（承認済み）。
 
-- [ ] 設計: kit-geo の `FrequentWay`（形・保存・見つけ方・道に沿った前もっての取得）。未決の U-1〜U-4 を決める
-- [ ] kit-geo の実装と公開
+- [x] 設計: kit-geo の `FrequentWay`（形・保存・見つけ方・道に沿った前もっての取得）。D-8〜D-12
+- [ ] kit-geo の実装と公開（v2.20.0）
 - [ ] CycleGuide: 画面・話・振り返り。要件の F-16 を書き直す（X-3）
 - [ ] SanpoGuide: 画面・話・振り返り（再訪の判定との関係は U-4）
 - [ ] 両アプリのプライバシーポリシーの「端末内の記録」を書き足す（N-2）
