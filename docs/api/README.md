@@ -10,6 +10,7 @@
 | ファイル | 内容 |
 |---|---|
 | `sanpo-messages.openapi.yaml` | API の定義（エンドポイント、リクエスト・レスポンスの形、エラー） |
+| `spot-tile.schema.json` | スポットのタイルの JSON Schema（[API-SPOT-TILES](../contracts/API-SPOT-TILES.md)）。タイルを作るバッチが書き出したものを確かめる |
 | `redocly.yaml` | 検証ツール（Redocly CLI）の設定。意図して外したルールと理由 |
 | `README.md` | このファイル |
 
