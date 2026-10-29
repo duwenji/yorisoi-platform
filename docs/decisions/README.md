@@ -11,6 +11,7 @@
 | `ADR-MATERIAL-PRODUCERS` | ADR-002 | [素材提供者](ADR-MATERIAL-PRODUCERS.md) | 素材提供者、素材集、利用許諾 |
 | `ADR-AI-ROLES` | ADR-004 | [生成 AI の役割と責任](ADR-AI-ROLES.md) | 根拠・演出・実演・枠・考査、費用、審査 |
 | `ADR-AI-RELAY` | — | [運営による AI の中継](ADR-AI-RELAY.md) | 運営の AI と自分のキー、無料の上限、Bedrock |
+| `ADR-SPOT-TILES` | — | [スポットのタイル](ADR-SPOT-TILES.md) | スポットの取り先、タイルの作り方と配り方、Overpass は予備 |
 
 ## 文書の呼び方
 
