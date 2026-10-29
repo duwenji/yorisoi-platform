@@ -60,7 +60,7 @@ ADR-SPOT-TILES で、アプリはスポット・施設・お店・信号を、�
 | ST-2 | 層 | `base`（スポット・施設・信号）と `shops`（お店）。どちらも同じタイルの番号で置く |
 | ST-3 | 範囲 | Geofabrik の日本の抽出の範囲（`japan.poly`）に少しでもかかるタイルは、中身が空でもすべて置く。範囲にかからないタイルは置かない（404） |
 | ST-4 | 新しさ | 週に 1 回作り直す。作り直したタイルは、遅くとも 1 時間で配信に反映される |
-| ST-5 | 取り直し | URL は版を含まない。中身が変わったタイルだけ `ETag` が変わる。アプリは残っているタイルの `ETag` を `If-None-Match` で送り、変わっていなければ 304 を受ける |
+| ST-5 | 取り直し | URL は版を含まない。中身（時刻を除く）が変わったタイルだけを置き直すので、それ以外のタイルの `ETag` は変わらない。アプリは残っているタイルの `ETag` を `If-None-Match` で送り、変わっていなければ 304 を受ける |
 | ST-6 | 圧縮 | タイルは gzip で置き、`Content-Encoding: gzip` で返す。アプリの HTTP クライアントが展開する |
 | ST-7 | 送るもの | アプリが送るのは、URL（層とタイルの番号）・`If-None-Match`・アプリ名と版の `User-Agent` だけ。クエリ文字列・インストール ID・位置は送らない。配信はアクセスログを残さない |
 | ST-8 | ライセンス | 各タイルに `license`（`ODbL-1.0`）と `attribution`（`© OpenStreetMap contributors`）を入れる。基点に `LICENSE.txt`（ODbL 1.0 で配っていること、出典、もとのデータの取得元と日時）を置く |
@@ -129,8 +129,8 @@ sequenceDiagram
 | `version` | 整数 | `1`。互換の変更（項目を足す）では上げない |
 | `layer` | 文字列 | `base` か `shops` |
 | `tile` | 文字列 | geohash の 5 桁 |
-| `osmTimestamp` | 文字列 | もとの OSM データの時刻（ISO 8601、UTC） |
-| `generatedAt` | 文字列 | タイルを作った時刻（ISO 8601、UTC） |
+| `osmTimestamp` | 文字列 | タイルの中身を作った OSM データの時刻（ISO 8601、UTC）。中身が変わらない週は作り直さないので、中身が最後に変わった週のもの |
+| `generatedAt` | 文字列 | タイルを作った時刻（ISO 8601、UTC）。`osmTimestamp` と同じく、中身が最後に変わった週のもの |
 | `license` | 文字列 | `ODbL-1.0` |
 | `attribution` | 文字列 | `© OpenStreetMap contributors` |
 
