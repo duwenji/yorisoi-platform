@@ -20,7 +20,7 @@
 
 [ADR-SPOT-TILES](../decisions/ADR-SPOT-TILES.md)・[API-SPOT-TILES](../contracts/API-SPOT-TILES.md)。
 
-- [ ] 契約 API-SPOT-TILES の承認（T-1）
+- [x] 契約 API-SPOT-TILES の承認（T-1）
 - [ ] バッチと配信の実装と配備（yorisoi-console の `infra/` に別スタック。console ADR-001 に足す。T-2）
 - [ ] `kit-geo` の実装と公開（T-3）
 - [ ] 両アプリで有効にし、内部テストで速さと失敗の数を記録で確かめる（T-4）と、文書・プライバシーポリシー・Play のデータ セーフティの改訂（T-5）
