@@ -21,9 +21,11 @@
 [ADR-SPOT-TILES](../decisions/ADR-SPOT-TILES.md)・[API-SPOT-TILES](../contracts/API-SPOT-TILES.md)。
 
 - [x] 契約 API-SPOT-TILES の承認（T-1）
-- [ ] バッチと配信の実装と配備（yorisoi-console の `infra/` に別スタック。console ADR-001 に足す。T-2）
-- [ ] `kit-geo` の実装と公開（T-3）
-- [ ] 両アプリで有効にし、内部テストで速さと失敗の数を記録で確かめる（T-4）と、文書・プライバシーポリシー・Play のデータ セーフティの改訂（T-5）
+- [x] バッチと配信の実装と配備（yorisoi-console の `YorisoiSpotTiles`。開発用を配備し、1 回目のタイルを作った。T-2）
+- [x] `kit-geo` の実装と公開（v2.22.0。T-3）
+- [x] 両アプリで有効にし（開発用の配信）、プライバシーポリシーを改めた。SanpoGuide 1.7.0 (12)・CycleGuide 1.7.0 (10) を内部テストに出した（T-4・T-5）
+- [ ] 実機での確認: 散歩・走行の記録で、スポットの `source` が `tiles`・`kept_tiles` になり、空白や待ちが減ったこと（T-4）
+- [ ] 残りの文書の追従: ADR-ECOSYSTEM-PLATFORM E-4、REQ-FREQUENT-WAYS（N-1・AC-4・AC-13・制約）、両アプリの architecture.md と手引き、技術チュートリアル（T-5）
 - [ ] 本番の配信を作る時期を決める（T-6）
 
 ## 第三者のチャンネル
