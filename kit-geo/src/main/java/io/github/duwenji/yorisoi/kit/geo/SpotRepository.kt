@@ -23,6 +23,12 @@ enum class SpotSource {
 
     /** The nearest kept answer, because Overpass failed or is being given a rest. */
     FALLBACK,
+
+    /** The operator's tiles ([SpotTiles]), of which one at least was asked about just now. */
+    TILES,
+
+    /** The operator's tiles kept on the device, without asking: new enough, or the server couldn't be asked. */
+    KEPT_TILES,
 }
 
 /**
@@ -38,6 +44,9 @@ enum class SpotSource {
  * [searchCenter] is where to search from a location: the location itself, or a point ahead of it
  * for an app that moves fast (a cyclist's). [signals] adds the traffic signals to the search, and
  * [facilityKinds] are the amenities searched (a walker's by default).
+ *
+ * With [tiles], the operator's tiles are used first, kept in the [cache]'s folder the same way;
+ * Overpass, and the kept answers from it, only when a tile can't be had (API-SPOT-TILES AP-7).
  */
 class SpotRepository(
     private val overpass: OverpassClient,
@@ -50,6 +59,7 @@ class SpotRepository(
     private val signals: Boolean = false,
     private val facilityKinds: Set<FacilityKind> = FacilityKind.WALK,
     private val retryDelaysMs: LongArray = RETRY_DELAYS_MS,
+    private val tiles: SpotTiles? = null,
 ) {
     private val _location = MutableStateFlow<Location?>(null)
     val location: StateFlow<Location?> = _location.asStateFlow()
@@ -120,6 +130,13 @@ class SpotRepository(
         val shown = shownAt
         val cache = cache?.takeIf { useCache() }
         if (!forceRefresh && shown != null && shops == lastShops && RouteGeometry.distanceM(shown, here) <= REFETCH_DISTANCE_M) return
+        tiles?.nearby(lat, lon, shops, signals, facilityKinds, cache?.tiles, freshMs().coerceIn(0L, SpotCache.MAX_AGE_MS), forceRefresh)?.let { found ->
+            show(found.result, if (found.asked) SpotSource.TILES else SpotSource.KEPT_TILES)
+            shownKept = null
+            shownAt = here
+            lastShops = shops
+            return
+        }
         if (!forceRefresh) {
             cache?.find(lat, lon, shops, REFETCH_DISTANCE_M, freshMs().coerceIn(0L, SpotCache.MAX_AGE_MS), signals, facilityKinds)?.let { kept ->
                 if (show(kept, SpotSource.CACHE)) {
@@ -159,18 +176,24 @@ class SpotRepository(
      * the answers without showing them: one search every [spacingM], skipping where a kept answer
      * is fresh, at most [maxSearches] in all, [pauseMs] apart. Stops at the first failure: the
      * servers are busy. Does nothing without a cache. Returns how many searches it made.
+     * With [tiles], fetches the tiles along the ways instead, at most [maxTiles], without a pause;
+     * searches Overpass as above only if a tile can't be had.
      */
     suspend fun prefetch(
         ways: List<List<LatLon>>,
         spacingM: Double = PREFETCH_SPACING_M,
         maxSearches: Int = PREFETCH_MAX_SEARCHES,
         pauseMs: Long = PREFETCH_PAUSE_MS,
+        maxTiles: Int = PREFETCH_MAX_TILES,
     ): Int {
         val cache = cache?.takeIf { useCache() } ?: return 0
         val shops = shops()
         val fresh = freshMs().coerceIn(0L, SpotCache.MAX_AGE_MS)
+        val centers = ways.flatMap { FrequentWayFinder.resample(it, spacingM) }
+        val tiled = tiles?.prefetch(centers, shops, cache.tiles, fresh, maxTiles)
+        if (tiled != null && !tiled.second) return tiled.first
         var searches = 0
-        for (center in ways.flatMap { FrequentWayFinder.resample(it, spacingM) }) {
+        for (center in centers) {
             if (searches >= maxSearches) break
             if (cache.find(center.lat, center.lon, shops, REFETCH_DISTANCE_M, fresh, signals, facilityKinds) != null) continue
             if (searches > 0) delay(pauseMs)
@@ -226,6 +249,9 @@ class SpotRepository(
         const val PREFETCH_SPACING_M = 500.0
         const val PREFETCH_MAX_SEARCHES = 20
         const val PREFETCH_PAUSE_MS = 10_000L
+
+        /** A tile is about 4km across: 40 (both layers) cover some 80km of ways. */
+        const val PREFETCH_MAX_TILES = 40
 
         /** How long to wait before asking Overpass again, after one failed search, two, and more. */
         internal val RETRY_DELAYS_MS = longArrayOf(30_000, 60_000, 120_000, 300_000)

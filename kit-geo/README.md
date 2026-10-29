@@ -87,10 +87,31 @@ val spots = SpotRepository(
 | `CACHE` | 7 日（`freshMs`）以内に残した答え |
 | `STALE` | `freshMs` より古い答え（問い合わせ中） |
 | `FALLBACK` | 問い合わせの失敗、または待ち時間の間に使った、残っている答え |
+| `TILES` | 運営のタイル。少なくとも 1 枚をいま配信に問い合わせた（200 か 304） |
+| `KEPT_TILES` | 端末に残っている運営のタイル。問い合わせなかった（新しいか、配信に問い合わせられなかった） |
 
 `onLocation` は、その呼び出しで表示するスポットを入れ替えたときに true を返します。位置が続けて届くと、呼び出しは前の問い合わせが終わるのを待ちます。`SpotRepository.updates`（入れ替えた回数）を前後で比べると、ほかの呼び出しの入れ替えまで数えてしまうので、記録には戻り値を使ってください。
 
 `SpotRepository.searchedAt` は、最後に Overpass に問い合わせた中心です（答えがあったかどうかに関わらない）。すべてのサーバーで失敗したときの `IOException` のメッセージには、サーバーごとの失敗（ホスト名・HTTP の状態または例外の名前・かかった時間）が並びます。
+
+## 運営のタイル（`SpotTiles`）
+
+運営が週に 1 回、OpenStreetMap から作って配るタイル（[API-SPOT-TILES](../docs/contracts/API-SPOT-TILES.md)）を、Overpass より先に使います。`SpotRepository` に `tiles` を渡すと有効になります。渡さなければ今までどおり Overpass だけを使います。
+
+```kotlin
+val spots = SpotRepository(
+    OverpassClient(),
+    shops = { /* いまのチャンネルが探すお店の種類 */ },
+    cache = SpotCache(File(context.cacheDir, "spots")),
+    tiles = SpotTiles(baseUrl = /* 配信の基点（BuildConfig） */, userAgent = "SanpoGuide/1.7.0"),
+)
+```
+
+- 検索の中心から 600m の円にかかるタイル（geohash 5 桁、約 4km × 5km。1〜4 枚）を使い、端末で Overpass の検索と同じ距離（スポット 600m、ベンチと自動販売機 250m、お店 400m）・同じ種類（`shops`・`facilityKinds`・`signals`）に絞る。輪郭のあるスポットは輪郭までの距離で数える
+- お店の層は、`shops` が空でないときだけ取る
+- タイルは `SpotCache` のフォルダの `tiles/` に残す（合計 30MB まで）。`freshMs` 以内のタイルは問い合わせずに使い、古ければ ETag を付けて問い合わせ直す（変わっていなければ 304）。問い合わせられなければ 90 日まで使う。`useCache` が `false` のあいだは端末に残さず、アプリが動いている間だけメモリに置く。`SpotCache.clear()` でタイルも消える
+- 1 枚でもタイルが使えないとき（配信が止まっていて残ってもいない、範囲外の 404、読めないタイル）は、その検索は上の「検索のしかた」のとおり Overpass に問い合わせる。404 のタイルは、アプリが動いている間は問い合わせ直さない
+- 配信に送るのは URL（層とタイルの名前）・`If-None-Match`・`userAgent` だけ
 
 ## よく通る道
 
@@ -137,6 +158,7 @@ flowchart LR
 - 1 回で 20 問い合わせまで、間は 10 秒空ける。失敗したらその回はやめる（混んでいるサーバーに続けて問い合わせない）
 - 問い合わせの種類（お店・信号・施設）は、そのアプリの `SpotRepository` と同じ。走行・散歩中の検索でそのまま使える
 - いつ呼ぶかはアプリが決める。走行・散歩をしていないときに、従量制でないネットワークで呼ぶ（REQ-FREQUENT-WAYS F-7）
+- `tiles` があるときは、上の点から 600 m の円にかかるタイルのうち、新しいものが残っていないタイルを取る。1 回で 40 枚（`PREFETCH_MAX_TILES`）まで、間は空けない。タイルが取れなければ、残りを上のとおり Overpass で問い合わせる
 
 ### 画面（`map/FrequentWaysScreen`）
 
