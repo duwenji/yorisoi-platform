@@ -82,10 +82,13 @@ class SpotCache(
         trim()
     }
 
-    /** Forgets every kept answer (they tell, roughly, where the user has walked). */
+    /** The operator's spot tiles ([SpotTiles]) kept beside the answers, and cleared with them. */
+    internal val tiles = SpotTileStore(File(dir, "tiles"), now)
+
+    /** Forgets every kept answer and tile (they tell, roughly, where the user has walked). */
     @Synchronized
     fun clear() {
-        dir.listFiles()?.forEach { it.delete() }
+        dir.listFiles()?.forEach { it.deleteRecursively() }
     }
 
     /** Drops answers past [MAX_AGE_MS], then the oldest until all fit in [maxBytes]. */

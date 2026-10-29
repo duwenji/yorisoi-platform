@@ -15,6 +15,41 @@ import java.util.concurrent.TimeUnit
 /** What one search found: spots to guide, amenities for the map, and traffic signals when asked for. */
 data class NearbyResult(val spots: List<Poi>, val facilities: List<Facility>, val signals: List<LatLon> = emptyList())
 
+/** One search's answer as it is gathered, from Overpass or from tiles, without the places mapped twice. */
+internal class NearbyCollector {
+    private val spots = LinkedHashMap<String, Poi>()
+    private val facilities = mutableListOf<Facility>()
+    private val signals = mutableListOf<LatLon>()
+
+    fun signal(at: LatLon) {
+        signals += at
+    }
+
+    fun facility(f: Facility) {
+        // A toilet is often mapped both as a node and its building; keep one.
+        val at = LatLon(f.lat, f.lon)
+        if (facilities.none { it.kind == f.kind && RouteGeometry.distanceM(LatLon(it.lat, it.lon), at) < SAME_FACILITY_M }) facilities += f
+    }
+
+    fun spot(poi: Poi) {
+        // The same place is often mapped both as a node and an area. Keep the area, whose
+        // edge tells when the user arrives, but also the node's tags (often the wikipedia link).
+        val key = "${poi.name}@${"%.3f".format(poi.lat)},${"%.3f".format(poi.lon)}"
+        val seen = spots[key]
+        spots[key] = when {
+            seen == null -> poi
+            seen.shape == null && poi.shape != null -> poi.copy(tags = seen.tags + poi.tags)
+            else -> seen
+        }
+    }
+
+    fun result() = NearbyResult(spots.values.toList(), facilities, signals)
+
+    private companion object {
+        const val SAME_FACILITY_M = 20.0
+    }
+}
+
 /** Searches OpenStreetMap (Overpass API) for walk-worthy spots and walk amenities around a point. */
 class OverpassClient(
     private val http: OkHttpClient = OkHttpClient.Builder()
@@ -129,22 +164,17 @@ class OverpassClient(
 
     internal fun parse(json: String): NearbyResult {
         val elements = JSONObject(json).getJSONArray("elements")
-        val result = LinkedHashMap<String, Poi>()
-        val facilities = mutableListOf<Facility>()
-        val signals = mutableListOf<LatLon>()
+        val found = NearbyCollector()
         for (i in 0 until elements.length()) {
             val e = elements.getJSONObject(i)
             val tagsJson = e.optJSONObject("tags") ?: continue
             val tags = tagsJson.keys().asSequence().associateWith { tagsJson.getString(it) }
             if (tags["highway"] == "traffic_signals" && e.has("lat")) {
-                signals += LatLon(e.getDouble("lat"), e.getDouble("lon"))
+                found.signal(LatLon(e.getDouble("lat"), e.getDouble("lon")))
                 continue
             }
             FacilityKind.of(tags)?.let { kind ->
-                facilityOf(e, kind, tags)?.let { f ->
-                    // A toilet is often mapped both as a node and its building; keep one.
-                    if (facilities.none { it.kind == kind && it.distanceFrom(f.lat, f.lon) < SAME_FACILITY_M }) facilities += f
-                }
+                facilityOf(e, kind, tags)?.let(found::facility)
                 continue
             }
             val name = tags["name:ja"] ?: tags["name"] ?: continue
@@ -158,30 +188,18 @@ class OverpassClient(
                     (b.getDouble("minlat") + b.getDouble("maxlat")) / 2 to (b.getDouble("minlon") + b.getDouble("maxlon")) / 2
                 }
             }
-            val id = "${e.getString("type")}/${e.getLong("id")}"
-            val poi = Poi(id, name, lat, lon, categoryOf(tags), tags, shapeOf(e, tags))
-            // The same place is often mapped both as a node and an area. Keep the area, whose
-            // edge tells when the user arrives, but also the node's tags (often the wikipedia link).
-            val key = "$name@${"%.3f".format(lat)},${"%.3f".format(lon)}"
-            val seen = result[key]
-            result[key] = when {
-                seen == null -> poi
-                seen.shape == null && poi.shape != null -> poi.copy(tags = seen.tags + poi.tags)
-                else -> seen
-            }
+            found.spot(Poi("${e.getString("type")}/${e.getLong("id")}", name, lat, lon, categoryOf(tags), tags, shapeOf(e, tags)))
         }
-        return NearbyResult(result.values.toList(), facilities, signals)
+        return found.result()
     }
 
     /** Nodes carry their position; ways and relations get a `center` from `out center`. */
     private fun facilityOf(e: JSONObject, kind: FacilityKind, tags: Map<String, String>): Facility? {
         val point = if (e.has("lat")) e else e.optJSONObject("center") ?: return null
-        val name = tags["name:ja"] ?: tags["name"]
         return Facility(
             "${e.getString("type")}/${e.getLong("id")}", kind,
             point.getDouble("lat"), point.getDouble("lon"),
-            // Bus stop roofs keep the rain off but aren't rest houses; say what they are.
-            if (kind == FacilityKind.SHELTER && tags["shelter_type"] == "public_transport") name ?: "バス停" else name,
+            facilityName(kind, tags["name:ja"] ?: tags["name"], tags["shelter_type"] == "public_transport"),
         )
     }
 
@@ -214,41 +232,47 @@ class OverpassClient(
         }
     }
 
-    private fun categoryOf(tags: Map<String, String>): String = when {
-        tags["amenity"] == "place_of_worship" -> when (tags["religion"]) {
-            "shinto" -> "神社"
-            "buddhist" -> "寺院"
-            "christian" -> "教会"
-            else -> "礼拝所"
-        }
-        tags.containsKey("historic") -> "史跡"
-        tags["tourism"] == "museum" -> "博物館"
-        tags["tourism"] == "gallery" -> "ギャラリー"
-        tags["tourism"] == "viewpoint" -> "展望スポット"
-        tags["tourism"] == "artwork" -> "アート"
-        tags["tourism"] == "attraction" -> "名所"
-        tags["leisure"] == "park" -> "公園"
-        tags["leisure"] == "garden" -> "庭園"
-        tags["natural"] == "beach" -> "海辺"
-        tags["natural"] == "water" -> "水辺"
-        tags.containsKey("natural") -> "自然"
-        else -> shopKindOf(tags)?.category ?: "スポット"
-    }
-
-    private fun shopKindOf(tags: Map<String, String>): SpotKind? = when {
-        tags["amenity"] == "restaurant" -> SpotKind.RESTAURANT
-        tags["amenity"] == "cafe" || tags["amenity"] == "ice_cream" -> SpotKind.CAFE
-        tags["amenity"] == "marketplace" -> SpotKind.MARKET
-        else -> SHOP_TAGS.entries.firstOrNull { (_, values) -> tags["shop"] in values }?.key
-    }
-
     private fun elapsed(since: Long) = System.currentTimeMillis() - since
 
     companion object {
         private const val TAG = "Overpass"
-        private const val CLOSE_RADIUS_M = 250
-        private const val SAME_FACILITY_M = 20f
-        private const val SHOP_RADIUS_M = 400
+
+        /** The search's radius: spots, and the amenities not only close by. */
+        internal const val RADIUS_M = 600
+        internal const val CLOSE_RADIUS_M = 250
+        internal const val SHOP_RADIUS_M = 400
+
+        internal fun categoryOf(tags: Map<String, String>): String = when {
+            tags["amenity"] == "place_of_worship" -> when (tags["religion"]) {
+                "shinto" -> "神社"
+                "buddhist" -> "寺院"
+                "christian" -> "教会"
+                else -> "礼拝所"
+            }
+            tags.containsKey("historic") -> "史跡"
+            tags["tourism"] == "museum" -> "博物館"
+            tags["tourism"] == "gallery" -> "ギャラリー"
+            tags["tourism"] == "viewpoint" -> "展望スポット"
+            tags["tourism"] == "artwork" -> "アート"
+            tags["tourism"] == "attraction" -> "名所"
+            tags["leisure"] == "park" -> "公園"
+            tags["leisure"] == "garden" -> "庭園"
+            tags["natural"] == "beach" -> "海辺"
+            tags["natural"] == "water" -> "水辺"
+            tags.containsKey("natural") -> "自然"
+            else -> shopKindOf(tags)?.category ?: "スポット"
+        }
+
+        internal fun shopKindOf(tags: Map<String, String>): SpotKind? = when {
+            tags["amenity"] == "restaurant" -> SpotKind.RESTAURANT
+            tags["amenity"] == "cafe" || tags["amenity"] == "ice_cream" -> SpotKind.CAFE
+            tags["amenity"] == "marketplace" -> SpotKind.MARKET
+            else -> SHOP_TAGS.entries.firstOrNull { (_, values) -> tags["shop"] in values }?.key
+        }
+
+        /** Bus stop roofs keep the rain off but aren't rest houses; say what they are. */
+        internal fun facilityName(kind: FacilityKind, name: String?, publicTransport: Boolean): String? =
+            if (kind == FacilityKind.SHELTER && publicTransport) name ?: "バス停" else name
 
         /** A busy town has a few hundred signals within 600m. */
         private const val SIGNAL_LIMIT = 300
