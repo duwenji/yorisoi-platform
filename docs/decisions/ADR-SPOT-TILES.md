@@ -163,7 +163,7 @@ flowchart LR
 
 | ID | 追従タスク | 担当 | 時期 |
 |---|---|---|---|
-| T-1 | タイルの技術契約 API-SPOT-TILES（URL の形、層ごとの JSON の形、版、ETag、404 の意味、ライセンスのファイル）。形式を core-format に置くか `kit-geo` に置くかもここで決める | Claude | 本書の承認後 |
+| T-1 | タイルの技術契約 API-SPOT-TILES（URL の形、層ごとの JSON の形、版、ETag、404 の意味、ライセンスのファイル）。形式の読み込みは `kit-geo` に置き、JSON Schema を docs/api に置く（API-SPOT-TILES ST-9） | Claude | 本書の承認後 |
 | T-2 | バッチと配信の実装と配備（yorisoi-console の `infra/` に別スタック）。console ADR-001 に足す | Claude | T-1 の後 |
 | T-3 | `kit-geo` の実装と公開 | Claude | T-1 の後 |
 | T-4 | 両アプリで有効にし、内部テストで速さと失敗の数を散歩・走行の記録で確かめる | Claude | T-2・T-3 の後 |
@@ -187,7 +187,6 @@ flowchart LR
 
 | No. | 内容 | 決める時期 |
 |---|---|---|
-| 1 | タイルの形式の置き場所（core-format か `kit-geo` か） | T-1 |
 | 2 | 本番の配信を作る時期 | T-6 |
 
 リスク:

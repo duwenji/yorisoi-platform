@@ -16,6 +16,16 @@
 - [ ] `kit-llm` とアプリの実装（T-4）と、アプリの文書・手引き・プライバシーポリシー・Play の申告の改訂（T-5）
 - [ ] 運営の AI 全体の 1 か月の予算を決める（T-7。本番に出す前）
 
+## スポットのタイル
+
+[ADR-SPOT-TILES](../decisions/ADR-SPOT-TILES.md)・[API-SPOT-TILES](../contracts/API-SPOT-TILES.md)。
+
+- [x] 契約 API-SPOT-TILES の承認（T-1）
+- [ ] バッチと配信の実装と配備（yorisoi-console の `infra/` に別スタック。console ADR-001 に足す。T-2）
+- [ ] `kit-geo` の実装と公開（T-3）
+- [ ] 両アプリで有効にし、内部テストで速さと失敗の数を記録で確かめる（T-4）と、文書・プライバシーポリシー・Play のデータ セーフティの改訂（T-5）
+- [ ] 本番の配信を作る時期を決める（T-6）
+
 ## 第三者のチャンネル
 
 - [ ] 関係者ごとの対応案（[関係者の課題と対応案](../overview/stakeholder-needs.md)）を承認し、公開の前に要るもの（W-1 内蔵のリスト）を進める
@@ -56,4 +66,4 @@ OpenAPI の検証: `docs/api` で `npx @redocly/cli lint sanpo-messages.openapi.
 
 - **サーバーの要否（決定済み）**: 他人宛ての秘密メッセージにはサーバーが必要で、アプリは接続先 URL を設定できる。詳細は [API-SECRET-MESSAGES](../contracts/API-SECRET-MESSAGES.md) を参照。SanpoGuide の現在の実装状況は [SanpoGuide TODO](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/TODO.md) を参照
 - **収益化**: 広告、有料プラン、提携。既存の広告 SDK は、位置情報を外部に送らない方針（API-CHANNEL-PACKAGE F-10）と合わないので使わない方向
-- **公開サーバーの負荷（SanpoGuide の現行実装）**: `kit-geo` は Overpass・Open-Meteo の公開サーバーを使っている。アプリ利用者が増える前に利用ポリシーを確認し、自前のサーバーや商用のサービスを検討する
+- **公開サーバーの負荷**: Overpass は運営のタイルに移す（[スポットのタイル](#スポットのタイル)）。Open-Meteo の公開サーバーは、アプリ利用者が増える前に利用ポリシーを確認し、自前のサーバーや商用のサービスを検討する
