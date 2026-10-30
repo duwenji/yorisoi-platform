@@ -2,6 +2,7 @@ package io.github.duwenji.yorisoi.kit.geo.map
 
 import org.osmdroid.tileprovider.tilesource.ITileSource
 import org.osmdroid.tileprovider.tilesource.OnlineTileSourceBase
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.tileprovider.tilesource.XYTileSource
 import org.osmdroid.util.MapTileIndex
 
@@ -10,6 +11,11 @@ sealed interface MapTiles {
     val style: MapStyle
 
     data class Gsi(override val style: MapStyle) : MapTiles
+
+    /** OpenStreetMap's standard tiles, under the OSMF tile usage policy (no bulk or offline use). */
+    data object Osm : MapTiles {
+        override val style = MapStyle.OSM_STANDARD
+    }
 
     data class Google(
         override val style: MapStyle,
@@ -51,6 +57,8 @@ private class GoogleTileSource(private val tiles: MapTiles.Google) : OnlineTileS
 
 fun MapTiles.tileSource(): ITileSource = when (this) {
     is MapTiles.Google -> GoogleTileSource(this)
+    // osmdroid's own source carries the policy: two downloads at a time, no bulk download.
+    MapTiles.Osm -> TileSourceFactory.MAPNIK
     is MapTiles.Gsi -> when (style) {
         MapStyle.GSI_PALE -> GsiPale
         MapStyle.GSI_PHOTO -> GsiPhoto
