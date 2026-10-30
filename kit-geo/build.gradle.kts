@@ -36,6 +36,8 @@ kotlin {
 dependencies {
     // The spot kinds a search asks for (SpotKind).
     api(project(":core-format"))
+    // The bar on top of the frequent ways screen.
+    implementation(project(":kit-ui"))
 
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)

@@ -19,6 +19,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.Scaffold
+import io.github.duwenji.yorisoi.kit.ui.ScreenBar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -28,7 +29,6 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.unit.dp
@@ -83,13 +83,9 @@ fun FrequentWaysScreen(ways: List<FrequentWay>, actions: WayActions, words: WayW
         WayDetail(way, actions, words, onClose = { open = null })
         return
     }
-    Scaffold { padding ->
+    Scaffold(topBar = { ScreenBar("よく通る道", onBack = onClose) }) { padding ->
         LazyColumn(Modifier.fillMaxSize().padding(padding).padding(horizontal = 24.dp)) {
             item {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("よく通る道", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.weight(1f))
-                    TextButton(onClick = onClose) { Text("閉じる") }
-                }
                 if (ways.isEmpty()) {
                     Text(
                         "まだありません。${words.threeTimes}、よく通る道になります。${words.trip}の履歴から作ることもできます。",
@@ -142,17 +138,11 @@ private fun WayDetail(way: FrequentWay, actions: WayActions, words: WayWords, on
             dismissButton = { TextButton(onClick = { deleting = false }) { Text("やめる") } },
         )
     }
-    Scaffold { padding ->
+    Scaffold(topBar = { ScreenBar(way.name, onBack = onClose) }) { padding ->
         LazyColumn(
             Modifier.fillMaxSize().padding(padding).padding(horizontal = 24.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            item {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("よく通る道", style = MaterialTheme.typography.headlineSmall, modifier = Modifier.weight(1f))
-                    TextButton(onClick = onClose) { Text("一覧へ") }
-                }
-            }
             item { Text(summary(way, words), style = MaterialTheme.typography.bodyMedium) }
             item { WayMap(way.points, highlight = null, Modifier.fillMaxWidth().height(320.dp)) }
             item {
