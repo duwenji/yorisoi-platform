@@ -1,37 +1,31 @@
 # エコシステム TODO
 
-エコシステム全体で残っている作業と、決めることを記録します。アプリだけの作業は各アプリの TODO（[SanpoGuide](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/TODO.md)）、管理システムの作業は [yorisoi-console の TODO](https://github.com/duwenji/yorisoi-console/blob/main/docs/TODO.md) を参照してください。
+エコシステム全体で残っている作業と、決めることを記録します。アプリだけの作業は各アプリの TODO（[SanpoGuide](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/TODO.md)・[CycleGuide](https://github.com/duwenji/yorisoi-cycleguide/blob/main/docs/TODO.md)）、管理システムの作業は [yorisoi-console の TODO](https://github.com/duwenji/yorisoi-console/blob/main/docs/TODO.md) を参照してください。
 
 ## ADR の追従タスク
 
-- [ ] CycleGuide（ADR-ECOSYSTEM-PLATFORM T-2。要件は [yorisoi-cycleguide の要件定義](https://github.com/duwenji/yorisoi-cycleguide/blob/main/docs/requirements.md)）
+- [ ] CycleGuide（ADR-ECOSYSTEM-PLATFORM T-2。要件は [yorisoi-cycleguide の要件定義](https://github.com/duwenji/yorisoi-cycleguide/blob/main/docs/requirements.md)）。段階 1・2 は内部テストに出ている。残りは各アプリの TODO
 - [ ] 新しいアプリの雛形と、要望からプロファイル・ルール・プロンプト・組み込みのチャンネルを生成するスキル（ADR-ECOSYSTEM-PLATFORM T-1。T-2 の後）
 
 ## 運営の AI（中継）
 
-[ADR-AI-RELAY](../decisions/ADR-AI-RELAY.md)・[API-AI-RELAY](../contracts/API-AI-RELAY.md)。
+[ADR-AI-RELAY](../decisions/ADR-AI-RELAY.md)・[API-AI-RELAY](../contracts/API-AI-RELAY.md)。中継は開発用（yorisoi-console の `YorisoiAiRelay-dev`）だけを配備し、両アプリのリリース版も開発用を使っています。
 
 - [ ] 中継のモデルを Claude Haiku 4.5 に切り替えることがあれば、その前にアカウントで Anthropic のユースケースを申告する（T-6）
-- [ ] 中継の実装と配備（yorisoi-console の `infra/` に別スタック。T-3）
-- [ ] `kit-llm` とアプリの実装（T-4）と、アプリの文書・手引き・プライバシーポリシー・Play の申告の改訂（T-5）
 - [ ] 運営の AI 全体の 1 か月の予算を決める（T-7。本番に出す前）
+- [ ] 本番の中継の配備と Play Integrity の確認。アプリ側の作業は各アプリの TODO「Google Play での公開」
 
 ## スポットのタイル
 
-[ADR-SPOT-TILES](../decisions/ADR-SPOT-TILES.md)・[API-SPOT-TILES](../contracts/API-SPOT-TILES.md)。
+[ADR-SPOT-TILES](../decisions/ADR-SPOT-TILES.md)・[API-SPOT-TILES](../contracts/API-SPOT-TILES.md)。配信は開発用（yorisoi-console の `YorisoiSpotTiles-dev`）で、両アプリのリリース版も開発用を使っています。
 
-- [x] 契約 API-SPOT-TILES の承認（T-1）
-- [x] バッチと配信の実装と配備（yorisoi-console の `YorisoiSpotTiles`。開発用を配備し、1 回目のタイルを作った。T-2）
-- [x] `kit-geo` の実装と公開（v2.22.0。T-3）
-- [x] 両アプリで有効にし（開発用の配信）、プライバシーポリシーを改めた。SanpoGuide 1.7.0 (12)・CycleGuide 1.7.0 (10) を内部テストに出した（T-4・T-5）
 - [ ] 実機での確認: 散歩・走行の記録で、スポットの `source` が `tiles`・`kept_tiles` になり、空白や待ちが減ったこと（T-4）
-- [ ] 残りの文書の追従: ADR-ECOSYSTEM-PLATFORM E-4、REQ-FREQUENT-WAYS（N-1・AC-4・AC-13・制約）、両アプリの architecture.md と手引き、技術チュートリアル（T-5）
+- [ ] 技術チュートリアルの追従（T-5）
 - [ ] 本番の配信を作る時期を決める（T-6）
 
 ## 第三者のチャンネル
 
 - [ ] 関係者ごとの対応案（[関係者の課題と対応案](../overview/stakeholder-needs.md)）を承認し、公開の前に要るもの（W-1 内蔵のリスト）を進める
-- [x] [審査基準](../policies/channel-review.md)を承認する
 - [ ] 審査にかかる期間の目安と、運営が複数になる場合（承認を 2 人にするか、権限を分けるか）
 
 決めること:
@@ -39,13 +33,8 @@
 
 ## よく通る道
 
-要件は [REQ-FREQUENT-WAYS](../requirements/REQ-FREQUENT-WAYS.md)（承認済み）。
+要件は [REQ-FREQUENT-WAYS](../requirements/REQ-FREQUENT-WAYS.md)。両アプリに入っている。
 
-- [x] 設計: kit-geo の `FrequentWay`（形・保存・見つけ方・道に沿った前もっての取得）。D-8〜D-12
-- [x] kit-geo の実装と公開（v2.20.0。画面を共通にした v2.21.0）
-- [x] CycleGuide: 画面・話・振り返り。要件の F-16 を書き直す（X-3）。1.6.0 (9) を内部テストに出した
-- [x] SanpoGuide: 画面・話・振り返り（再訪の判定はそのまま使い、24 時間以内は話さない判定を足した。D-11）。1.6.0 (11) を内部テストに出した
-- [x] 両アプリのプライバシーポリシーの「端末内の記録」を書き足す（N-2）
 - [ ] CycleGuide のプロンプト・パック 0.1.2 の公開（`prompts-v0.1.2`。前に話した見どころの見本 `ride-guide-again` が増える）と、yorisoi-console の validator の追従（今は 0.1.0）
 - [ ] 実機での確認: 3 回通った道がよく通る道になる、Overpass が混んでいる日にも前方の見どころが空白にならない、前の日に話した見どころを別の話で話す
 - [ ] 散策の見つけ方の値（300 m）を散歩の記録で確かめる（U-1）
@@ -57,8 +46,6 @@
 - [ ] 準拠テスト: 任意のサーバーの URL に対して流せるテスト（API-SECRET-MESSAGES の確認観点 V-01〜V-18）。Kotlin（JVM）＋ Tink を想定
 - [ ] 参照実装のサーバー（開発・テスト用。技術は自由）
 
-OpenAPI の検証: `docs/api` で `npx @redocly/cli lint sanpo-messages.openapi.yaml`
-
 決めること:
 - 位置の偽装（位置情報の偽装アプリ）で開けられることへの対策をどこまでやるか
 - 公開メッセージの不適切な投稿への対策（通報・削除）
@@ -66,6 +53,5 @@ OpenAPI の検証: `docs/api` で `npx @redocly/cli lint sanpo-messages.openapi.
 
 ## 共通の検討事項
 
-- **サーバーの要否（決定済み）**: 他人宛ての秘密メッセージにはサーバーが必要で、アプリは接続先 URL を設定できる。詳細は [API-SECRET-MESSAGES](../contracts/API-SECRET-MESSAGES.md) を参照。SanpoGuide の現在の実装状況は [SanpoGuide TODO](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/TODO.md) を参照
 - **収益化**: 広告、有料プラン、提携。既存の広告 SDK は、位置情報を外部に送らない方針（API-CHANNEL-PACKAGE F-10）と合わないので使わない方向
-- **公開サーバーの負荷**: Overpass は運営のタイルに移す（[スポットのタイル](#スポットのタイル)）。Open-Meteo の公開サーバーは、アプリ利用者が増える前に利用ポリシーを確認し、自前のサーバーや商用のサービスを検討する
+- **公開サーバーの負荷**: スポットは運営のタイルを先に使い、Overpass は予備（[スポットのタイル](#スポットのタイル)）。Open-Meteo の公開サーバーは、アプリ利用者が増える前に利用ポリシーを確認し、自前のサーバーや商用のサービスを検討する

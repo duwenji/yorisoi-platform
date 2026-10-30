@@ -294,7 +294,7 @@ sequenceDiagram
 1. 契約書の「サーバーの準拠要件」を読む
 2. このファイルから、使う言語のサーバーのひな形を生成してもよい（例: [OpenAPI Generator](https://openapi-generator.tech/)）。生成しなくても、この定義どおりに応答すれば準拠できる
 3. 第 1 版は `x-sanpo-release: 1` の操作をすべて実装し、検出 API の `features` を `["direct", "group", "subscription"]` にする
-4. 準拠テスト（作成予定。任意のサーバーの URL に対して流せるもの）で確認する
+4. 準拠テスト（任意のサーバーの URL に対して流せるもの。まだない。[エコシステム TODO](../work/ecosystem-todo.md#位置に紐づく秘密メッセージ)）で確認する
 
 ### アプリを作る人
 
@@ -305,6 +305,6 @@ sequenceDiagram
 
 ## 定義を変えるとき
 
-1. 先に契約書を直し、承認をとる（変更履歴に追記）
+1. 先に契約書を直し、承認をとる
 2. このファイルを直して `npx @redocly/cli lint sanpo-messages.openapi.yaml` を通す
 3. 項目・エンドポイントの追加は互換性のある変更。既存の項目の意味の変更・削除は `/v2` を検討する（契約書の「互換性方針」）

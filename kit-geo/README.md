@@ -4,7 +4,7 @@
 
 ## スポット検索のキャッシュ
 
-スポットと施設は、OpenStreetMap の公開の Overpass サーバーに問い合わせて探します（`OverpassClient`）。公開のサーバーはよく混んでいて、成功しても 20〜30 秒かかり、3 つのサーバーすべてで失敗することもあります。そこで `SpotRepository` に `SpotCache` を渡すと、近くで取った答えを端末に残して使い回します。OpenStreetMap のデータはゆっくりとしか変わらないので、数日前の答えでも散歩には十分です。
+スポットと施設は、運営のタイル（[`SpotTiles`](#運営のタイルspottiles)）を渡していればそれを先に使い、なければ OpenStreetMap の公開の Overpass サーバーに問い合わせて探します（`OverpassClient`）。公開のサーバーはよく混んでいて、成功しても 20〜30 秒かかり、3 つのサーバーすべてで失敗することもあります。そこで `SpotRepository` に `SpotCache` を渡すと、近くで取った答えを端末に残して使い回します。OpenStreetMap のデータはゆっくりとしか変わらないので、数日前の答えでも散歩には十分です。
 
 ```kotlin
 val spots = SpotRepository(
@@ -96,7 +96,7 @@ val spots = SpotRepository(
 
 ## 運営のタイル（`SpotTiles`）
 
-運営が週に 1 回、OpenStreetMap から作って配るタイル（[API-SPOT-TILES](../docs/contracts/API-SPOT-TILES.md)）を、Overpass より先に使います。`SpotRepository` に `tiles` を渡すと有効になります。渡さなければ今までどおり Overpass だけを使います。
+運営が週に 1 回、OpenStreetMap から作って配るタイル（[API-SPOT-TILES](../docs/contracts/API-SPOT-TILES.md)）を、Overpass より先に使います。`SpotRepository` に `tiles` を渡すと有効になります。渡さなければ Overpass だけを使います。
 
 ```kotlin
 val spots = SpotRepository(
