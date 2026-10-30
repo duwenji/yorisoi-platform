@@ -28,10 +28,19 @@ import io.github.duwenji.yorisoi.kit.geo.Facility
 import io.github.duwenji.yorisoi.kit.geo.FacilityKind
 import io.github.duwenji.yorisoi.kit.geo.LatLon
 import io.github.duwenji.yorisoi.kit.geo.Poi
+import org.osmdroid.config.Configuration
 import org.osmdroid.events.DelayedMapListener
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
 import org.osmdroid.events.ZoomEvent
+import org.osmdroid.tileprovider.MapTileProviderBasic
+import org.osmdroid.tileprovider.modules.IFilesystemCache
+import org.osmdroid.tileprovider.modules.INetworkAvailablityCheck
+import org.osmdroid.tileprovider.modules.MapTileDownloader
+import org.osmdroid.tileprovider.modules.TileDownloader
+import org.osmdroid.tileprovider.tilesource.ITileSource
+import org.osmdroid.tileprovider.tilesource.OnlineTileSourceBase
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
@@ -83,6 +92,8 @@ fun facilityColor(kind: FacilityKind) = when (kind) {
  * back on a walk with no [location].
  * With [up], the map turns so that bearing (degrees clockwise from north) is at the top, and a
  * small arrow shows north; null keeps north up.
+ * [onTilesFailed] is called when OpenStreetMap tiles keep failing to download, so the screen
+ * can switch to other tiles.
  */
 @Composable
 fun SpotMap(
@@ -101,14 +112,20 @@ fun SpotMap(
     recenterRequests: Int = 0,
     fitWalked: Boolean = false,
     up: Float? = null,
+    onTilesFailed: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val density = context.resources.displayMetrics.density
     val meIcon = remember { ContextCompat.getDrawable(context, R.drawable.me_dot) }
     val facilityIcons = remember { FacilityKind.entries.associateWith { ContextCompat.getDrawable(context, facilityDot(it)) } }
     val reportViewport by rememberUpdatedState(onViewportChanged)
+    val tilesFailed by rememberUpdatedState(onTilesFailed)
     val mapView = remember {
-        MapView(context).apply {
+        // MapView settles the tile cache's folder before making its own provider; this one needs it too.
+        Configuration.getInstance().getOsmdroidTileCache(context)
+        val provider = WatchedTileProvider(context.applicationContext)
+        MapView(context, provider).apply {
+            provider.onOsmFailing { post { tilesFailed() } }
             setMultiTouchControls(true)
             controller.setZoom(17.0)
             addMapListener(DelayedMapListener(object : MapListener {
@@ -256,6 +273,27 @@ fun SpotMap(
         if (tiles !is MapTiles.Google) map.overlays += copyright
         if (up != null) map.overlays += north
         map.invalidate()
+    }
+}
+
+/** osmdroid's tile provider, with the downloads of OpenStreetMap tiles watched for a run of failures. */
+private class WatchedTileProvider(context: Context) : MapTileProviderBasic(context) {
+    // Set while the superclass constructor runs; having no initializer, it isn't reset afterwards.
+    private lateinit var downloader: MapTileDownloader
+
+    override fun createDownloaderProvider(check: INetworkAvailablityCheck?, source: ITileSource?): MapTileDownloader =
+        super.createDownloaderProvider(check, source).also { downloader = it }
+
+    /** [report] runs on a download thread. Offline, osmdroid doesn't try, so nothing is counted. */
+    fun onOsmFailing(report: () -> Unit) {
+        val streak = FailureStreak()
+        downloader.setTileDownloader(object : TileDownloader() {
+            override fun downloadTile(index: Long, cache: IFilesystemCache?, source: OnlineTileSourceBase?): Drawable? {
+                val tile = super.downloadTile(index, cache, source)
+                if (source === TileSourceFactory.MAPNIK && streak.record(tile != null)) report()
+                return tile
+            }
+        })
     }
 }
 
