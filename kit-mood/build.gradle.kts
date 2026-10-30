@@ -37,6 +37,8 @@ dependencies {
     api(project(":kit-geo"))
     api(project(":kit-voice"))
     api(project(":core-format"))
+    // With no mood, the yorisoi green.
+    implementation(project(":kit-ui"))
 
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)

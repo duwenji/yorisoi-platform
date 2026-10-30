@@ -18,6 +18,7 @@ rootProject.name = "yorisoi-platform"
 //.
 include(":core-format")
 include(":core-prompt")
+include(":kit-ui")
 include(":kit-voice")
 include(":kit-llm")
 include(":kit-geo")
