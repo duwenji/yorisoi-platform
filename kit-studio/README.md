@@ -2,7 +2,7 @@
 
 スタジオ（[REQ-STUDIO](../docs/requirements/REQ-STUDIO.md)・[ADR-STUDIO](../docs/decisions/ADR-STUDIO.md)・[API-STUDIO](../docs/contracts/API-STUDIO.md)）のアプリ側の部品です（Android）。散歩・走行の間に近くの一言と掲載を取り、語りの合間に読み上げ、一言を声で置きます。SanpoGuide と CycleGuide が使います。
 
-> 状態: 設計の草案（未承認）。承認のあとに実装する。
+> 状態: 設計は承認済み（2026-10-31）。
 
 ## 部品
 
