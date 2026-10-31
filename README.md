@@ -14,9 +14,10 @@
 | `kit-channel` | JVM | アプリの中のチャンネル（利用者の変更を重ねた設定値とスロット）、チャンネルの一覧と使っているチャンネル、組み込みのチャンネルの読み込み、第三者のチャンネルの素材。第三者のチャンネルの取り込み（`remote`: `ChannelSync`・`ThirdPartyChannels`）、前もって取る素材の計画と素材提供者（`material`: `MaterialPlan`・`SelectorPlan`・`Producer`・`Producers`・`CueFinder`・`CuePresenter`・`Grounding`・`ResourceProducer`・`SelectorProducer`。題材の `Subject`・素材の `Content`・アプリの文脈の `Situation` はアプリが足せる）、チャンネルの通報（`report`）。使う側で org.json が要る（`OkHttpProviderHttp`・`TinkEd25519` を使うなら OkHttp・Tink も） |
 | `kit-ui` | Android | どのアプリにも共通の見た目。よりそいの緑の配色（`YorisoiTheme`）、画面の上部のバー（`ScreenBar`）、ホーム画面のアイコンの緑の背景（`yorisoi_launcher_background`） |
 | `kit-voice` | Android | 読み上げ（オーディオフォーカス）と背景音の合成 |
-| `kit-llm` | Android | AI の接続（Claude・OpenAI 互換・運営の AI の中継）と鍵の暗号化、自分のキーの 1 日の呼び出しの数、使わない返事（連絡先を含む）の判定 |
+| `kit-llm` | Android | AI の接続（Claude・OpenAI 互換・運営の AI の中継。中継のセッションのトークンはほかの部品にも貸せる）と鍵の暗号化、自分のキーの 1 日の呼び出しの数、使わない返事（連絡先を含む）の判定 |
 | [`kit-geo`](kit-geo/README.md) | Android | スポット・ルート・写真・天気・地図。運営のスポットのタイル、スポット検索のキャッシュ、よく通る道 |
 | `kit-mood` | Android | 雰囲気（時間帯・季節・空模様・場所）と、配色・絵・背景音。雰囲気がないときの配色は `kit-ui` の緑 |
+| [`kit-studio`](kit-studio/README.md) | Android | スタジオのアプリ側。近くの一言と掲載を取り、語りの合間に読み上げる（`StudioFeed`）、API-STUDIO（`StudioClient`、トークンは運営の AI の中継から）、掲載の音声（`ClipCache`・`ClipPlayer`）、一言を声で置く（`NoteRecognizer`）、設定（`StudioSettingsStore`） |
 
 コアは Android に依存しません。管理システムがアプリと同じコードで確かめるためです。
 

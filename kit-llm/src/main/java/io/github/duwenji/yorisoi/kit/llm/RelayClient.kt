@@ -89,6 +89,15 @@ class RelayClient(
         parseQuota(authorized { token -> call("GET", "/v1/quota", null, token) }).also { _quota.value = it }
     }
 
+    /**
+     * A token of this install's session, for another service that accepts the relay's sessions
+     * (the studio, platform API-STUDIO ST-2). Opens a session when there is none.
+     */
+    suspend fun token(): String = withContext(Dispatchers.IO) { session() }
+
+    /** Forgets the session after another service said its token is no longer known. */
+    fun forgetToken() = store.clearSession()
+
     /** Runs [block] with a session, opening a new one once if the relay no longer knows the token. */
     private suspend fun authorized(block: (String) -> JSONObject): JSONObject {
         val token = session()
