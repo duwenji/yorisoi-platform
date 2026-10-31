@@ -3,7 +3,7 @@
 | 項目 | 内容 |
 |---|---|
 | 版 | 1 |
-| 状態 | 草案（未承認） |
+| 状態 | 承認済み |
 | 根拠 | [ADR-STUDIO](../decisions/ADR-STUDIO.md) S-3〜S-5、[REQ-STUDIO](../requirements/REQ-STUDIO.md) D-2〜D-6・D-11・D-24、[API-STUDIO](../contracts/API-STUDIO.md) |
 | 読む人 | 一言を置くアプリ利用者（アプリが初めて一言を置く前に見せる） |
 | 運営者 | duwenji |

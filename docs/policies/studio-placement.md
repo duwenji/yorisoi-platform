@@ -3,7 +3,7 @@
 | 項目 | 内容 |
 |---|---|
 | 版 | 1 |
-| 状態 | 草案（未承認） |
+| 状態 | 承認済み |
 | 根拠 | [ADR-STUDIO](../decisions/ADR-STUDIO.md) S-2・S-6、[REQ-STUDIO](../requirements/REQ-STUDIO.md) D-14〜D-19・F-13・F-14・F-19・F-24、[API-STUDIO](../contracts/API-STUDIO.md) |
 | 読む人 | 掲載を出したいチャンネル提供者・素材提供者（承認の申し込みの前に）と、承認し事後に対応する運営 |
 | 問い合わせ先 | duwenji@gmail.com |
