@@ -15,7 +15,7 @@
 |---|---|---|
 | **yorisoi-platform** | 付き添いアプリ間で共有するライブラリ、形式、語彙を提供する | このリポジトリの [共通文書](../README.md) と実装 |
 | **アプリ** | 共通基盤を使い、対象の過ごし方に合った体験を提供する | 各アプリのリポジトリ（[yorisoi-sanpoguide](https://github.com/duwenji/yorisoi-sanpoguide)・[yorisoi-cycleguide](https://github.com/duwenji/yorisoi-cycleguide)）。SanpoGuide は[アプリ別手引き](../apps/sanpoguide/manual/README.md)も参照 |
-| **yorisoi-console** | チャンネルや素材集の申請・審査・配信を扱う管理システム。運営の AI の中継とスポットのタイルの配信も置く | [yorisoi-console の文書](https://github.com/duwenji/yorisoi-console/tree/main/docs) |
+| **yorisoi-console** | チャンネルや素材集の申請・審査・配信を扱う管理システム。運営の AI の中継、スポットのタイルの配信、スタジオ（場所に残る一言と提供者の掲載）も置く | [yorisoi-console の文書](https://github.com/duwenji/yorisoi-console/tree/main/docs) |
 | **yorisoi-tutorial** | 仕組みを学ぶための説明を提供する。規範や契約の正本にはしない | [yorisoi-tutorial](https://github.com/duwenji/yorisoi-tutorial) |
 
 ## 文書の正本と置き場所
@@ -26,7 +26,7 @@
 |---|---|---|
 | 意思決定記録（ADR） | エコシステムの方針と設計判断 | [決定記録一覧](../decisions/README.md) |
 | 技術契約（API） | 形式、境界、相互運用上の振る舞い | [技術契約一覧](../contracts/README.md) |
-| ポリシー | 合意した方針に基づく審査・運用基準 | [チャンネル審査基準](../policies/channel-review.md) |
+| ポリシー | 合意した方針に基づく審査・運用基準 | [チャンネル審査基準](../policies/channel-review.md)、[一言の利用規約](../policies/studio-note-terms.md)、[掲載の決まり](../policies/studio-placement.md) |
 | 用語・関係者 | エコシステムの共通概念と呼び方 | [関係者と用語](roles-and-vocabulary.md) |
 | アプリ別手順 | 個別アプリの操作・試用・運用 | [SanpoGuide 手引き](../apps/sanpoguide/manual/README.md) |
 | 未完了の作業 | エコシステムに関する未完了事項と検討項目 | [エコシステム TODO](../work/ecosystem-todo.md) |
