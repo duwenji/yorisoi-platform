@@ -12,7 +12,7 @@
 | `ADR-AI-ROLES` | ADR-004 | [生成 AI の役割と責任](ADR-AI-ROLES.md) | 根拠・演出・実演・枠・考査、費用、審査 |
 | `ADR-AI-RELAY` | — | [運営による AI の中継](ADR-AI-RELAY.md) | 運営の AI と自分のキー、無料の上限、Bedrock |
 | `ADR-SPOT-TILES` | — | [スポットのタイル](ADR-SPOT-TILES.md) | スポットの取り先、タイルの作り方と配り方、Overpass は予備 |
-| `ADR-STUDIO` | — | [スタジオの一言と掲載](ADR-STUDIO.md)（草案） | 人の発言の層、置いた人・掲載者の責任、識別とブロック、宣伝との関係、契約 |
+| `ADR-STUDIO` | — | [スタジオの一言と掲載](ADR-STUDIO.md) | 人の発言の層、置いた人・掲載者の責任、識別とブロック、宣伝との関係、契約 |
 
 ## 文書の呼び方
 
