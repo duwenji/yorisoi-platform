@@ -36,7 +36,7 @@
 - 一言と掲載の機能・上限・受入条件（REQ-STUDIO）
 - 契約の形（API-STUDIO で決める）
 - 掲載の有料化（REQ-STUDIO U-9）
-- 法令の確かめ（REQ-STUDIO U-1）
+- 法令の確かめ（REQ-STUDIO の「法令」）
 
 ## 対応元ID（トレーサビリティ）
 
