@@ -12,6 +12,7 @@
 | `API-MATERIAL-PRODUCER` | [素材提供者インタフェース](API-MATERIAL-PRODUCER.md) | 素材提供者と、素材を利用するチャンネル・アプリ | `API-004` |
 | `API-AI-RELAY` | [運営の AI 中継](API-AI-RELAY.md) | アプリと運営の AI の中継 | — |
 | `API-SPOT-TILES` | [スポットのタイル](API-SPOT-TILES.md) | アプリと運営のスポットのタイルの配信 | — |
+| `API-STUDIO` | [スタジオ](API-STUDIO.md)（草案） | アプリと、一言と掲載の置き場と配信のサーバー | — |
 
 各契約はエコシステム共通の境界を定めます。画面や運用など特定アプリに限る説明は、契約本文でその範囲を示します。
 
