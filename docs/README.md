@@ -9,6 +9,7 @@
 | yorisoi とリポジトリの役割を知る | [エコシステム概要](overview/yorisoi-ecosystem.md) |
 | 関係者の呼び方、役割、共通用語を確認する | [関係者と共通用語](overview/roles-and-vocabulary.md) |
 | 関係者の課題と未承認の対応案を確認する | [関係者の課題と対応案](overview/stakeholder-needs.md) |
+| だれに何を提供し、費用をだれが持つかの検討を読む | [提供価値と事業の検討](overview/value-proposition.md) |
 | 設計方針と決定の根拠を読む | [ADR 一覧](decisions/README.md) |
 | 複数のアプリにまたがる機能の要件を読む | [よく通る道](requirements/REQ-FREQUENT-WAYS.md) |
 | システム境界の形式・動作を確認する | [API 契約一覧](contracts/README.md) |
