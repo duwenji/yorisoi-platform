@@ -28,6 +28,7 @@
 | 枠の直し | 共通の指示（`shared/guard`）や出力の確認をすり抜けた AI の発言は、アプリで直す（ADR-AI-ROLES H-7） |
 | アプリの公開と更新 | Google Play、署名の鍵、申告、プライバシーポリシー |
 | リストの受け入れ | アプリに内蔵するリストと、そのリストIDの正しさ |
+| スタジオの対応 | 掲載を出す提供者の承認と、通報された一言・掲載への対応は管理システムで行う（console の[運営ガイド 13 章](https://github.com/duwenji/yorisoi-console/blob/main/docs/guide/operator.md#13-スタジオ)）。アプリの通報は運営の画面の列に入り、メールでは届かない |
 
 ## 2. 定期の確認
 
@@ -162,4 +163,4 @@
 | [privacy-policy.md](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/privacy-policy.md) | 外部サービスへの送信、位置情報、端末に保存する情報 |
 | [play-console.md](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/play-console.md) | データセーフティ、フォアグラウンドサービスの申告。マージ後に Play Console の答えも直す |
 | [README](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/README.md) | 「散歩の記録の扱い」「外部サービス」 |
-| [散策者の手引き 11 章](walker.md#11-送る情報と費用) | 送る情報の表 |
+| [散策者の手引き 12 章](walker.md#12-送る情報と費用) | 送る情報の表 |
