@@ -18,6 +18,7 @@ import io.github.duwenji.yorisoi.core.format.PresentAs
 import io.github.duwenji.yorisoi.core.format.RejectCode
 import io.github.duwenji.yorisoi.core.format.StationCheck
 import io.github.duwenji.yorisoi.core.format.StationValidator
+import io.github.duwenji.yorisoi.core.format.Trigger
 import io.github.duwenji.yorisoi.kit.channel.remote.TestPublisher
 import io.github.duwenji.yorisoi.kit.channel.remote.TinkEd25519
 import io.github.duwenji.yorisoi.kit.channel.remote.sha256
@@ -245,6 +246,51 @@ class CuesTest {
         val fire = CueFinder(Memory()).point(station.id, station.materials!!.media, 35.3263, 139.5566, emptySet(), day1)!!
         assertEquals("本宮は石段の上にあります。", text(present(station, fire).single().items.single()))
         assertTrue(SubjectMatch.distance(35.3263, 139.5566, 35.3262, 139.5566) < 50)
+    }
+
+    /** Stands in for builtin:studio: answers with the categories and prelude it was asked for. */
+    private class Asked : Producer {
+        override val descriptor = BuiltInProducers.STUDIO
+        override suspend fun produce(request: MaterialRequest): MaterialResult = MaterialResult.Ready(
+            Material(MaterialType.TEXT, Content.Text("${request.params.prelude?.spoken.orEmpty()}${request.params.categories}"), descriptor.id),
+        )
+    }
+
+    @Test
+    fun `a channel without material still shows the shorthand cues between the companion's lines`() {
+        val standard = TestChannels.load().first { it.id == "standard" }
+        assertNull(standard.materials)
+        val idle = standard.cueMedia.cues.filter { it.trigger == Trigger.Event(CueEvent.IDLE) }
+        assertEquals(listOf("shorthand-studio", "shorthand-note"), idle.map { it.id })
+
+        // Idle cues aren't counted by repeat: they fire every time there's room.
+        val finder = CueFinder(Memory()) { tokyo }
+        val shown = mutableSetOf<String>()
+        repeat(3) {
+            val fires = finder.events(standard.id, standard.cueMedia, CueEvent.IDLE, Subject.None, shown, day1)
+            assertEquals(2, fires.size)
+            fires.forEach { finder.record(it, shown, day1) }
+        }
+        val studioFire = finder.events(standard.id, standard.cueMedia, CueEvent.IDLE, Subject.None, shown, day1)[0]
+        val shownNow = runBlocking {
+            CuePresenter(Producers(listOf(Asked())), stage = 1).present(studioFire, standard, MaterialContext(standard))
+        }
+        assertEquals("null", text(shownNow.single().items.single()))
+    }
+
+    @Test
+    fun `a channel naming a producer or turning it off gets no shorthand for it, and its params reach the producer`() {
+        val station = station(JSONArray().put(cue(
+            "temple-news", JSONObject().put("type", "event").put("event", "idle"),
+            speak("builtin:studio").put("params", JSONObject().put("categories", JSONArray().put("shrine-temple")).put("prelude", "by-the-way")),
+        )))
+        assertEquals(listOf("temple-news", "shorthand-note"), station.cueMedia.cues.map { it.id })
+        val fire = CueFinder(Memory()) { tokyo }.events(station.id, station.cueMedia, CueEvent.IDLE, Subject.None, emptySet(), day1)[0]
+        val shown = runBlocking { CuePresenter(Producers(listOf(Asked())), stage = 1).present(fire, station, MaterialContext(station)) }
+        assertEquals("ところで、[SHRINE_TEMPLE]", text(shown.single().items.single()))
+
+        val off = io.github.duwenji.yorisoi.core.format.StationMedia.NONE.copy(shorthandsOff = setOf("builtin:note"))
+        assertEquals(listOf("shorthand-studio"), Shorthands.expand(off).cues.map { it.id })
     }
 }
 

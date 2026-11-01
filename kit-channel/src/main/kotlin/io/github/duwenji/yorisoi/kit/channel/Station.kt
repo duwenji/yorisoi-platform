@@ -5,7 +5,9 @@ import io.github.duwenji.yorisoi.core.format.Slot
 import io.github.duwenji.yorisoi.core.format.SoundChoice
 import io.github.duwenji.yorisoi.core.format.SpotKind
 import io.github.duwenji.yorisoi.core.format.StationManifest
+import io.github.duwenji.yorisoi.core.format.StationMedia
 import io.github.duwenji.yorisoi.core.format.StationPackage
+import io.github.duwenji.yorisoi.kit.channel.material.Shorthands
 import io.github.duwenji.yorisoi.core.format.TalkEventKind
 import io.github.duwenji.yorisoi.core.format.TalkLevel
 
@@ -49,6 +51,9 @@ class Station(
     val materials: ChannelMaterials? = null,
 ) {
     val manifest: StationManifest get() = pkg.manifest
+
+    /** The channel's cues with the built-in producers' shorthand cues added (API-004「省略形の展開」). */
+    val cueMedia: StationMedia by lazy { Shorthands.expand(materials?.media ?: pkg.media) }
     val name: String get() = manifest.name
 
     /** The name as screens show it: a channel on trial says so (API-CHANNEL-LIST 試用チケット). */

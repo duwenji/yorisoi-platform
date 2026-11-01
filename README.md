@@ -17,7 +17,7 @@
 | `kit-llm` | Android | AI の接続（Claude・OpenAI 互換・運営の AI の中継。中継のセッションのトークンはほかの部品にも貸せる）と鍵の暗号化、自分のキーの 1 日の呼び出しの数、使わない返事（連絡先を含む）の判定 |
 | [`kit-geo`](kit-geo/README.md) | Android | スポット・ルート・写真・天気・地図。運営のスポットのタイル、スポット検索のキャッシュ、よく通る道 |
 | `kit-mood` | Android | 雰囲気（時間帯・季節・空模様・場所）と、配色・絵・背景音。雰囲気がないときの配色は `kit-ui` の緑 |
-| [`kit-studio`](kit-studio/README.md) | Android | 区画ごとに運営から取る素材（スタジオ、一言）のアプリ側。近くのスタジオと一言を取り、語りの合間に読み上げる（`StudioFeed`）、API-LOCAL-MATERIALS（`StudioClient`、トークンは運営の AI の中継から）、スタジオの音声（`ClipCache`・`ClipPlayer`）、一言を声で置く（`NoteRecognizer`）、設定（`StudioSettingsStore`） |
+| [`kit-local-materials`](kit-local-materials/README.md) | Android | 区画ごとに運営から取る素材（スタジオ、一言）のアプリ側。組み込みの素材提供者 `builtin:studio`・`builtin:note`。近くのスタジオと一言を取って種類ごとに選ぶ（`LocalFeed`、`StudioProducer`・`NoteProducer`）、API-LOCAL-MATERIALS（`LocalClient`、トークンは運営の AI の中継から）、スタジオの音声（`ClipCache`・`ClipPlayer`）、一言を声で置く（`NoteRecognizer`）、設定（`LocalSettingsStore`） |
 
 コアは Android に依存しません。管理システムがアプリと同じコードで確かめるためです。
 

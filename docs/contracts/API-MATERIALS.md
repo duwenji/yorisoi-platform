@@ -172,8 +172,8 @@ interface Producer {
 | `builtin:commons-photo` | `SpotPhotos` | スポットの写真（`image`、幅 800px） | `spot` | `onDemand` / `subject` / false | なし |
 | `builtin:ambient` | `Soundscape`・`AmbientPlayer` | 合成の背景音（`audio`、ループ） | `none` | `local` / `none` / false | `sound`（`auto`・`rain`・`waves`・`wind`・`birds`・`insects`・`temple`） |
 | `builtin:mood-scene` | `MoodScene` | 雰囲気の絵（`image`、`content=render`） | `none` | `local` / `none` / false | なし |
-| `builtin:studio` | kit-studio の `StudioFeed` | スタジオ（`text`。音声があれば読み上げの後に続けて流す） | `event`（`idle`）・`spot`・`point` | `area` / `area` / false、`verbatim=true` | `categories`（[スタジオの分類](#スタジオの分類)を 1〜9 個。省略はすべて）、`prelude`（[前置き](#前置き)） |
-| `builtin:note` | kit-studio の `StudioFeed` | 一言（`text`） | `event`（`idle`）・`spot`・`point` | `area` / `area` / false、`verbatim=true` | `prelude`（[前置き](#前置き)） |
+| `builtin:studio` | kit-local-materials の `StudioProducer` | スタジオ（`text`。音声があれば読み上げの後に続けて流す） | `event`（`idle`）・`spot`・`point` | `area` / `area` / false、`verbatim=true` | `categories`（[スタジオの分類](#スタジオの分類)を 1〜9 個。省略はすべて）、`prelude`（[前置き](#前置き)） |
+| `builtin:note` | kit-local-materials の `NoteProducer` | 一言（`text`） | `event`（`idle`）・`spot`・`point` | `area` / `area` / false、`verbatim=true` | `prelude`（[前置き](#前置き)） |
 
 - 組み込みの素材提供者を足すのはアプリの更新だけ（ADR-MATERIALS D-6）。足したら本表に加え、本書の版を上げる
 - `builtin:studio`・`builtin:note` は、チャンネル提供者が 1 件ずつではなく条件で選ぶ素材（ADR-MATERIALS D-50）。`spot`・`point` のきっかけでは、その題材の区画にあるものから選び、AI の解説の後に出す。`idle` では、端末がいる区画とその周りから選ぶ。どれを選ぶか（近さ・期限・いいね）は REQ-STUDIO F-9・REQ-NOTES F-9 のとおり

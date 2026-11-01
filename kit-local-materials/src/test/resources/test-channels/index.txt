@@ -1,0 +1,2 @@
+standard/channel.json
+standard/prompts/guide/persona.md
