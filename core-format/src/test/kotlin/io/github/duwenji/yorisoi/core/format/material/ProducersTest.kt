@@ -34,4 +34,22 @@ class ProducersTest {
         assertNotNull(ProducerPolicy.violation(collection.copy(generated = true)))
         assertNotNull(ProducerPolicy.violation(collection.copy(trust = Trust.TRIAL, fetch = Fetch.ON_DEMAND)))
     }
+
+    @Test
+    fun areaFetchingAndPeoplesOwnWordsAreForBuiltInProducersOnly() {
+        // P-7: fetching by area, and telling the cell, are left to the app's own code.
+        val collection = ProducerDescriptor(
+            "collection:x", 1, setOf(MaterialType.TEXT), setOf(SubjectKind.SPOT), Trust.REVIEWED, Fetch.PREFETCH, Exposure.NONE, generated = false,
+        )
+        assertNotNull(ProducerPolicy.violation(collection.copy(fetch = Fetch.AREA)))
+        assertNotNull(ProducerPolicy.violation(collection.copy(exposure = Exposure.AREA)))
+        // P-8: people's own words are never generated.
+        assertNotNull(ProducerPolicy.violation(BuiltInProducers.STUDIO.copy(generated = true)))
+        listOf(BuiltInProducers.STUDIO, BuiltInProducers.NOTE).forEach {
+            assertTrue(it.id, it.verbatim)
+            assertEquals(it.id, Fetch.AREA, it.fetch)
+            assertEquals(it.id, Exposure.AREA, it.exposure)
+        }
+        assertEquals(setOf("builtin:studio", "builtin:note"), BuiltInProducers.withShorthand.map { it.id }.toSet())
+    }
 }

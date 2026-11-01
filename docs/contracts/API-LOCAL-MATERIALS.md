@@ -46,13 +46,13 @@
 | 対応元ID | 内容 | 対応状況 |
 |---|---|---|
 | ADR-MATERIALS D-42・D-51 | インストール ID と API-AI-RELAY のセッション | [認証](#認証) |
-| ADR-MATERIALS D-43 | 一覧に置いた人の値を入れない。ブロックと自分の一言はサーバーで判定 | [GET /v1/studio/cells](#get-v1studiocells)、[ブロック](#post-v1studioblocks) |
-| REQ-NOTES D-3〜D-6、F-1〜F-4 | 一言の長さ・区画・期限・置く前の確認・上限 | [POST /v1/studio/notes](#post-v1studionotes) |
-| REQ-STUDIO・REQ-NOTES D-7・D-8・N-6、REQ-STUDIO D-22 | 区画ごとの取得、5 分おき、スタジオの音声を一緒に取る | [GET /v1/studio/cells](#get-v1studiocells) |
-| REQ-STUDIO・REQ-NOTES D-9、REQ-NOTES D-15、REQ-STUDIO D-23 | 聞いた数・いいねの概数 | [概数](#概数)、[POST /v1/studio/reactions](#post-v1studioreactions) |
-| REQ-NOTES D-24・F-22・F-23 | 利用規約の同意、ブロック | `termsVersion`、[ブロック](#post-v1studioblocks) |
-| REQ-NOTES F-5 | 自分の一言の一覧と、期限の前に消す | [GET /v1/studio/notes/mine](#get-v1studionotesmine)、[DELETE](#delete-v1studionotesid) |
-| REQ-STUDIO・REQ-NOTES F-12・F-13 | 通報、3 台以上で届けない | [POST /v1/studio/reports](#post-v1studioreports) |
+| ADR-MATERIALS D-43 | 一覧に置いた人の値を入れない。ブロックと自分の一言はサーバーで判定 | [GET /v1/local/cells](#get-v1localcells)、[ブロック](#post-v1localblocks) |
+| REQ-NOTES D-3〜D-6、F-1〜F-4 | 一言の長さ・区画・期限・置く前の確認・上限 | [POST /v1/local/notes](#post-v1localnotes) |
+| REQ-STUDIO・REQ-NOTES D-7・D-8・N-6、REQ-STUDIO D-22 | 区画ごとの取得、5 分おき、スタジオの音声を一緒に取る | [GET /v1/local/cells](#get-v1localcells) |
+| REQ-STUDIO・REQ-NOTES D-9、REQ-NOTES D-15、REQ-STUDIO D-23 | 聞いた数・いいねの概数 | [概数](#概数)、[POST /v1/local/reactions](#post-v1localreactions) |
+| REQ-NOTES D-24・F-22・F-23 | 利用規約の同意、ブロック | `termsVersion`、[ブロック](#post-v1localblocks) |
+| REQ-NOTES F-5 | 自分の一言の一覧と、期限の前に消す | [GET /v1/local/notes/mine](#get-v1localnotesmine)、[DELETE](#delete-v1localnotesid) |
+| REQ-STUDIO・REQ-NOTES F-12・F-13 | 通報、3 台以上で届けない | [POST /v1/local/reports](#post-v1localreports) |
 | REQ-STUDIO・REQ-NOTES F-14・F-15 | 締め出し、置けない区画 | エラー `author_banned`・`area_closed` |
 | REQ-STUDIO・REQ-NOTES N-1・N-2 | 送るもの・残すもの | [サーバーが残すもの](#サーバーが残すもの) |
 | REQ-NOTES N-5 | 中継が予算で止まっている間は一言を置けない | エラー `relay_paused` |
@@ -79,20 +79,20 @@ sequenceDiagram
     A->>R: セッション（端末の確認）
     R-->>A: トークン
     loop 散歩・走行の間（区画を移ったときと 5 分おき）
-        A->>S: GET /v1/studio/cells（geohash6 を 9 つ）
+        A->>S: GET /v1/local/cells（geohash6 を 9 つ）
         S-->>A: 一言・スタジオの一覧（置いた人の値なし）
         A->>C: スタジオの音声
         A->>A: 近づいたかを判定して読み上げる
     end
     opt 一言を置く
-        A->>S: POST /v1/studio/notes（文・geohash7・期限）
+        A->>S: POST /v1/local/notes（文・geohash7・期限）
         S->>S: 置く前の確認（運営の AI）
         S-->>A: 置いた／置けなかった
     end
     opt 通報（すぐ）
-        A->>S: POST /v1/studio/reports
+        A->>S: POST /v1/local/reports
     end
-    A->>S: 散歩・走行の終わりに POST /v1/studio/reactions（聞いた・開いた・いいね）
+    A->>S: 散歩・走行の終わりに POST /v1/local/reactions（聞いた・開いた・いいね）
 ```
 
 ### 一言の項目
@@ -107,8 +107,6 @@ sequenceDiagram
 | `mine` | boolean | この端末が置いた一言なら `true` |
 
 ### スタジオの項目
-
-通信の上では、スタジオの種類を `placement`、一覧を `placements` と書く。
 
 | 項目 | 型 | 説明 |
 |---|---|---|
@@ -144,28 +142,28 @@ sequenceDiagram
 
 | メソッド | パス | 認証 | 用途 |
 |---|---|---|---|
-| GET | `/v1/studio/cells` | トークン | 区画の素材の一覧を取る |
-| POST | `/v1/studio/notes` | トークン | 一言を置く |
-| GET | `/v1/studio/notes/mine` | トークン | 自分の一言の一覧を見る |
-| DELETE | `/v1/studio/notes/{id}` | トークン | 自分の一言を消す |
-| POST | `/v1/studio/reactions` | トークン | 聞いた・開いた・いいねをまとめて送る |
-| POST | `/v1/studio/reports` | トークン | 通報する |
-| POST | `/v1/studio/blocks` | トークン | 一言の置いた人をブロックする |
-| GET | `/v1/studio/blocks` | トークン | ブロックの一覧を見る |
-| DELETE | `/v1/studio/blocks/{id}` | トークン | ブロックを解く |
-| GET | `/v1/studio/terms` | なし | 一言の利用規約の版と URL を知る |
+| GET | `/v1/local/cells` | トークン | 区画の素材の一覧を取る |
+| POST | `/v1/local/notes` | トークン | 一言を置く |
+| GET | `/v1/local/notes/mine` | トークン | 自分の一言の一覧を見る |
+| DELETE | `/v1/local/notes/{id}` | トークン | 自分の一言を消す |
+| POST | `/v1/local/reactions` | トークン | 聞いた・開いた・いいねをまとめて送る |
+| POST | `/v1/local/reports` | トークン | 通報する |
+| POST | `/v1/local/blocks` | トークン | 一言の置いた人をブロックする |
+| GET | `/v1/local/blocks` | トークン | ブロックの一覧を見る |
+| DELETE | `/v1/local/blocks/{id}` | トークン | ブロックを解く |
+| GET | `/v1/local/terms` | なし | 一言の利用規約の版と URL を知る |
 
 本文はすべて `application/json`（UTF-8）。スタジオの音声は、一覧の `audio.url` から認証なしで取る。
 
 ## リクエスト・レスポンス仕様
 
-### GET /v1/studio/cells
+### GET /v1/local/cells
 
 ```
-GET /v1/studio/cells?cells=xn76ur,xn76us,…（geohash6 を 1〜9 個、カンマ区切り）&kinds=note,placement
+GET /v1/local/cells?cells=xn76ur,xn76us,…（geohash6 を 1〜9 個、カンマ区切り）&kinds=note,studio
 ```
 
-- `kinds` は、聞く設定（REQ-STUDIO・REQ-NOTES D-12）で選んだものと、今のチャンネルが出すもの（D-25）だけを指定する。`note`・`placement` のどちらか、または両方
+- `kinds` は、聞く設定（REQ-STUDIO・REQ-NOTES D-12）で選んだものと、今のチャンネルが出すもの（D-25）だけを指定する。`note`・`studio` のどちらか、または両方
 - 区画を移ったとき以外は、5 分に 1 回まで（N-6）
 
 ```json
@@ -174,9 +172,9 @@ GET /v1/studio/cells?cells=xn76ur,xn76us,…（geohash6 を 1〜9 個、カン�
     { "id": "01JBX…", "text": "この坂の上から富士山が見えた", "cell": "xn76ury",
       "spotName": "富士見坂", "expiresAt": "2026-11-01T03:00:00Z", "mine": false }
   ],
-  "placements": [
+  "studios": [
     { "id": "01JBY…", "providerName": "谷中銀座商店会", "category": "event", "text": "今日 15 時から、夕やけだんだんで豆まきをします。",
-      "audio": { "url": "https://…/placements/01JBY…/audio.m4a", "durationSec": 24, "bytes": 196000,
+      "audio": { "url": "https://…/studios/01JBY…/audio.m4a", "durationSec": 24, "bytes": 196000,
                  "contentType": "audio/mp4", "sha256": "…" },
       "cells": ["xn77h2"], "startsAt": "2026-10-31T00:00:00Z", "endsAt": "2026-11-02T15:00:00Z",
       "hours": { "from": "10:00", "to": "18:00" } }
@@ -191,7 +189,7 @@ GET /v1/studio/cells?cells=xn76ur,xn76us,…（geohash6 を 1〜9 個、カン�
 - 一覧の順番は、上の選び方の順。アプリはこれを読み上げの優先の参考にしてよい
 - 音声を合わせて 3 MB を超えないよう、サーバーはスタジオの件数を絞る
 
-### POST /v1/studio/notes
+### POST /v1/local/notes
 
 ```json
 { "text": "この坂の上から富士山が見えた", "cell": "xn76ury", "spotName": "富士見坂",
@@ -199,7 +197,7 @@ GET /v1/studio/cells?cells=xn76ur,xn76us,…（geohash6 を 1〜9 個、カン�
 ```
 
 - `ttl` は `1h`・`24h`・`7d`
-- `termsVersion` は、アプリ利用者が同意した一言の利用規約の版。今の版（`GET /v1/studio/terms`）より古いと `terms_not_accepted`
+- `termsVersion` は、アプリ利用者が同意した一言の利用規約の版。今の版（`GET /v1/local/terms`）より古いと `terms_not_accepted`
 - サーバーは、長さ・形式を確かめたあと、運営の AI で置く前の確認（REQ-NOTES D-6）をして、結果を返す。確認は 5 秒以内（N-4）
 
 ```json
@@ -208,7 +206,7 @@ GET /v1/studio/cells?cells=xn76ur,xn76us,…（geohash6 を 1〜9 個、カン�
 
 確認に当たったときは `422 note_rejected`。理由の種類は返さない（どこを直せば通るかを探れないようにする）。
 
-### GET /v1/studio/notes/mine
+### GET /v1/local/notes/mine
 
 ```json
 {
@@ -224,16 +222,16 @@ GET /v1/studio/cells?cells=xn76ur,xn76us,…（geohash6 を 1〜9 個、カン�
 - `state` は `active`（届いている）、`hidden`（通報で、運営が確かめるまで届けていない）、`removed`（運営が消した）。期限が来た一言は返さない
 - `heard`・`likes` は [概数](#概数)
 
-### DELETE /v1/studio/notes/{id}
+### DELETE /v1/local/notes/{id}
 
 自分の一言を消す。`204`。自分のものでない・期限が来た・ない一言は `404 not_found`。消した一言は、すぐに一覧から外れる。音声はないので、ほかに消すものはない。
 
-### POST /v1/studio/reactions
+### POST /v1/local/reactions
 
 ```json
 {
-  "heard":  [ { "type": "note", "id": "01JBX…" }, { "type": "placement", "id": "01JBY…" } ],
-  "opened": [ { "type": "placement", "id": "01JBY…" } ],
+  "heard":  [ { "type": "note", "id": "01JBX…" }, { "type": "studio", "id": "01JBY…" } ],
+  "opened": [ { "type": "studio", "id": "01JBY…" } ],
   "liked":  [ "01JBX…" ]
 }
 ```
@@ -244,7 +242,7 @@ GET /v1/studio/cells?cells=xn76ur,xn76us,…（geohash6 を 1〜9 個、カン�
 - 期限が来た・ない ID は、エラーにせず無視する
 - 応答は `202`（本文なし）。数は日ごとの合計にだけ足し、だれが送ったかは残さない
 
-### POST /v1/studio/reports
+### POST /v1/local/reports
 
 ```json
 { "type": "note", "id": "01JBX…", "reason": "danger" }
@@ -263,7 +261,7 @@ GET /v1/studio/cells?cells=xn76ur,xn76us,…（geohash6 を 1〜9 個、カン�
 - 一言は、3 台以上から通報されると、運営が確かめるまで届けない（F-13）。スタジオは、3 台以上から、または `danger`・`rights` で通報されると、運営が確かめるまで届けない
 - 通報は位置を持たない。本文には、一言・スタジオの ID と `reason` しか入れない
 
-### POST /v1/studio/blocks
+### POST /v1/local/blocks
 
 ```json
 { "noteId": "01JBX…" }
@@ -277,7 +275,7 @@ GET /v1/studio/cells?cells=xn76ur,xn76us,…（geohash6 を 1〜9 個、カン�
 - 一言の期限が来たあとでもブロックできるよう、アプリが聞いた一言の ID は、その散歩・走行の画面に出ている間、使える（サーバーは、期限が来てから 7 日まで置いた人の HMAC を引ける）
 - 自分の一言はブロックできない（`400 invalid_request`）
 
-### GET /v1/studio/blocks
+### GET /v1/local/blocks
 
 ```json
 { "blocks": [ { "id": "blk_01JBZ…", "createdAt": "2026-10-31T05:10:00Z", "expiresAt": "2027-10-31T05:10:00Z" } ] }
@@ -285,14 +283,14 @@ GET /v1/studio/cells?cells=xn76ur,xn76us,…（geohash6 を 1〜9 個、カン�
 
 ブロックした人がだれかは返さない。アプリは、ブロックしたときの一言の文を端末に覚えておき、設定の一覧で見せてよい。
 
-### DELETE /v1/studio/blocks/{id}
+### DELETE /v1/local/blocks/{id}
 
 ブロックを解く。`204`。ないものは `404 not_found`。
 
-### GET /v1/studio/terms
+### GET /v1/local/terms
 
 ```json
-{ "version": 1, "url": "https://…/studio-terms/1.html", "updatedAt": "2026-11-15T00:00:00Z" }
+{ "version": 1, "url": "https://…/notes-terms/1.html", "updatedAt": "2026-11-15T00:00:00Z" }
 ```
 
 アプリは、初めて一言を置く前と、版が上がったときに利用規約を見せ、同意を得てから `termsVersion` に入れる。
@@ -315,7 +313,7 @@ GET /v1/studio/cells?cells=xn76ur,xn76us,…（geohash6 を 1〜9 個、カン�
 | 429 | `too_many_requests` | 取得が 5 分に 1 回を超えた、送信元ごとの回数の制限 | `Retry-After` まで待つ |
 | 502 | `upstream_error` | 一言の置く前の確認で、運営の AI の呼び出しが失敗した（確かめられないものは置かない） | 「今は置けません」と出す。少し待てば置き直せる |
 | 503 | `relay_paused` | 運営の AI が予算で止まっていて、一言の確認ができない | 一言を置けないことを出す。取得と読み上げは続ける |
-| 503 | `studio_paused` | 運営がスタジオを止めている | 取得をやめ、一言・スタジオなしで散歩・走行を続ける |
+| 503 | `local_paused` | 運営がその場の素材の配信を止めている | 取得をやめ、一言・スタジオなしで散歩・走行を続ける |
 
 - WAF が返す 429 は `application/problem+json` でないことがある。アプリは `code` のない 429 を `too_many_requests` として扱う
 - どのエラーでも、散歩・走行と語りは続ける。この契約で取る素材は、なくても困らない素材として扱う
@@ -334,7 +332,7 @@ GET /v1/studio/cells?cells=xn76ur,xn76us,…（geohash6 を 1〜9 個、カン�
 | V-08 | 聞いた数が 2 のとき `heard` は `null`、3 のとき `{ "atLeast": 3 }`、47 のとき `{ "atLeast": 30 }` |
 | V-09 | 一覧が 50 件・3 MB を超えない |
 | V-10 | ログに一言・スタジオの本文、区画、ブロックの組が残らない。期限が来た一言・スタジオと音声が 2 日以内に消える |
-| V-11 | `relay_paused`・`studio_paused`・通信の失敗のとき、アプリが散歩・走行と語りを続ける |
+| V-11 | `relay_paused`・`local_paused`・通信の失敗のとき、アプリが散歩・走行と語りを続ける |
 | V-12 | アプリが `reactions` を散歩・走行の終わりにだけ送っている（通信の記録で確かめる） |
 
 ## 互換性方針・移行メモ

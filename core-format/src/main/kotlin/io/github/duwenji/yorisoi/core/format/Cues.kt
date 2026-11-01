@@ -1,8 +1,12 @@
 package io.github.duwenji.yorisoi.core.format
 
 import io.github.duwenji.yorisoi.core.format.material.BuiltInProducers
+import io.github.duwenji.yorisoi.core.format.material.CueParams
+import io.github.duwenji.yorisoi.core.format.material.Fetch
 import io.github.duwenji.yorisoi.core.format.material.MaterialType
+import io.github.duwenji.yorisoi.core.format.material.Prelude
 import io.github.duwenji.yorisoi.core.format.material.Resources
+import io.github.duwenji.yorisoi.core.format.material.StudioCategory
 import org.json.JSONObject
 
 /** A third-party collection a channel uses, under a name of its own (API-003 `collections`). */
@@ -30,7 +34,8 @@ sealed interface Trigger {
     data class Event(val event: CueEvent) : Trigger
 }
 
-enum class CueEvent(override val json: String) : JsonValue { SELECT("select"), START("start"), FINISH("finish") }
+/** [IDLE]: between the companion's lines, when the app has nothing to say (API-003; only for producers fetched by area). */
+enum class CueEvent(override val json: String) : JsonValue { SELECT("select"), START("start"), FINISH("finish"), IDLE("idle") }
 
 /** Whether a spot cue stands in for the AI's narration or follows it (API-003 F-12). */
 enum class NarrationMode(override val json: String) : JsonValue { REPLACE("replace"), ADD("add") }
@@ -74,24 +79,34 @@ sealed interface Reference {
     data class Alias(val alias: String, val id: String?) : Reference
 }
 
-/** One way of showing in a cue: candidates in order for each item (a sheet may show several items). */
-data class Presentation(val presentAs: PresentAs, val items: List<List<Reference>>)
+/**
+ * One way of showing in a cue: candidates in order for each item (a sheet may show several items),
+ * and what the cue tells the built-in producers among them (API-003 `present[].params`).
+ */
+data class Presentation(val presentAs: PresentAs, val items: List<List<Reference>>, val params: CueParams = CueParams.NONE)
 
 data class Cue(
     val id: String,
     val trigger: Trigger,
     /** Null when not written: a cue that asks the AI itself mustn't also say how it relates to the AI. */
     val narration: NarrationMode?,
+    /** Not written for [CueEvent.IDLE]: what isn't read out twice there follows each kind's own rule (API-004 P-8). */
     val repeat: Repeat,
     val present: List<Presentation>,
 )
 
-/** A channel's material: its own resources, the collections and selectors it uses, and its cues. */
+/**
+ * A channel's material: its own resources, the collections and selectors it uses, and its cues.
+ *
+ * @param shorthandsOff built-in producers the channel turned off in `shorthands`: no shorthand cue
+ *   for them (API-004「省略形の展開」). Producers the cues name get none either.
+ */
 data class StationMedia(
     val resources: Resources,
     val collections: List<CollectionUse>,
     val selectors: List<Selector>,
     val cues: List<Cue>,
+    val shorthandsOff: Set<String> = emptySet(),
 ) {
     val isEmpty: Boolean get() = resources.items.isEmpty() && collections.isEmpty() && selectors.isEmpty() && cues.isEmpty()
 
@@ -138,12 +153,30 @@ internal object CueReader {
         val anySpot = cues.count { it.trigger is Trigger.AnySpot }
         if (anySpot > MAX_ANY_SPOT_CUES) reject(RejectCode.BAD_CUE, "$anySpot cues for any spot (max $MAX_ANY_SPOT_CUES)")
 
+        val off = readShorthands(json, lenient)
         // Every declared collection and selector must be used by some cue (once the cues an app
         // left out are gone, that may no longer hold, and needn't).
-        if (lenient) return StationMedia(resources, collections, selectors, cues)
+        if (lenient) return StationMedia(resources, collections, selectors, cues, off)
         val used = cues.flatMap { c -> c.present.flatMap { p -> p.items.flatten() } }.filterIsInstance<Reference.Alias>().map { it.alias }.toSet()
         (aliases - used).firstOrNull()?.let { reject(RejectCode.BAD_CUE, "\"$it\" is declared but no cue uses it") }
-        return StationMedia(resources, collections, selectors, cues)
+        return StationMedia(resources, collections, selectors, cues, off)
+    }
+
+    /**
+     * `shorthands`: built-in producers whose shorthand cue the channel doesn't want, each set to false
+     * (API-003). An app ignores producers it doesn't know; the review turns them away.
+     */
+    fun readShorthands(json: JSONObject, lenient: Boolean): Set<String> {
+        val value = json.optNullable("shorthands") ?: return emptySet()
+        val o = value as? JSONObject ?: reject(RejectCode.BAD_CUE, "shorthands is not an object")
+        return o.keySet().mapNotNull { key ->
+            if (o.opt(key) != false) reject(RejectCode.BAD_CUE, "shorthands.$key must be false")
+            when {
+                BuiltInProducers.withShorthand.any { it.id == key } -> key
+                lenient -> null
+                else -> reject(RejectCode.BAD_VALUE, "shorthands \"$key\"")
+            }
+        }.toSet()
     }
 
     private fun readCollections(json: JSONObject): List<CollectionUse> {
@@ -194,18 +227,24 @@ internal object CueReader {
         val trigger = readTrigger(id, c.obj("trigger", RejectCode.BAD_CUE))
         val narration = c.optString("narration", RejectCode.BAD_CUE)?.let { parseEnum<NarrationMode>(it) ?: reject(RejectCode.BAD_CUE, "$id: narration \"$it\"") }
         if (narration != null && trigger !is Trigger.Spot && trigger !is Trigger.AnySpot) reject(RejectCode.BAD_CUE, "$id: narration is for spot cues")
+        val idle = trigger == Trigger.Event(CueEvent.IDLE)
+        if (idle && c.has("repeat")) reject(RejectCode.BAD_CUE, "$id: an idle cue has no repeat")
         val repeat = c.optString("repeat", RejectCode.BAD_CUE)?.let { parseEnum<Repeat>(it) ?: reject(RejectCode.BAD_CUE, "$id: repeat \"$it\"") }
             ?: Repeat.ONCE_PER_WALK
         val present = c.list("present", RejectCode.BAD_CUE).objects("$id present", RejectCode.BAD_CUE)
         if (present.size !in 1..4) reject(RejectCode.BAD_CUE, "$id: ${present.size} presentations (1..4)")
         val presentations = present.mapNotNull { p ->
             try {
-                readPresentation(id, p, resources, collections, selectors)
+                readPresentation(id, p, resources, collections, selectors, lenient)
             } catch (e: UnknownValue) {
                 if (lenient) null else throw e
             }
         }
         if (presentations.isEmpty()) unknownValue(RejectCode.BAD_CUE, "$id: no presentation this app knows")
+        // Idle has no place or spot to ask about: only producers that bring what's around the phone fit it.
+        if (idle) presentations.flatMap { it.items.flatten() }.firstOrNull { ref ->
+            (ref as? Reference.BuiltIn)?.let { BuiltInProducers.byId(it.id)?.fetch } != Fetch.AREA
+        }?.let { reject(RejectCode.BAD_CUE, "$id: an idle cue shows only producers fetched by area, not $it") }
         val asksAi = presentations.any { p -> p.items.flatten().contains(Reference.BuiltIn(BuiltInProducers.AI_GUIDE.id)) }
         if (asksAi && narration != null) reject(RejectCode.BAD_CUE, "$id: a cue that asks builtin:ai-guide can't also set narration")
         return Cue(id, trigger, narration, repeat, presentations)
@@ -239,22 +278,54 @@ internal object CueReader {
     }
 
     private fun readPresentation(
-        cue: String, p: JSONObject, resources: Resources, collections: List<CollectionUse>, selectors: List<Selector>,
+        cue: String, p: JSONObject, resources: Resources, collections: List<CollectionUse>, selectors: List<Selector>, lenient: Boolean,
     ): Presentation {
         val presentAs = p.string("as", RejectCode.BAD_CUE).let { parseEnum<PresentAs>(it) ?: unknownValue(RejectCode.BAD_CUE, "as \"$it\"") }
         val written = listOf("resource", "resources", "source", "sources").filter { p.optNullable(it) != null }
         if (written.size != 1) reject(RejectCode.BAD_CUE, "$cue: ${presentAs.json} needs one of resource, resources, source or sources")
         val many = written[0] == "resources" || written[0] == "sources"
         if (many && presentAs != PresentAs.SHEET) reject(RejectCode.BAD_CUE, "$cue: only a sheet shows several items")
-        val items: List<List<Reference>> = when (written[0]) {
+        val asWritten: List<List<Reference>> = when (written[0]) {
             "resource" -> listOf(listOf(Reference.Self(p.string("resource", RejectCode.BAD_CUE))))
             "resources" -> p.list("resources", RejectCode.BAD_CUE).strings("$cue resources", RejectCode.BAD_CUE).map { listOf(Reference.Self(it)) }
             "source" -> listOf(candidates(cue, p.required("source", RejectCode.BAD_CUE)))
             else -> p.list("sources", RejectCode.BAD_CUE).map { candidates(cue, it) }
         }
-        if (items.isEmpty() || items.size > 10) reject(RejectCode.BAD_CUE, "$cue: ${items.size} items on the sheet (1..10)")
+        if (asWritten.isEmpty() || asWritten.size > 10) reject(RejectCode.BAD_CUE, "$cue: ${asWritten.size} items on the sheet (1..10)")
+        // An app passes over built-in producers it doesn't know, as if they had nothing (API-004 互換性).
+        val items = if (!lenient) asWritten else asWritten.map { c -> c.filter { it !is Reference.BuiltIn || BuiltInProducers.byId(it.id) != null } }
+        if (items.any { it.isEmpty() }) unknownValue(RejectCode.BAD_CUE, "$cue: no candidate this app knows")
         items.flatten().forEach { check(cue, presentAs, it, resources, collections, selectors) }
-        return Presentation(presentAs, items)
+        val params = p.optNullable("params")?.let { v ->
+            readParams(cue, v as? JSONObject ?: reject(RejectCode.BAD_CUE, "$cue: params is not an object"), items, lenient)
+        } ?: CueParams.NONE
+        return Presentation(presentAs, items, params)
+    }
+
+    /** `present[].params`: only what the built-in producers among the candidates declare, with a rule for its values (API-004 I-8). */
+    private fun readParams(cue: String, o: JSONObject, items: List<List<Reference>>, lenient: Boolean): CueParams {
+        val declared = items.flatten().filterIsInstance<Reference.BuiltIn>().mapNotNull { BuiltInProducers.byId(it.id) }.flatMap { it.params }.toSet()
+        var params = CueParams.NONE
+        for (key in o.keySet()) {
+            if (key !in declared) reject(RejectCode.BAD_CUE, "$cue: no producer here takes \"$key\"")
+            params = when (key) {
+                CueParams.CATEGORIES -> {
+                    val written = o.list(key, RejectCode.BAD_CUE).strings("$cue categories", RejectCode.BAD_CUE)
+                    if (written.size !in 1..StudioCategory.entries.size || written.toSet().size != written.size) {
+                        reject(RejectCode.BAD_CUE, "$cue: categories must be 1..${StudioCategory.entries.size} different values")
+                    }
+                    // A category this app doesn't know just matches nothing here.
+                    params.copy(categories = written.mapNotNull { c -> parseEnum<StudioCategory>(c) ?: if (lenient) null else reject(RejectCode.BAD_VALUE, "$cue: category \"$c\"") })
+                }
+                CueParams.PRELUDE -> {
+                    val written = o.string(key, RejectCode.BAD_CUE)
+                    params.copy(prelude = parseEnum<Prelude>(written) ?: if (lenient) Prelude.NONE else reject(RejectCode.BAD_VALUE, "$cue: prelude \"$written\""))
+                }
+                // Other declared instructions (an AI's persona, a sound) come from the channel's own fields, not from cues.
+                else -> reject(RejectCode.BAD_CUE, "$cue: \"$key\" can't be set in a cue")
+            }
+        }
+        return params
     }
 
     /** One source: a reference, or 1–3 of them in order. */
