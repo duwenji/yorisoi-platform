@@ -2,7 +2,7 @@
 
 付き添いアプリのエコシステム **yorisoi**（寄り添い）の共通パッケージです。場所と状況に応じて AI が語りかけるアプリ（付き添いアプリ）が共通に使う部品を置いています。アプリは [SanpoGuide](https://github.com/duwenji/yorisoi-sanpoguide) と [CycleGuide](https://github.com/duwenji/yorisoi-cycleguide)、管理システムは [yorisoi-console](https://github.com/duwenji/yorisoi-console) です。
 
-方針は [ADR-ECOSYSTEM-PLATFORM](docs/decisions/ADR-ECOSYSTEM-PLATFORM.md) にあります。
+方針は [ECOSYSTEM](docs/overview/yorisoi-ecosystem.md) にあります。
 
 ## モジュール
 
@@ -73,4 +73,4 @@ providers.gradleProperty("yorisoi.platformDir").orNull?.let { includeBuild(it) }
 
 ## 文書
 
-エコシステム全体の文書（ADR・契約書・審査基準・関係者）は [docs/](docs/README.md) にあります。一覧、置き場所の決まり、文書の番号の呼び方もそこにあります。
+エコシステム全体の文書（方針・契約書・審査基準・関係者）は [docs/](docs/README.md) にあります。一覧、置き場所の決まり、文書の番号の呼び方もそこにあります。

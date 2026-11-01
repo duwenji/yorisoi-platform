@@ -8,7 +8,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** Reports go to whoever answers for the channel, with the line but never the place (platform ADR-004 H-11). */
+/** Reports go to whoever answers for the channel, with the line but never the place (platform AI-ROLES H-11). */
 class ReportTest {
     private val contact = "app@example.com"
     private val report = Report("TestApp", contact)

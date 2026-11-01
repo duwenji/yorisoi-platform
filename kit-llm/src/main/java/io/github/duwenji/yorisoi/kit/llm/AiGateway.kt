@@ -3,14 +3,14 @@ package io.github.duwenji.yorisoi.kit.llm
 import kotlin.coroutines.cancellation.CancellationException
 
 /**
- * How the AI is reached (ADR-AI-RELAY R-1): the operator's AI through its relay, paid by the
+ * How the AI is reached (API-AI-RELAY R-1): the operator's AI through its relay, paid by the
  * operator up to its daily limit, or the user's own key straight to the service they chose.
  */
 enum class AiRoute { OPERATOR, OWN_KEY }
 
 /**
  * The app's AI settings as the gateway needs them: the route and, for the user's own key, the
- * service, key and model, and how many calls a day it may make (null for no limit; ADR-AI-ROLES H-9).
+ * service, key and model, and how many calls a day it may make (null for no limit; AI-ROLES H-9).
  */
 data class AiConnection(
     val route: AiRoute,
@@ -72,7 +72,7 @@ class AiGateway(
 
     val isConfigured: Boolean get() = connection().isConfigured(relay != null)
 
-    /** Whether today's calls reached the limit (ADR-AI-ROLES H-9, ADR-AI-RELAY R-2). */
+    /** Whether today's calls reached the limit (AI-ROLES H-9, API-AI-RELAY R-2). */
     fun limitReached(): Boolean {
         val c = connection()
         return when (c.route) {

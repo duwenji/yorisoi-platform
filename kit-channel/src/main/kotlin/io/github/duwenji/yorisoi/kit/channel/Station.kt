@@ -88,7 +88,7 @@ class Station(
 
     val sound: SoundChoice get() = overrides.sound ?: manifest.sound
 
-    /** Built-in channels can be adjusted by the user; a third party's are as its publisher made them (ADR-CHANNELS). */
+    /** Built-in channels can be adjusted by the user; a third party's are as its publisher made them (CHANNELS). */
     val isBuiltIn: Boolean get() = manifest.publisher == null
 
     fun withOverrides(overrides: StationOverrides) =
@@ -119,6 +119,6 @@ class Station(
  */
 data class StationSource(
     val providerId: String, val providerName: String, val publisherName: String, val trial: Boolean = false,
-    /** The list operator's contact (API-CHANNEL-LIST `contact`), where problems are reported (ADR-AI-ROLES H-11). */
+    /** The list operator's contact (API-CHANNEL-LIST `contact`), where problems are reported (AI-ROLES H-11). */
     val contact: String? = null,
 )

@@ -36,7 +36,7 @@ data class CollectionResolution(val statuses: Map<String, CollectionStatus>, val
 /**
  * Checks the collections a channel uses against its provider's list (API-MATERIALS 確かめる手順 3・4).
  * Shared by the management system, which needs every reference sound before approving, and the
- * app, which skips just the candidates it can't use (ADR-002 D-12).
+ * app, which skips just the candidates it can't use (MATERIALS D-12).
  */
 object CollectionReferences {
     /**
@@ -71,7 +71,7 @@ object CollectionReferences {
 
     /**
      * The resource ids each collection's resources are referenced by in [media], by collection id:
-     * what an update of the collection must keep while the channel is listed (ADR-002 D-8).
+     * what an update of the collection must keep while the channel is listed (MATERIALS D-8).
      */
     fun usedResources(media: StationMedia): Map<String, Set<String>> {
         val idOf = media.collections.associate { it.alias to it.id }

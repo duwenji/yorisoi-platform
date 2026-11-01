@@ -27,9 +27,9 @@ import io.github.duwenji.yorisoi.core.format.verifyPackageSignature
 import org.json.JSONArray
 
 /**
- * Which publishers may use a collection (API-MATERIALS `grants`, ADR-002 D-9), and in which apps (API-MATERIALS
+ * Which publishers may use a collection (API-MATERIALS `grants`, MATERIALS D-9), and in which apps (API-MATERIALS
  * 1.5 I-11). Null means any. [grounding]: whether the AI may take its texts as grounds (API-MATERIALS
- * I-13, ADR-004 H-4).
+ * I-13, AI-ROLES H-4).
  */
 data class Grants(val publishers: Set<String>?, val apps: Set<String>? = null, val grounding: Boolean = false) {
     fun allows(publisher: String): Boolean = publishers == null || publisher in publishers

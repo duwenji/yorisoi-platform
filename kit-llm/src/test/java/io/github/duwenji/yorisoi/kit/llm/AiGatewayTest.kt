@@ -11,7 +11,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Test
 
-/** The AI however it is reached: set up or not, within the day's limit, replies cleaned (ADR-AI-ROLES H-6, H-9). */
+/** The AI however it is reached: set up or not, within the day's limit, replies cleaned (AI-ROLES H-6, H-9). */
 class AiGatewayTest {
     private val server = MockWebServer().apply { start() }
     private val usage = AiUsage(object : UsageStore {

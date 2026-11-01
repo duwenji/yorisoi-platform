@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 // The channel and collection package formats (API-CHANNEL-PACKAGE, API-MATERIALS) and the channel list (API-CHANNEL-LIST):
 // reading and checking packages, their signatures and the list. Plain JVM so the channel
-// management system's review tools run exactly the checks the apps run (ADR-003 E-3).
+// management system's review tools run exactly the checks the apps run (ECOSYSTEM E-3).
 plugins {
     alias(libs.plugins.kotlin.jvm)
 }

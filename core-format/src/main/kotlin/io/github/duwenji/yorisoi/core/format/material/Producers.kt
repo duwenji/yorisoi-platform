@@ -28,7 +28,7 @@ enum class Exposure(val json: String) { NONE("none"), SUBJECT("subject"), AREA("
  * allows follows from these values ([ProducerPolicy]), not from what kind of producer it is.
  *
  * @param params the instructions a channel may give it (API-MATERIALS I-8).
- * @param verbatim people's own words, read out as they are (API-MATERIALS P-8, ADR-MATERIALS D-38): never the
+ * @param verbatim people's own words, read out as they are (API-MATERIALS P-8, MATERIALS D-38): never the
  *   AI's grounding, never reworded, introduced by where they come from.
  */
 data class ProducerDescriptor(
@@ -63,7 +63,7 @@ object ProducerPolicy {
 
 /**
  * The producers built into the app (API-MATERIALS「組み込みの素材提供者」). Adding one takes an app update
- * (ADR-002 D-6) and a new row in that table. The management system's checks read this list to
+ * (MATERIALS D-6) and a new row in that table. The management system's checks read this list to
  * know which `builtin:` references a channel may use.
  */
 object BuiltInProducers {
@@ -108,13 +108,13 @@ object BuiltInProducers {
         Trust.BUILTIN, Fetch.LOCAL, Exposure.NONE, generated = false,
     )
 
-    /** Shops' and places' announcements by producers, fetched by area (kit-studio; ADR-MATERIALS D-39・D-44). */
+    /** Shops' and places' announcements by producers, fetched by area (kit-studio; MATERIALS D-39・D-44). */
     val STUDIO = ProducerDescriptor(
         "${PREFIX}studio", VERSION, setOf(MaterialType.TEXT), setOf(SubjectKind.EVENT, SubjectKind.SPOT, SubjectKind.POINT),
         Trust.BUILTIN, Fetch.AREA, Exposure.AREA, generated = false, params = setOf(CueParams.CATEGORIES, CueParams.PRELUDE), verbatim = true,
     )
 
-    /** Notes users leave at a place, fetched by area (kit-studio; ADR-MATERIALS D-41・D-44). */
+    /** Notes users leave at a place, fetched by area (kit-studio; MATERIALS D-41・D-44). */
     val NOTE = ProducerDescriptor(
         "${PREFIX}note", VERSION, setOf(MaterialType.TEXT), setOf(SubjectKind.EVENT, SubjectKind.SPOT, SubjectKind.POINT),
         Trust.BUILTIN, Fetch.AREA, Exposure.AREA, generated = false, params = setOf(CueParams.PRELUDE), verbatim = true,
@@ -124,7 +124,7 @@ object BuiltInProducers {
 
     /**
      * Producers a channel gets in a shorthand cue unless it names them in its cues or turns them off
-     * in `shorthands` (API-MATERIALS「省略形の展開」, ADR-MATERIALS D-53・D-54).
+     * in `shorthands` (API-MATERIALS「省略形の展開」, MATERIALS D-53・D-54).
      */
     val withShorthand: List<ProducerDescriptor> = listOf(STUDIO, NOTE)
 

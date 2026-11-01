@@ -2,30 +2,30 @@
 
 エコシステム全体で残っている作業と、決めることを記録します。アプリだけの作業は各アプリの TODO（[SanpoGuide](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/TODO.md)・[CycleGuide](https://github.com/duwenji/yorisoi-cycleguide/blob/main/docs/TODO.md)）、管理システムの作業は [yorisoi-console の TODO](https://github.com/duwenji/yorisoi-console/blob/main/docs/TODO.md) を参照してください。
 
-## ADR の追従タスク
+## 共通基盤
 
-- [ ] CycleGuide（ADR-ECOSYSTEM-PLATFORM T-2。要件は [yorisoi-cycleguide の要件定義](https://github.com/duwenji/yorisoi-cycleguide/blob/main/docs/requirements.md)）。段階 1・2 は内部テストに出ている。残りは各アプリの TODO
-- [ ] 新しいアプリの雛形と、要望からプロファイル・ルール・プロンプト・組み込みのチャンネルを生成するスキル（ADR-ECOSYSTEM-PLATFORM T-1。T-2 の後）
+- [ ] CycleGuide（ECOSYSTEM E-23。要件は [yorisoi-cycleguide の要件定義](https://github.com/duwenji/yorisoi-cycleguide/blob/main/docs/requirements.md)）。段階 1・2 は内部テストに出ている。残りは各アプリの TODO
+- [ ] 新しいアプリの雛形と、要望からプロファイル・ルール・プロンプト・組み込みのチャンネルを生成するスキル（CycleGuide の後。ECOSYSTEM E-20）
 
 ## 運営の AI（中継）
 
-[ADR-AI-RELAY](../decisions/ADR-AI-RELAY.md)・[API-AI-RELAY](../contracts/API-AI-RELAY.md)。中継は開発用（yorisoi-console の `YorisoiAiRelay-dev`）だけを配備し、両アプリのリリース版も開発用を使っています。
+[API-AI-RELAY](../contracts/API-AI-RELAY.md)。中継は開発用（yorisoi-console の `YorisoiAiRelay-dev`）だけを配備し、両アプリのリリース版も開発用を使っています。
 
-- [ ] 中継のモデルを Claude Haiku 4.5 に切り替えることがあれば、その前にアカウントで Anthropic のユースケースを申告する（T-6）
-- [ ] 運営の AI 全体の 1 か月の予算を決める（T-7。本番に出す前）
+- [ ] 中継のモデルを Claude Haiku 4.5 に切り替えることがあれば、その前にアカウントで Anthropic のユースケースを申告する
+- [ ] 運営の AI 全体の 1 か月の予算を決める（本番に出す前。API-AI-RELAY 未決事項 No.2）
 - [ ] 本番の中継の配備と Play Integrity の確認。アプリ側の作業は各アプリの TODO「Google Play での公開」
 
 ## スポットのタイル
 
-[ADR-SPOT-TILES](../decisions/ADR-SPOT-TILES.md)・[API-SPOT-TILES](../contracts/API-SPOT-TILES.md)。配信は開発用（yorisoi-console の `YorisoiSpotTiles-dev`）で、両アプリのリリース版も開発用を使っています。
+[API-SPOT-TILES](../contracts/API-SPOT-TILES.md)。配信は開発用（yorisoi-console の `YorisoiSpotTiles-dev`）で、両アプリのリリース版も開発用を使っています。
 
-- [ ] 実機での確認: 散歩・走行の記録で、スポットの `source` が `tiles`・`kept_tiles` になり、空白や待ちが減ったこと（T-4）
-- [ ] 技術チュートリアルの追従（T-5）
-- [ ] 本番の配信を作る時期を決める（T-6）
+- [ ] 実機での確認: 散歩・走行の記録で、スポットの `source` が `tiles`・`kept_tiles` になり、空白や待ちが減ったこと
+- [ ] 技術チュートリアルの追従
+- [ ] 本番の配信を作る時期を決める（API-SPOT-TILES 未決事項 No.2）
 
 ## その場の素材（スタジオ・一言）
 
-[REQ-STUDIO](../requirements/REQ-STUDIO.md)・[REQ-NOTES](../requirements/REQ-NOTES.md)・[ADR-MATERIALS](../decisions/ADR-MATERIALS.md)・[API-LOCAL-MATERIALS](../contracts/API-LOCAL-MATERIALS.md)。サーバーは開発用（yorisoi-console の `YorisoiLocalMaterials-dev`）だけです。アプリ側の部品は [kit-local-materials](../../kit-local-materials/README.md)。
+[REQ-STUDIO](../requirements/REQ-STUDIO.md)・[REQ-NOTES](../requirements/REQ-NOTES.md)・[MATERIALS](../overview/materials.md)・[API-LOCAL-MATERIALS](../contracts/API-LOCAL-MATERIALS.md)。サーバーは開発用（yorisoi-console の `YorisoiLocalMaterials-dev`）だけです。アプリ側の部品は [kit-local-materials](../../kit-local-materials/README.md)。
 
 - [ ] 両アプリの内部テストへの送信と、実機での確認（声で一言を置く、スタジオの音声の再生、走行中の読み上げ、チャンネルのきっかけと省略形）
 - [ ] 実際の M4A で、スタジオの確認（Transcribe・運営の AI）から配信・アプリでの再生までを通しで確かめる
@@ -42,7 +42,7 @@
 - [ ] 審査にかかる期間の目安と、運営が複数になる場合（承認を 2 人にするか、権限を分けるか）
 
 決めること:
-- ADR-CHANNELS の未決事項（第三者のチャンネルのカスタマイズ）
+- CHANNELS の未決事項（第三者のチャンネルのカスタマイズ）
 
 ## よく通る道
 
@@ -61,7 +61,7 @@
 
 決めること:
 - 位置の偽装（位置情報の偽装アプリ）で開けられることへの対策をどこまでやるか
-- 公開メッセージの不適切な投稿への対策（通報・削除）。一言の仕組み（通報・自動で隠す・締め出し・置けない区画）を使えるか、ADR-MATERIALS U-2 とあわせて決める
+- 公開メッセージの不適切な投稿への対策（通報・削除）。一言の仕組み（通報・自動で隠す・締め出し・置けない区画）を使えるか、MATERIALS U-2 とあわせて決める
 - 私有地・危険な場所に置かせない配慮
 
 ## 共通の検討事項

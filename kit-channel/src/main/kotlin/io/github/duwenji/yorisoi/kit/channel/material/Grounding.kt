@@ -8,7 +8,7 @@ import io.github.duwenji.yorisoi.kit.channel.Station
 
 /**
  * A text from a reviewed collection that the AI may take as fact (API-MATERIALS「AI の根拠」, platform
- * ADR-004 H-3): what it says, and whose it is for the credit line.
+ * AI-ROLES H-3): what it says, and whose it is for the credit line.
  */
 data class Ground(
     val text: String,

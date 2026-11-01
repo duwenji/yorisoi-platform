@@ -1,6 +1,6 @@
 package io.github.duwenji.yorisoi.core.format
 
-/** What a channel is for (API-CHANNEL-PACKAGE `activities`, ADR-003 E-24). */
+/** What a channel is for (API-CHANNEL-PACKAGE `activities`, ECOSYSTEM E-24). */
 enum class Activity(override val json: String) : JsonValue { WALK("walk"), CYCLE("cycle") }
 
 /** How users look for channels (API-CHANNEL-PACKAGE `genres`). */
@@ -51,7 +51,7 @@ object AppIds {
 }
 
 /**
- * What an app is and does, for choosing channels (API-CHANNEL-PACKAGE G-4, ADR-003 E-6 ①). Each app has one.
+ * What an app is and does, for choosing channels (API-CHANNEL-PACKAGE G-4, ECOSYSTEM E-6 ①). Each app has one.
  *
  * @param versionCode this build's version, for `minAppVersions` (API-CHANNEL-LIST P-20)
  */

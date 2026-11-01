@@ -6,7 +6,7 @@
 |---|---|
 | 文書ID | API-SPOT-TILES |
 | ドキュメント種別 | API契約書 |
-| 対象システム/機能 | yorisoi エコシステムのアプリ（`kit-geo`）と、運営のスポットのタイルの配信（[ADR-SPOT-TILES](../decisions/ADR-SPOT-TILES.md)） |
+| 対象システム/機能 | yorisoi エコシステムのアプリ（`kit-geo`）と、運営のスポットのタイルの配信（[API-SPOT-TILES](../contracts/API-SPOT-TILES.md)） |
 | 承認者 | 開発者 |
 | ステータス | 承認済 |
 
@@ -14,7 +14,7 @@
 
 ## 目的・背景
 
-ADR-SPOT-TILES で、アプリはスポット・施設・お店・信号を、公開の Overpass に問い合わせる代わりに、運営が週 1 回作る geohash 5 桁のタイルから取ることにした。本書は、作る側（バッチ）と読む側（`kit-geo`）が同じものを前提にできるよう、次のことを定める。
+API-SPOT-TILES で、アプリはスポット・施設・お店・信号を、公開の Overpass に問い合わせる代わりに、運営が週 1 回作る geohash 5 桁のタイルから取ることにした。本書は、作る側（バッチ）と読む側（`kit-geo`）が同じものを前提にできるよう、次のことを定める。
 
 1. タイルの URL と、層ごとの JSON の形
 2. どの OSM の要素を、どの形で入れるか（今の `OverpassClient` と同じ答えになるように）
@@ -30,7 +30,7 @@ ADR-SPOT-TILES で、アプリはスポット・施設・お店・信号を、�
 - 互換性の方針
 
 非スコープ:
-- バッチと配信の AWS の構成・配備・警報（yorisoi-console の文書。ADR-SPOT-TILES T-2）
+- バッチと配信の AWS の構成・配備・警報（yorisoi-console の文書）
 - スポットの種類の表示名や、話す判断での使い方（今と同じく `kit-geo`・`kit-companion` で決める）
 - スポットの写真（`SpotPhotos`）
 
@@ -38,16 +38,64 @@ ADR-SPOT-TILES で、アプリはスポット・施設・お店・信号を、�
 
 | 対応元ID | 内容 | 対応状況 |
 |---|---|---|
-| ADR-SPOT-TILES S-2 | geohash 5 桁、中心があるタイルに丸ごと入れる | [タイルの単位と位置](#タイルの単位と位置) |
-| ADR-SPOT-TILES S-3 | 基本とお店の 2 層 | [URL と層](#url-と層) |
-| ADR-SPOT-TILES S-4 | 今の Overpass の条件、上限なし、座標 5 桁、輪郭 5m | [抜き出しの条件](#抜き出しの条件)・[JSON の形](#json-の形) |
-| ADR-SPOT-TILES S-5 | 日本全体、週 1 回 | ST-3・ST-4 |
-| ADR-SPOT-TILES S-8 | 版を含まない URL、ETag で取り直し | ST-5・[HTTP の応答](#http-の応答) |
-| ADR-SPOT-TILES S-9 | 円にかかるタイル、端末で今と同じ距離に絞る、取れないときは Overpass | [アプリの取り方](#アプリの取り方) |
-| ADR-SPOT-TILES S-10 | 端末に残す期間、先読み | [アプリの取り方](#アプリの取り方) |
-| ADR-SPOT-TILES S-12 | 運営に届くのはタイルの番号だけ | ST-7 |
-| ADR-SPOT-TILES S-13 | ODbL 1.0 と出典 | ST-8 |
-| ADR-SPOT-TILES 未決事項 1 | 形式の置き場所 | ST-9 |
+| API-SPOT-TILES S-2 | geohash 5 桁、中心があるタイルに丸ごと入れる | [タイルの単位と位置](#タイルの単位と位置) |
+| API-SPOT-TILES S-3 | 基本とお店の 2 層 | [URL と層](#url-と層) |
+| API-SPOT-TILES S-4 | 今の Overpass の条件、上限なし、座標 5 桁、輪郭 5m | [抜き出しの条件](#抜き出しの条件)・[JSON の形](#json-の形) |
+| API-SPOT-TILES S-5 | 日本全体、週 1 回 | ST-3・ST-4 |
+| API-SPOT-TILES S-8 | 版を含まない URL、ETag で取り直し | ST-5・[HTTP の応答](#http-の応答) |
+| API-SPOT-TILES S-9 | 円にかかるタイル、端末で今と同じ距離に絞る、取れないときは Overpass | [アプリの取り方](#アプリの取り方) |
+| API-SPOT-TILES S-10 | 端末に残す期間、先読み | [アプリの取り方](#アプリの取り方) |
+| API-SPOT-TILES S-12 | 運営に届くのはタイルの番号だけ | ST-7 |
+| API-SPOT-TILES S-13 | ODbL 1.0 と出典 | ST-8 |
+
+## スポットのタイルの方針
+
+### タイル
+
+| No. | 論点 | 決定 |
+|---|---|---|
+| S-1 | 取り先 | 運営が地域ごとのタイルを前もって作り、静的なファイルとして配る。アプリはまずタイルを使い、取れないときだけ今の Overpass に問い合わせる（S-9） |
+| S-2 | タイルの単位 | geohash 5 桁（日本の緯度で約 4km × 5km）。1 枚に、その範囲に中心がある要素をすべて入れる。公園などの輪郭は、中心があるタイルに丸ごと入れる |
+| S-3 | 層 | 1 枚のタイルを 2 つの層に分けて配る。**基本**: スポット・施設（`FacilityKind` のすべて）・信号。**お店**: 店の種類（API-CHANNEL-PACKAGE の `restaurant`〜`shop`）。お店の層は、チャンネルが店の種類を探すとき（`searchedKinds` が空でないとき）だけ取る。都心ではお店が約半分を占めるため |
+| S-4 | 中身 | 今の `OverpassClient.query` と同じ条件で抜き出す（名前のあるスポットの種類、施設の種類と `access` の除外、チェーン店の除外）。ただし件数の上限（`out geom 80` など）はかけない。スポットとお店は OSM のタグをそのまま持つ（AI の根拠と写真の手がかりに使うため）。施設は種類・位置・名前だけ持つ。座標は小数 5 桁、輪郭は 5m で間引く。アプリの種類の判定（`categoryOf`・`FacilityKind.of`）は今のまま端末で行う |
+| S-5 | 範囲と新しさ | 日本全体。週に 1 回作り直す。日本全体でも gzip 後で約 100MB なので、地域を絞らない |
+
+### 作り方と配り方
+
+| No. | 論点 | 決定 |
+|---|---|---|
+| S-6 | 作り方 | Geofabrik の日本の抽出（`.osm.pbf`）を週 1 回取り、osmium で S-4 の条件に合う要素を抜き出し、輪郭を組み立て、タイルごとの JSON に変える。Overpass は使わない（約 1.9 万枚を取ると、混雑と利用の制限で取りきれない）。バッチは EventBridge Scheduler から ECS Fargate で動かす。作り終えたら前の週のタイルと比べ、枚数や合計の大きさが大きく減っていれば差し替えずに運営に知らせる |
+| S-7 | 置き場所 | 運営の AWS アカウント（ap-northeast-1、開発用と本番用）に、管理システムとも運営の AI とも別のスタックとして置く。S3 に置き、CloudFront で配る。誰でも読める（OSM のデータで、秘密がない）。コードと配備は yorisoi-console の `infra/` に置き、CDK と GitHub Actions の配備の仕組みを共用する |
+| S-8 | 版と取り直し | タイルの URL は版を含まない固定の形にし、作り直しで中身が変わったタイルだけ `ETag` が変わる。アプリは残っているタイルを、`If-None-Match` で取り直す（変わっていなければ 304 で中身を送らない） |
+
+### アプリ
+
+| No. | 論点 | 決定 |
+|---|---|---|
+| S-9 | 取り方と予備 | `kit-geo` に、タイルからスポットを取る部品を足す。検索の中心から今の検索の半径（600m）の円にかかるタイル（1〜4 枚）を取り、端末で今と同じ距離（スポット 600m、近くだけの施設 250m、お店 400m）に絞って、今と同じ `NearbyResult` にする。タイルが取れず端末にも残っていないとき、またはタイルのない場所（日本の外。404）では、今の Overpass に問い合わせる |
+| S-10 | 端末に残すもの | `SpotCache` は、Overpass の答えの代わりにタイルを残す。設定の「残す・期間・消す」の意味は変えない（期間を過ぎたタイルは S-8 で取り直し、取れなければ最長 90 日まで使う）。よく通る道の先読み（REQ-FREQUENT-WAYS F-6）は、道にかかるタイルを取るだけにする。間を 10 秒空ける必要はなくなる |
+| S-11 | 新しさの表示 | 開発者モードの記録の `source` に、タイルから取ったことを足す（Overpass・残っていたタイル・取り直したタイルを分ける） |
+
+### 情報とライセンス
+
+| No. | 論点 | 決定 |
+|---|---|---|
+| S-12 | 配信に届く情報 | 運営に届くのは、取られたタイルの番号（約 4km × 5km の範囲）と IP アドレスだけ。CloudFront のアクセスログは有効にせず、要求の数などの集計（CloudWatch のメトリクス）だけ見る。今の Overpass には検索の中心の正確な緯度経度が第三者に届いているので、それよりも届く情報は少なくなる。Overpass に問い合わせる予備の経路（S-9）は今と同じ |
+| S-13 | OSM のライセンス | タイルは OSM から作ったデータベースとして公開することになるので、ODbL 1.0 で配る。配信の入口に、ライセンスと出典（© OpenStreetMap contributors）を書いたファイルを置く。アプリの出典表示（設定画面）は今のまま |
+
+```mermaid
+flowchart LR
+  subgraph BATCH["運営の AWS（週 1 回）"]
+    GF["Geofabrik<br/>日本の .osm.pbf"] --> F["Fargate<br/>osmium で抜き出し<br/>タイルの JSON に変換"]
+    F --> S3[("S3<br/>geohash5 × 基本・お店")]
+    S3 --> CF["CloudFront"]
+  end
+  subgraph APP["アプリ（kit-geo）"]
+    R["SpotRepository"] --> C[("端末のタイル<br/>SpotCache")]
+  end
+  CF -- "タイルの番号だけ<br/>ETag で取り直し" --> R
+  R -. "取れないとき・日本の外" .-> OP["Overpass（公開サーバー）"]
+```
 
 ## 方針・決定事項
 
@@ -291,21 +339,33 @@ sequenceDiagram
 
 ## 制約
 
-- バッチは公開の Overpass を使わない（ADR-SPOT-TILES）
+- バッチは公開の Overpass を使わない（API-SPOT-TILES）
 - 配信はアクセスログを残さない（ST-7）
-- 抜き出しの条件は `OverpassClient.query` と同じに保つ
+- 抜き出しの条件は `OverpassClient.query` と同じに保ち、チャンネルの店の種類（API-CHANNEL-PACKAGE）と `FacilityKind` に従う。種類が増えたらバッチも合わせる
+- 運営の担当者は 1 人（CHANNELS C-10）。運用は警報の知らせと、前の週のタイルを残すことで回す
+
+## 見直しの条件
+
+- 1 枚のタイルが大きすぎる地域が出たとき（都心で gzip 後 500KB を超えるなど。geohash 6 桁に細かくするか、層を分ける）
+- 1 週間の遅れが散策の案内で問題になったとき
+- Geofabrik の抽出が使えなくなったとき
+- 日本の外でも使うことになったとき
 
 ## 未決事項・リスク
 
-未決事項はない。
+| No. | 内容 | 決める時期 |
+|---|---|---|
+| 2 | 本番の配信を作る時期 | 本番に出す前 |
 
 リスク:
-- 端末で 1〜4 枚を合わせて絞るので、都心では 1 回の検索で数 MB の JSON を読むことがある（gzip 前で 1 枚 約 500KB）。読み込みの時間とメモリを T-3 で測る
+- 端末で 1〜4 枚を合わせて絞るので、都心では 1 回の検索で数 MB の JSON を読むことがある（gzip 前で 1 枚 約 500KB）。読み込みの時間とメモリに気をつける
 - 抜き出しの条件が `OverpassClient` とずれると、予備に戻ったときと答えが変わる（CK-1 で確かめる）
+- 日本全体の pbf から輪郭を組み立てるには、数 GB のメモリが要る
+- 配信が止まると、端末にタイルが残っていない地域では Overpass に戻るので、遅さと失敗が増える
 
 ## 関連ドキュメント・参照リンク
 
-- [ADR-SPOT-TILES](../decisions/ADR-SPOT-TILES.md)
+- [API-SPOT-TILES](../contracts/API-SPOT-TILES.md)
 - [API-CHANNEL-PACKAGE](API-CHANNEL-PACKAGE.md)（店の種類）
 - [REQ-FREQUENT-WAYS](../requirements/REQ-FREQUENT-WAYS.md)（F-6）
 - [`api/spot-tile.schema.json`](../api/spot-tile.schema.json)

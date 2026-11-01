@@ -13,7 +13,7 @@ import java.time.Instant
 import java.util.UUID
 
 /**
- * The operator's AI (ADR-AI-RELAY): a client of the relay at [relayUrl] for this app, with its
+ * The operator's AI (API-AI-RELAY): a client of the relay at [relayUrl] for this app, with its
  * session in the app's preferences, or null when the build has no relay.
  *
  * @param cloudProjectNumber the Google Cloud project for Play Integrity; 0 to send no verdict

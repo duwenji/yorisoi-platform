@@ -19,7 +19,7 @@ import io.github.duwenji.yorisoi.kit.channel.material.Subject
  */
 data class LocalReading(val reading: Reading, val text: String) : Content
 
-/** `builtin:studio`: the studios around the cue's place, or the phone's (ADR-MATERIALS D-44〜D-46). */
+/** `builtin:studio`: the studios around the cue's place, or the phone's (MATERIALS D-44〜D-46). */
 class StudioProducer(feed: () -> LocalFeed?) : LocalProducer(BuiltInProducers.STUDIO, feed) {
     override suspend fun next(feed: LocalFeed, request: MaterialRequest, near: LocalFeed.Near?): Reading? =
         feed.nextStudio(request.params.categories?.map { it.json }?.toSet(), near)
