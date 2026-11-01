@@ -23,7 +23,7 @@
 
 この形式は、組み込みのチャンネルにも使う。アプリが自分の組み込みのチャンネルを同じ形式・同じ確認で読み込むことで、形式の不備に開発中に気づけるようにする。また、組み込みのチャンネルを第三者のチャンネルの見本にできる。
 
-[ADR-CHANNEL-CURATION](../decisions/ADR-CHANNEL-CURATION.md) C-7 のとおり、第三者が変えられるのは語り手と話題の部分だけで、安全の案内・共通ルール・上限はアプリが必ず強制する。本書はそれを形式で保証する。つまり、**変えてよい部分だけを差し込み口（スロット）として開け、それ以外は形式の上で書けない**ようにする。
+[ADR-CHANNELS](../decisions/ADR-CHANNELS.md) C-7 のとおり、第三者が変えられるのは語り手と話題の部分だけで、安全の案内・共通ルール・上限はアプリが必ず強制する。本書はそれを形式で保証する。つまり、**変えてよい部分だけを差し込み口（スロット）として開け、それ以外は形式の上で書けない**ようにする。
 
 ## スコープ・非スコープ
 
@@ -32,8 +32,8 @@
 - `channel.json`（設定）の項目と、とりうる値・上限
 - プロンプトのスロット（差し込み口）と、アプリの固定部分との組み立て方
 - 素材（テキスト・画像・音声・映像）、きっかけ、見せ方と、その安全の決まり
-- チャンネル提供者の署名（ADR-CHANNEL-CURATION C-4）
-- アプリと審査用の道具が行う機械的な確認（ADR-CHANNEL-CURATION C-8 の「機械で確かめる項目」）
+- チャンネル提供者の署名（ADR-CHANNELS C-4）
+- アプリと審査用の道具が行う機械的な確認（ADR-CHANNELS C-8 の「機械で確かめる項目」）
 
 非スコープ:
 - パッケージの取得・リスト・運営の署名（API-CHANNEL-LIST）
@@ -44,11 +44,11 @@
 
 | 対応元ID | 内容 | 対応状況 |
 |---|---|---|
-| ADR-CHANNEL-CURATION | C-4（チャンネル提供者の署名）、C-7（アプリが強制すること）、C-8（機械で確かめる項目） | 本書で形式にする |
+| ADR-CHANNELS | C-4（チャンネル提供者の署名）、C-7（アプリが強制すること）、C-8（機械で確かめる項目） | 本書で形式にする |
 | API-CHANNEL-LIST | `package.format`・パッケージの大きさの上限・`hash_mismatch`・`package_rejected` | 本書が `format` を定める |
 | [エコシステム TODO「チャンネル」](../work/ecosystem-todo.md) | チャンネルが決める軸（語り手・話題・話す場面・話す量・雰囲気） | 本書で項目にする |
-| ADR-MATERIAL-PRODUCERS | D-2（同梱の素材）、D-8（参照する版）、D-11（候補の順番）、D-15（省略形）、D-17（ID だけで参照） | `collections`・`source` として形式にする |
-| API-MATERIAL-PRODUCER | 素材提供者 IF、参照の書き方、省略形の展開、確かめる手順 3・4 | 本書から参照する |
+| ADR-MATERIALS | D-2（同梱の素材）、D-8（参照する版）、D-11（候補の順番）、D-15（省略形）、D-17（ID だけで参照） | `collections`・`source` として形式にする |
+| API-MATERIALS | 素材提供者 IF、参照の書き方、省略形の展開、確かめる手順 3・4 | 本書から参照する |
 
 ## 方針・決定事項
 
@@ -306,7 +306,7 @@ ADR-ECOSYSTEM-PLATFORM E-24 のとおり、実装するアプリを作ると決�
 
 チャンネルは、語り（AI が文章を作るスロット）に加えて、素材（テキスト・画像・音声・映像）を持ち、決まったきっかけで決まった見せ方で出せる。形式ですべての種類を定め、アプリが対応する種類を段階的に増やす（M-1）。
 
-1.2 から、素材は**素材提供者**が出すものとして扱う（[ADR-MATERIAL-PRODUCERS](../decisions/ADR-MATERIAL-PRODUCERS.md)、[API-MATERIAL-PRODUCER](API-MATERIAL-PRODUCER.md)）。素材提供者は、組み込みの素材提供者（AI の語り・Commons の写真・背景音など）、第三者の素材集、チャンネルに同梱の素材（本章の `resources`）の 3 種類で、どれも同じインタフェースで扱う。チャンネルは、きっかけの見せ方ごとに素材提供者への参照（`source`）を並べる。`resources` だけを使う 1.1 までの書き方は、そのまま使える（省略形）。
+1.2 から、素材は**素材提供者**が出すものとして扱う（[ADR-MATERIALS](../decisions/ADR-MATERIALS.md)、[API-MATERIALS](API-MATERIALS.md)）。素材提供者は、組み込みの素材提供者（AI の語り・Commons の写真・背景音など）、第三者の素材集、チャンネルに同梱の素材（本章の `resources`）の 3 種類で、どれも同じインタフェースで扱う。チャンネルは、きっかけの見せ方ごとに素材提供者への参照（`source`）を並べる。`resources` だけを使う 1.1 までの書き方は、そのまま使える（省略形）。
 
 ```
 チャンネル
@@ -387,7 +387,7 @@ ADR-ECOSYSTEM-PLATFORM E-24 のとおり、実装するアプリを作ると決�
 
 ### 素材集の宣言（collections）
 
-第三者の素材集（API-MATERIAL-PRODUCER「素材集の形式」）を使うときに宣言する。
+第三者の素材集（API-MATERIALS「素材集の形式」）を使うときに宣言する。
 
 ```json
 "collections": [
@@ -398,22 +398,22 @@ ADR-ECOSYSTEM-PLATFORM E-24 のとおり、実装するアプリを作ると決�
 | 項目 | 内容 |
 |---|---|
 | `as` | このチャンネルの中での別名。英小文字・数字・`-`、1〜20 文字。`self`・`builtin` と、`builtin:` で始まる値は使えない。重ねない |
-| `id` | 素材集の ID（リストの中で一意）。素材提供者のアカウントIDは書かない（ADR-MATERIAL-PRODUCERS D-17） |
+| `id` | 素材集の ID（リストの中で一意）。素材提供者のアカウントIDは書かない（ADR-MATERIALS D-17） |
 | `minVersion` | 使える最低の版。実際に使う版は、リスト（API-CHANNEL-LIST の `collections[]`）に載っている版 |
 
 - 1 チャンネルで 5 個まで
 - 宣言した素材集は、どれかのきっかけで参照すること。参照しない宣言があれば拒む（`bad_cue`）
-- 素材集が使えるのは、同じリストに載っていて、利用許諾（`grants`）がこのチャンネルの `publisher` を含むとき（API-MATERIAL-PRODUCER 手順 3）。組み込みのチャンネルは内蔵のリストで確かめる
+- 素材集が使えるのは、同じリストに載っていて、利用許諾（`grants`）がこのチャンネルの `publisher` を含むとき（API-MATERIALS 手順 3）。組み込みのチャンネルは内蔵のリストで確かめる
 - 前もっての取得の上限（映像を除いて 50MB）は、同梱の素材と宣言した素材集の、きっかけで使う素材の合計で数える
 
 ### 基準での選択（selectors）
 
-素材集・素材を指す代わりに、選ぶ基準を書く。項目・タグ・複数当たったときの順番・前もっての取得の範囲は [API-MATERIAL-PRODUCER「基準で選ぶ素材提供者」](API-MATERIAL-PRODUCER.md#基準で選ぶ素材提供者)のとおり。
+素材集・素材を指す代わりに、選ぶ基準を書く。項目・タグ・複数当たったときの順番・前もっての取得の範囲は [API-MATERIALS「基準で選ぶ素材提供者」](API-MATERIALS.md#基準で選ぶ素材提供者)のとおり。
 
 - 1 チャンネルで 5 個まで。別名は `collections` と合わせて重ねない
 - 宣言した基準は、どれかのきっかけの `source` で参照すること（参照しない宣言は `bad_cue`）
 - 基準の別名には `#<id>` を付けられない（`unresolved_reference`）
-- `resourcesSize`（API-CHANNEL-LIST）には入らない。前もっての取得は API-MATERIAL-PRODUCER P-6 の上限（50MB、映像を除く）で別に抑える
+- `resourcesSize`（API-CHANNEL-LIST）には入らない。前もっての取得は API-MATERIALS P-6 の上限（50MB、映像を除く）で別に抑える
 
 ### きっかけ（cues）
 
@@ -444,21 +444,21 @@ ADR-ECOSYSTEM-PLATFORM E-24 のとおり、実装するアプリを作ると決�
 | `repeat` | `oncePerWalk`（既定）/ `oncePerDay` / `once`（その端末で 1 度だけ） |
 | `present` | 見せ方と素材の組（1〜4 個）。上から順に出す。素材は `resource`（同梱の素材 1 つ）か `source`（素材提供者への参照の候補、下表）のどちらかで指す。`sheet` は `resources`（同梱）か `sources`（参照の候補の配列を並べる）で複数の素材を並べられる |
 
-`source` の書き方（API-MATERIAL-PRODUCER「参照の書き方」）:
+`source` の書き方（API-MATERIALS「参照の書き方」）:
 
 | 書き方 | 意味 |
 |---|---|
-| 文字列 1 つ、または 1〜3 個の配列 | 並べた順に素材提供者に求め、最初に出せた素材を使う。全部出せなければ、その見せ方は飛ばす（API-MATERIAL-PRODUCER I-7） |
+| 文字列 1 つ、または 1〜3 個の配列 | 並べた順に素材提供者に求め、最初に出せた素材を使う。全部出せなければ、その見せ方は飛ばす（API-MATERIALS I-7） |
 | `self#<id>` | 同梱の素材（`resource: "<id>"` と同じ） |
 | `<別名>#<id>` | 宣言した素材集の素材 |
 | `<別名>` | 宣言した素材集から、きっかけの題材（スポット・地点）についての素材（`about`）を選ぶ |
-| `<基準の別名>` | `selectors` の基準に合う素材を、きっかけの題材で選ぶ（API-MATERIAL-PRODUCER「基準で選ぶ素材提供者」） |
-| `builtin:<名前>` | 組み込みの素材提供者（API-MATERIAL-PRODUCER「組み込みの素材提供者」）。題材から作る |
+| `<基準の別名>` | `selectors` の基準に合う素材を、きっかけの題材で選ぶ（API-MATERIALS「基準で選ぶ素材提供者」） |
+| `builtin:<名前>` | 組み込みの素材提供者（API-MATERIALS「組み込みの素材提供者」）。題材から作る |
 
 - 見せ方と素材の組み合わせ（[見せ方](#見せ方)）は、候補ごとに確かめる。組み込みの素材提供者はその素材提供者の `types` で、素材集・同梱は素材の `type` で確かめる
 - `sheet` の `resources`・`sources` に並べられるのは 1〜10 個。`spot` のきっかけの `name` は 1〜60 文字
 - アプリの段（M-1）は、使う素材の種類と見せ方から決める（第 1 段: テキスト・画像、第 2 段: 音声と `play`・`ambient`、第 3 段: 映像）。素材集を参照する見せ方は、素材集の中身が分かるまで数えない（パッケージだけでは最低限の段になる）。管理システムは、リストに載せる素材集の中身も数えて `minAppVersions` を決める
-- `narration`（`replace`・`add`）は省略形として残す。展開の規則は API-MATERIAL-PRODUCER「省略形の展開」。`source` に `builtin:ai-guide` を書いたきっかけでは `narration` を書けない（`bad_cue`。AI の解説が二重にならないように）
+- `narration`（`replace`・`add`）は省略形として残す。展開の規則は API-MATERIALS「省略形の展開」。`source` に `builtin:ai-guide` を書いたきっかけでは `narration` を書けない（`bad_cue`。AI の解説が二重にならないように）
 
 - きっかけは 1 チャンネルで 500 個まで。題材を問わないきっかけ（`"any": true`）は 5 個まで
 - 題材を問わないきっかけ: 1 つのスポットに、特定のスポットのきっかけと題材を問わないきっかけの両方が当たるときは、特定のスポットのきっかけだけを出す。`repeat` はスポットごとに数える。`source` の候補がすべて出せないスポットでは、きっかけがなかったものとして通常のスポット案内に戻る
@@ -486,9 +486,9 @@ ADR-ECOSYSTEM-PLATFORM E-24 のとおり、実装するアプリを作ると決�
 
 ### 審査で確かめること（素材・きっかけ）
 
-機械では確かめにくいので、チャンネルの承認時に人が確かめる（M-2・M-3。ADR-CHANNEL-CURATION C-8 の人が確かめる項目。[審査基準](../policies/channel-review.md)に含める）。
+機械では確かめにくいので、チャンネルの承認時に人が確かめる（M-2・M-3。ADR-CHANNELS C-8 の人が確かめる項目。[審査基準](../policies/channel-review.md)に含める）。
 
-1.2 から、第三者の素材集の素材そのもの（出典・ライセンス・写っているもの・書き起こし）は、素材集の審査で確かめる（ADR-MATERIAL-PRODUCERS D-7）。チャンネルの審査では、同梱の素材についての下の項目すべてと、素材集を使うきっかけの場所・見せ方・候補の組み合わせ（素材集と AI の解説が同じ場所で食い違わないか、など）を確かめる。
+1.2 から、第三者の素材集の素材そのもの（出典・ライセンス・写っているもの・書き起こし）は、素材集の審査で確かめる（ADR-MATERIALS D-7）。チャンネルの審査では、同梱の素材についての下の項目すべてと、素材集を使うきっかけの場所・見せ方・候補の組み合わせ（素材集と AI の解説が同じ場所で食い違わないか、など）を確かめる。
 
 - 映像を使う場合: 内容が散策と関係し、歩きながら見る前提になっていないか
 - きっかけの場所: `point` が車道・線路・私有地・立入禁止・危険な場所にないか。立ち止まりやすい場所か
@@ -537,13 +537,13 @@ ADR-ECOSYSTEM-PLATFORM E-24 のとおり、実装するアプリを作ると決�
 7. 組み立てたシステムプロンプトに未定義の変数がないか（`PromptTemplates` で全出来事を組み立ててみる）
 8. 素材: 項目・形式・上限、`file` の存在、`transcript`・`poster` の参照先、`credit`・`alt`
 9. きっかけ: 素材の参照先、見せ方と素材の組み合わせ（[見せ方の一覧](#見せ方)）、値の範囲
-9a. 素材集: `collections`・`selectors` の項目（タグ・種類の値の範囲）、素材集がリストにあり使ってよいこと、`source` の参照がすべて解決できること（API-MATERIAL-PRODUCER の手順 3・4）。組み込みのチャンネルでは、解決できない候補だけを飛ばす
+9a. 素材集: `collections`・`selectors` の項目（タグ・種類の値の範囲）、素材集がリストにあり使ってよいこと、`source` の参照がすべて解決できること（API-MATERIALS の手順 3・4）。組み込みのチャンネルでは、解決できない候補だけを飛ばす
 10. アプリが対応していない素材の種類・見せ方を使っていないか（アプリだけが確かめる。審査用の道具は、使っている種類から必要なアプリの段を出す）
 11. パッケージの外の素材: チャンネルを選んだときに取得し、`size` と SHA-256 を確かめる（合わなければその素材を使わず、その素材を使うきっかけを出さない）
 
 1〜10 のどこかで失敗したら、パッケージ全体を拒む（`package_rejected`。理由のコードを下表から付ける）。11 の失敗は、その素材とそれを使うきっかけだけを無効にする。
 
-素材集の取得・確認（API-MATERIAL-PRODUCER の手順 1・2）は、チャンネルとは別に行う。取り込んだあとで素材集が取り下げられた・使えなくなったときは、チャンネルを拒まず、その素材集を参照する候補だけを「出せない」にする（ADR-MATERIAL-PRODUCERS D-12）。
+素材集の取得・確認（API-MATERIALS の手順 1・2）は、チャンネルとは別に行う。取り込んだあとで素材集が取り下げられた・使えなくなったときは、チャンネルを拒まず、その素材集を参照する候補だけを「出せない」にする（ADR-MATERIALS D-12）。
 
 ## エラー表
 
@@ -565,8 +565,8 @@ API-CHANNEL-LIST の `package_rejected` の詳細の理由。審査用の道具�
 | `bad_cue` | きっかけの値の範囲の違反、素材の参照先がない、見せ方と素材の組み合わせが一覧にない |
 | `unsupported_resource` | アプリがまだ対応していない素材の種類・見せ方を使っている（API-CHANNEL-LIST の `minAppVersions` で案内する） |
 | `resource_mismatch` | パッケージの外の素材の大きさ・SHA-256 が合わない（パッケージ全体ではなく、その素材とそれを使うきっかけだけを無効にする） |
-| `unresolved_reference` | `source` の参照が解決できない。宣言していない別名、知らない `builtin:`、素材集のその版にない素材の ID（API-MATERIAL-PRODUCER） |
-| `not_granted` | 素材集の利用許諾が、このチャンネル提供者を含まない（API-MATERIAL-PRODUCER） |
+| `unresolved_reference` | `source` の参照が解決できない。宣言していない別名、知らない `builtin:`、素材集のその版にない素材の ID（API-MATERIALS） |
+| `not_granted` | 素材集の利用許諾が、このチャンネル提供者を含まない（API-MATERIALS） |
 | `collection_not_listed` | 宣言した素材集が、同じリストにない・`minVersion` より古い（取り込み時。取り込んだ後なら候補だけを無効にする） |
 
 ## 確認観点
@@ -592,7 +592,7 @@ API-CHANNEL-LIST の `package_rejected` の詳細の理由。審査用の道具�
 | V-17 | `source` の候補が上から試され、最初に出せたものが使われる。全部出せないときは、その見せ方だけが飛ばされる |
 | V-18 | 宣言していない別名・知らない `builtin:`・素材集にない素材の ID を拒む（`unresolved_reference`） |
 | V-19 | `builtin:ai-guide` を `source` に書いたきっかけに `narration` があると拒む |
-| V-20 | `resources`・`resource`・`narration` だけを使うチャンネルが、素材集に対応したアプリでも同じに動く（API-MATERIAL-PRODUCER W-01） |
+| V-20 | `resources`・`resource`・`narration` だけを使うチャンネルが、素材集に対応したアプリでも同じに動く（API-MATERIALS W-01） |
 | V-21 | `selectors` と題材を問わないきっかけで、`categories` の種類のスポットに近づいたとき、基準に合う素材が出る。合う素材がなければ通常のスポット案内になる |
 | V-22 | 特定のスポットのきっかけがあるスポットでは、題材を問わないきっかけを出さない |
 | V-24 | 審査: 一覧にない `activities`・`genres`・`requires.features` の値を拒む。`activities` がない・空のものを拒む |
@@ -613,7 +613,7 @@ API-CHANNEL-LIST の `package_rejected` の詳細の理由。審査用の道具�
 
 ## 制約
 
-- 機械の確認で防げるのは形式まで。スロットの文章の意味（不適切な語り口）は、人の審査（ADR-CHANNEL-CURATION C-8）と共通の指示に頼る
+- 機械の確認で防げるのは形式まで。スロットの文章の意味（不適切な語り口）は、人の審査（ADR-CHANNELS C-8）と共通の指示に頼る
 - 共通の指示を後ろに付けても、AI がスロットの指示に引きずられる可能性は残る
 - 第 1 版は日本語のチャンネルだけ
 - 「歩いている」の判定は GPS の速さに頼るので、信号待ちなどで立ち止まった直後に全画面を開けることがある
@@ -633,8 +633,8 @@ API-CHANNEL-LIST の `package_rejected` の詳細の理由。審査用の道具�
 ## 関連ドキュメント・参照リンク
 
 - [API-CHANNEL-LIST.md（API-CHANNEL-LIST）](API-CHANNEL-LIST.md): リスト・取得・運営の署名
-- [ADR-CHANNEL-CURATION](../decisions/ADR-CHANNEL-CURATION.md): C-4・C-7・C-8
-- [ADR-MATERIAL-PRODUCERS](../decisions/ADR-MATERIAL-PRODUCERS.md): 素材の素材提供者の切り出し
-- [API-MATERIAL-PRODUCER.md（API-MATERIAL-PRODUCER）](API-MATERIAL-PRODUCER.md): 素材提供者 IF・参照の書き方・省略形の展開・素材集の形式
+- [ADR-CHANNELS](../decisions/ADR-CHANNELS.md): C-4・C-7・C-8
+- [ADR-MATERIALS](../decisions/ADR-MATERIALS.md): 素材の素材提供者の切り出し
+- [API-MATERIALS.md（API-MATERIALS）](API-MATERIALS.md): 素材提供者 IF・参照の書き方・省略形の展開・素材集の形式
 - [channels.md](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/channels.md): アプリ側の設計（組み込みのチャンネル・カスタマイズ・切り替え）
 - [prompts.md](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/prompts.md): SanpoGuide のプロンプトの構成

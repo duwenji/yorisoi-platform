@@ -1,11 +1,11 @@
-# 素材提供者インタフェース契約書
+# 素材のインタフェース契約書
 
 ## 文書情報
 
 | 項目 | 内容 |
 |---|---|
-| 文書ID | API-MATERIAL-PRODUCER |
-| 旧文書ID | API-004 |
+| 文書ID | API-MATERIALS |
+| 旧文書ID | API-004・API-MATERIAL-PRODUCER |
 | ドキュメント種別 | API契約書 |
 | 対象システム/機能 | yorisoi エコシステムの素材（テキスト・画像・音声・映像）の素材提供者と、チャンネルがそれを使うときの共通のインタフェース（IF）。第三者の素材集の形式 |
 | 関連Skill | 020_api-contract-design |
@@ -19,7 +19,7 @@
 
 ## 目的・背景
 
-[ADR-MATERIAL-PRODUCERS](../decisions/ADR-MATERIAL-PRODUCERS.md) で、素材の素材提供者をチャンネルから切り出し、組み込み・第三者・チャンネルに同梱のすべての素材提供者を共通の IF で扱うことにした。本書はその IF と、第三者の素材提供者が出す素材集の形式を定める。
+[ADR-MATERIALS](../decisions/ADR-MATERIALS.md) で、素材の素材提供者をチャンネルから切り出し、組み込み・第三者・チャンネルに同梱のすべての素材提供者を共通の IF で扱うことにした。本書はその IF と、第三者の素材提供者が出す素材集の形式を定める。
 
 IF は、アプリの中のコード（Kotlin の `interface`）と、チャンネル・素材集のファイル（JSON）の両方に現れる。本書は両方に共通する「型と意味」を定め、ファイルの書き方（`channel.json` の `collections`・`source`）は API-CHANNEL-PACKAGE で、リストへの掲載は API-CHANNEL-LIST で定める。
 
@@ -43,9 +43,9 @@ IF は、アプリの中のコード（Kotlin の `interface`）と、チャン�
 
 | 対応元ID | 内容 | 対応状況 |
 |---|---|---|
-| ADR-MATERIAL-PRODUCERS | D-1〜D-16 | 本書で IF と形式にする |
+| ADR-MATERIALS | D-1〜D-16 | 本書で IF と形式にする |
 | API-CHANNEL-PACKAGE | `resources` の形（F-9・F-11）、F-10（取得の時期）、F-12（AI の語りとの関係） | 素材の形を引き継ぐ。F-12 は候補の順番（I-7）で表す |
-| ADR-CHANNEL-CURATION | C-4（身元と署名） | 素材提供者の署名に同じ鍵とアカウントIDを使う |
+| ADR-CHANNELS | C-4（身元と署名） | 素材提供者の署名に同じ鍵とアカウントIDを使う |
 | ADR-AI-ROLES | H-3〜H-5（素材を AI の根拠にする） | I-13〜I-15 と「[AI の根拠](#ai-の根拠)」で形にする |
 
 ## 方針・決定事項
@@ -72,7 +72,7 @@ IF は、アプリの中のコード（Kotlin の `interface`）と、チャン�
 
 | 用語 | 意味 |
 |---|---|
-| 素材提供者 | 素材を出すもの。組み込み・第三者の素材集・チャンネルに同梱の素材の 3 種類（ADR-MATERIAL-PRODUCERS D-2） |
+| 素材提供者 | 素材を出すもの。組み込み・第三者の素材集・チャンネルに同梱の素材の 3 種類（ADR-MATERIALS D-2） |
 | 素材 | アプリ利用者に見せる 1 つの単位。`text`・`image`・`audio`・`video` |
 | 素材集 | 第三者の素材提供者が作り、署名して申請する素材のまとまり。審査・版・取り下げの単位 |
 | 題材 | 素材が何についてのものか。スポット（OSM の ID）・地点（緯度経度と半径）・出来事 |
@@ -86,7 +86,7 @@ IF は、アプリの中のコード（Kotlin の `interface`）と、チャン�
 
 | 項目 | 型 | 内容 |
 |---|---|---|
-| `id` | string | 組み込みは `builtin:<名前>`。第三者は `collection:<素材集のID>`（素材提供者のアカウントIDは含めない。鍵の移し替えで変わらないようにするため。ADR-MATERIAL-PRODUCERS D-17）。同梱は `self` |
+| `id` | string | 組み込みは `builtin:<名前>`。第三者は `collection:<素材集のID>`（素材提供者のアカウントIDは含めない。鍵の移し替えで変わらないようにするため。ADR-MATERIALS D-17）。同梱は `self` |
 | `version` | int | 組み込みはアプリの版、第三者・同梱は素材集・チャンネルの版 |
 | `types` | string[] | 出せる素材の種類 |
 | `subjects` | string[] | 題材で選べる種類。`spot` / `point` / `event` / `none`（題材なし。ID で選ぶだけ） |
@@ -152,7 +152,7 @@ interface Producer {
 
 | No. | 条件 | 方針 |
 |---|---|---|
-| P-1 | `trust` が `reviewed`・`trial` | `fetch=prefetch`・`exposure=none`・`generated=false` 以外は拒む（ADR-MATERIAL-PRODUCERS D-5）。素材集の形式がこれ以外を書けないので、実際には形式の確認で拒まれる |
+| P-1 | `trust` が `reviewed`・`trial` | `fetch=prefetch`・`exposure=none`・`generated=false` 以外は拒む（ADR-MATERIALS D-5）。素材集の形式がこれ以外を書けないので、実際には形式の確認で拒まれる |
 | P-2 | `fetch=onDemand` かつ `exposure=subject` | `trust=builtin` に限る。アプリ利用者の回線の設定に従う（例: Commons の写真は既定で従量制でない回線のときだけ） |
 | P-3 | `generated=true` | 共通の指示（`shared/guard`）を必ず付ける。カード・解説の画面に「AI による」と出す |
 | P-4 | すべて | 見せ方の安全（F-8）、話す順番（F-13）、素材の上限（API-CHANNEL-PACKAGE）を当てる。上限を超える素材は `unavailable(failed)` と同じに扱う |
@@ -170,7 +170,7 @@ interface Producer {
 | `builtin:ambient` | `Soundscape`・`AmbientPlayer` | 合成の背景音（`audio`、ループ） | `none` | `local` / `none` / false | `sound`（`auto`・`rain`・`waves`・`wind`・`birds`・`insects`・`temple`） |
 | `builtin:mood-scene` | `MoodScene` | 雰囲気の絵（`image`、`content=render`） | `none` | `local` / `none` / false | なし |
 
-- 組み込みの素材提供者を足すのはアプリの更新だけ（ADR-MATERIAL-PRODUCERS D-6）。足したら本表に加え、本書の版を上げる
+- 組み込みの素材提供者を足すのはアプリの更新だけ（ADR-MATERIALS D-6）。足したら本表に加え、本書の版を上げる
 - `builtin:ai-guide` が `unavailable(no_key)` を返したとき定型文に移るのは、省略形の展開で `builtin:fallback-text` を候補の最後に入れることで表す
 
 ## 参照の書き方
@@ -200,7 +200,7 @@ interface Producer {
 ]
 ```
 
-- `collections[]` は素材集の ID だけで指す。素材提供者のアカウントIDは書かない。素材提供者が誰かは、リストの `collections[].producer` で分かる（ADR-MATERIAL-PRODUCERS D-17）
+- `collections[]` は素材集の ID だけで指す。素材提供者のアカウントIDは書かない。素材提供者が誰かは、リストの `collections[].producer` で分かる（ADR-MATERIALS D-17）
 - `source` は 1〜3 個（I-7）。並べた順に試す
 - `#` のない参照で、きっかけに題材がない（`event` の `select` など）ときは、その参照は `none`
 - 宣言した素材集で使っていないものがあれば拒む。使う素材の ID は、管理システムがチャンネルの申請時に、リストに載った版で確かめる（D-8）
@@ -222,7 +222,7 @@ interface Producer {
 
 ## 基準で選ぶ素材提供者
 
-ADR-MATERIAL-PRODUCERS D-23〜D-27 による。チャンネルは、素材集・素材を指す代わりに、選ぶ基準を書ける。
+ADR-MATERIALS D-23〜D-27 による。チャンネルは、素材集・素材を指す代わりに、選ぶ基準を書ける。
 
 ```json
 "selectors": [
@@ -248,7 +248,7 @@ ADR-MATERIAL-PRODUCERS D-23〜D-27 による。チャンネルは、素材集・
 ### 複数の素材が当たったとき
 
 1. `producers` に書かれた素材提供者（書かれた順）
-2. 確認済みの素材提供者（ADR-MATERIAL-PRODUCERS の未決事項 No.4 で印を付けることにした場合）
+2. 確認済みの素材提供者（ADR-MATERIALS の未決事項 No.4 で印を付けることにした場合）
 3. 素材集の承認日の新しい順、同じ素材集の中では `resources` の順
 
 同じ散歩の中では、同じスポット・地点に対して最初に出した素材を出し続ける（散歩ごとに変わることはある）。
@@ -324,11 +324,11 @@ resources/
 | 項目 | 内容 |
 |---|---|
 | `format` | 本書は `1` |
-| `id` | 英小文字・数字・`-`、3〜40 文字。リストの中で一意。最初に登録した素材提供者が持ち、取り下げ・退会のあとも再利用しない（ADR-MATERIAL-PRODUCERS D-17）。チャンネルの ID とは別の名前空間 |
+| `id` | 英小文字・数字・`-`、3〜40 文字。リストの中で一意。最初に登録した素材提供者が持ち、取り下げ・退会のあとも再利用しない（ADR-MATERIALS D-17）。チャンネルの ID とは別の名前空間 |
 | `version` | 1 以上 |
 | `producer` | 素材提供者のアカウントID（`sg1…`）。`signature.json` の公開鍵から計算した値と一致し、リストの `collections[].producer` とも一致すること（API-CHANNEL-PACKAGE F-6 と同じ確かめ方）。鍵を移し替えたあとの版は、新しいアカウントIDの鍵（その秘密鍵）で署名する。前の鍵で署名した承認済みの版は、リストが同じ素材集の版として載せている限り使える |
 | `name` / `summary` / `lang` | API-CHANNEL-PACKAGE の `channel.json` と同じ決まり |
-| `grants.publishers` | 使ってよいチャンネル提供者。`"*"`（誰でも）か、アカウントIDの配列（1〜50 個）（ADR-MATERIAL-PRODUCERS D-9） |
+| `grants.publishers` | 使ってよいチャンネル提供者。`"*"`（誰でも）か、アカウントIDの配列（1〜50 個）（ADR-MATERIALS D-9） |
 | `grants.apps` | （I-11）使ってよいアプリの ID の配列（1〜20 個）。省略はすべてのアプリ |
 | `grants.grounding` | （I-13）AI の根拠に使ってよいか。省略は偽。真のときは、根拠になるテキスト（`text` の本文・`alt`・書き起こし）が API-CHANNEL-PACKAGE F-2 と同じ決まり（`{{`・URL を含まない）に従うこと |
 | `resources[]` | API-CHANNEL-PACKAGE の `resources[]` と同じ項目・上限。加えて `about`（任意） |
@@ -339,7 +339,7 @@ resources/
 - 素材は 1 つ以上（空の素材集は拒む）。`resources/` の下に置けるのは、`file` で指されたファイルだけ
 - 素材集の大きさの上限は、API-CHANNEL-PACKAGE のチャンネル 1 つ分と同じ（外の素材の合計 200MB、映像を除いて 50MB、パッケージ 2MB（API-CHANNEL-LIST））。1 つのチャンネルが参照する素材集すべてと同梱の素材を合わせた前もっての取得も、映像を除いて 50MB まで
 - 素材は 1 つの素材集で 500 個まで
-- 更新で、公開中のチャンネルが参照している素材の ID を消す・`type` を変えることはできない（管理システムが拒む。ADR-MATERIAL-PRODUCERS D-8）
+- 更新で、公開中のチャンネルが参照している素材の ID を消す・`type` を変えることはできない（管理システムが拒む。ADR-MATERIALS D-8）
 
 ## 確かめる手順（アプリ・管理システム共通）
 
@@ -395,7 +395,7 @@ resources/
 - `channel.json` は省略形のまま読めるので、`collections`・`source` を使わないチャンネルはそのまま動く
 - `collections`・`source` を使うチャンネルは、素材集に対応していないアプリで拒まれる（知らない項目は無視されるが、`source` だけの `present` は `resource` がないので形式の誤りになる）。API-CHANNEL-LIST の必要な版で案内する
 - 組み込みの素材提供者を足すのは互換性のある変更。知らない `builtin:` は `none` として扱い、次の候補に進む
-- 方針（P-1〜P-5）を緩める変更は、ADR-MATERIAL-PRODUCERS の見直しの条件にあたる
+- 方針（P-1〜P-5）を緩める変更は、ADR-MATERIALS の見直しの条件にあたる
 - `grants.grounding` を知らないアプリは、素材集を根拠に使わない（省略と同じ扱いになる）
 - リストの `collections[]`・`producerChange` の形は API-CHANNEL-LIST で定める
 
@@ -413,7 +413,7 @@ resources/
 
 ## 関連ドキュメント・参照リンク
 
-- [ADR-MATERIAL-PRODUCERS](../decisions/ADR-MATERIAL-PRODUCERS.md): 素材提供者を切り出す判断
+- [ADR-MATERIALS](../decisions/ADR-MATERIALS.md): 素材提供者を切り出す判断
 - [API-CHANNEL-PACKAGE.md（API-CHANNEL-PACKAGE）](API-CHANNEL-PACKAGE.md): 素材・きっかけ・見せ方
 - [API-CHANNEL-LIST.md（API-CHANNEL-LIST）](API-CHANNEL-LIST.md): 承認済みチャンネル・リスト
 - [channels.md](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/channels.md): アプリ側の設計

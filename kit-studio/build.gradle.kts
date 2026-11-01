@@ -1,4 +1,4 @@
-// The studio on the app's side (platform API-STUDIO): notes and placements near the walk or ride,
+// The studio on the app's side (platform API-LOCAL-MATERIALS): notes and placements near the walk or ride,
 // read out between the narration, and notes placed by voice. Published with the other modules.
 plugins {
     alias(libs.plugins.android.library)
@@ -27,7 +27,7 @@ kotlin {
 }
 
 dependencies {
-    // The relay's session (API-STUDIO ST-2).
+    // The relay's session (API-LOCAL-MATERIALS ST-2).
     api(project(":kit-llm"))
     // Cells (Geohash).
     implementation(project(":kit-geo"))

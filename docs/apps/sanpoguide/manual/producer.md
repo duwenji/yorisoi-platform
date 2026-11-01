@@ -4,7 +4,7 @@
 
 対象は SanpoGuide（散策ガイド）の Android アプリでの素材の表示・利用です。
 
-あなたの素材集の素材が、SanpoGuide のアプリ利用者にいつ・どう出るかを確かめるための手引きです。素材集の作り方・申請・身元の確認は、管理システムの[素材提供者ガイド](https://github.com/duwenji/yorisoi-console/blob/main/docs/guide/producer.md)と platform の [API-MATERIAL-PRODUCER](../../../contracts/API-MATERIAL-PRODUCER.md) を先に読んでください。
+あなたの素材集の素材が、SanpoGuide のアプリ利用者にいつ・どう出るかを確かめるための手引きです。素材集の作り方・申請・身元の確認は、管理システムの[素材提供者ガイド](https://github.com/duwenji/yorisoi-console/blob/main/docs/guide/producer.md)と platform の [API-MATERIALS](../../../contracts/API-MATERIALS.md) を先に読んでください。
 
 ## 目次
 

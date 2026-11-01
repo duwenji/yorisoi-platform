@@ -13,7 +13,7 @@ import kotlinx.coroutines.withContext
 import kotlin.coroutines.resume
 
 /**
- * A note spoken and written out on the device (REQ-STUDIO D-3, F-1, F-2): the voice never leaves
+ * A note spoken and written out on the device (REQ-NOTES D-3, F-1, F-2): the voice never leaves
  * it. Needs Android 12's on-device recognition; without it the app doesn't offer to place notes.
  */
 class NoteRecognizer(private val context: Context) {
@@ -63,7 +63,7 @@ class NoteRecognizer(private val context: Context) {
     }
 
     companion object {
-        /** A note is up to 60 characters (API-STUDIO); longer speech is cut there. */
+        /** A note is up to 60 characters (API-LOCAL-MATERIALS); longer speech is cut there. */
         const val MAX_CHARS = 60
 
         fun fit(text: String): String = text.codePoints().limit(MAX_CHARS.toLong()).toArray().let { String(it, 0, it.size) }

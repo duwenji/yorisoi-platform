@@ -14,7 +14,7 @@ import java.io.IOException
 import java.time.Instant
 import java.util.concurrent.TimeUnit
 
-/** A note as the studio lists it (API-STUDIO「一言の項目」). */
+/** A note as the studio lists it (API-LOCAL-MATERIALS「一言の項目」). */
 data class Note(
     val id: String,
     val text: String,
@@ -30,7 +30,7 @@ data class PlacementAudio(val url: String, val durationSec: Double, val bytes: L
 /** Reading hours in Japan, `HH:mm` to `HH:mm`. */
 data class Hours(val from: String, val to: String)
 
-/** A placement as the studio lists it (API-STUDIO「掲載の項目」). */
+/** A placement as the studio lists it (API-LOCAL-MATERIALS「スタジオの項目」). */
 data class Placement(
     val id: String,
     val providerName: String,
@@ -47,7 +47,7 @@ data class CellList(val notes: List<Note>, val placements: List<Placement>, val 
 
 data class PlacedNote(val id: String, val expiresAt: Instant, val remainingToday: Int)
 
-/** API-STUDIO「概数」: null below 3. */
+/** API-LOCAL-MATERIALS「概数」: null below 3. */
 data class Approx(val atLeast: Int)
 
 data class MyNote(
@@ -70,7 +70,7 @@ enum class NoteTtl(val wire: String) { HOUR("1h"), DAY("24h"), WEEK("7d") }
 
 enum class ReportReason(val wire: String) { DANGER("danger"), HARASSMENT("harassment"), AD("ad"), RIGHTS("rights"), INAPPROPRIATE("inappropriate"), OTHER("other") }
 
-/** One heard or opened note or placement (API-STUDIO `reactions`). */
+/** One heard or opened note or placement (API-LOCAL-MATERIALS `reactions`). */
 data class Ref(val type: String, val id: String) {
     companion object {
         fun note(id: String) = Ref("note", id)
@@ -79,7 +79,7 @@ data class Ref(val type: String, val id: String) {
 }
 
 /**
- * A studio failure: [code] is API-STUDIO's, or `network` when the studio couldn't be reached.
+ * A studio failure: [code] is API-LOCAL-MATERIALS's, or `network` when the studio couldn't be reached.
  * [until] (a ban) and [resetsAt] (today's notes) come with some codes.
  */
 class StudioException(
@@ -90,7 +90,7 @@ class StudioException(
     cause: Throwable? = null,
 ) : IOException(message, cause)
 
-/** Where the studio's bearer token comes from: the operator's AI relay (API-STUDIO ST-2). */
+/** Where the studio's bearer token comes from: the operator's AI relay (API-LOCAL-MATERIALS ST-2). */
 interface StudioTokens {
     suspend fun token(): String
     fun forget()
@@ -102,7 +102,7 @@ interface StudioApi {
     suspend fun reactions(heard: List<Ref>, opened: List<Ref>, liked: List<String>)
 }
 
-/** The studio's API for the apps (platform API-STUDIO). */
+/** The studio's API for the apps (platform API-LOCAL-MATERIALS). */
 class StudioClient(
     baseUrl: String,
     private val tokens: StudioTokens,
@@ -204,7 +204,7 @@ class StudioClient(
                 } catch (e: JSONException) {
                     JSONObject()
                 }
-                // WAF answers 429 without a problem body (API-STUDIO エラー表).
+                // WAF answers 429 without a problem body (API-LOCAL-MATERIALS エラー表).
                 val code = problem.optString("code").ifEmpty {
                     when {
                         res.code == 429 -> "too_many_requests"
@@ -275,7 +275,7 @@ internal fun JSONArray.objects(): List<JSONObject> = (0 until length()).map(::ge
 
 internal fun JSONObject.optStringOrNull(key: String): String? = if (has(key) && !isNull(key)) getString(key) else null
 
-/** The relay's session as the studio's tokens (API-STUDIO ST-2). */
+/** The relay's session as the studio's tokens (API-LOCAL-MATERIALS ST-2). */
 class RelayTokens(private val relay: io.github.duwenji.yorisoi.kit.llm.RelayClient) : StudioTokens {
     override suspend fun token(): String = relay.token()
     override fun forget() = relay.forgetToken()

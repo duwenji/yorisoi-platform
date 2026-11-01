@@ -50,7 +50,7 @@ ADR-AI-ROLES は、運営が AI を中継する案（案 D）を、位置や題�
 | ADR-AI-ROLES H-9 | アプリ利用者が決める 1 日の上限 | 自分のキーでは今のまま。運営の AI では使わず、運営が決めた上限をサーバーで守る（R-2） |
 | ADR-AI-ROLES H-6 ③ | 出力の機械の確認はアプリで行う | 変えない（R-8） |
 | ADR-AI-ROLES 案 D・見直しの条件 | 運営のサーバーで AI を中継する | 中継は採る。出力の確認はサーバーに移さない |
-| ADR-CHANNEL-CURATION 背景 1 | 第三者のプロンプトでアプリ利用者の費用が増える | 運営の AI では運営の費用になる。運営が決めた上限で抑える |
+| ADR-CHANNELS 背景 1 | 第三者のプロンプトでアプリ利用者の費用が増える | 運営の AI では運営の費用になる。運営が決めた上限で抑える |
 | [関係者の課題と対応案](../overview/stakeholder-needs.md) W-3 | 費用の見え方 | 運営の AI では残りの回数を見せる（R-11） |
 
 ## 方針・決定事項
@@ -187,7 +187,7 @@ flowchart LR
 - 運営の AI は、運営の AWS アカウントの Bedrock だけを呼ぶ。運営は AI サービスのキーを持たない
 - 中継はプロンプトと出力を保存しない（R-13）
 - 安全に関わる決まり（固定の指示・出力の確認・止められない出来事）は、2 つの経路で同じ（ADR-AI-ROLES H-6）
-- 運営の担当者は 1 人（ADR-CHANNEL-CURATION C-10）。運用は警報の知らせと自動の停止で回す
+- 運営の担当者は 1 人（ADR-CHANNELS C-10）。運用は警報の知らせと自動の停止で回す
 
 ## 未決事項・リスク
 
@@ -205,7 +205,7 @@ flowchart LR
 ## 関連ドキュメント・参照リンク
 
 - [ADR-AI-ROLES](ADR-AI-ROLES.md)（H-6・H-8・H-9）
-- [ADR-CHANNEL-CURATION](ADR-CHANNEL-CURATION.md)（C-10）
+- [ADR-CHANNELS](ADR-CHANNELS.md)（C-10）
 - [console ADR-001](https://github.com/duwenji/yorisoi-console/blob/main/docs/adr/ADR-001-aws-architecture.md)（AWS の構成・配備）
 - [SanpoGuide プライバシーポリシー](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/privacy-policy.md)
 - [SanpoGuide Play Console](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/play-console.md)
