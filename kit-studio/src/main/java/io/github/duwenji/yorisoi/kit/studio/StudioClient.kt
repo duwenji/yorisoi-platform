@@ -30,7 +30,7 @@ data class PlacementAudio(val url: String, val durationSec: Double, val bytes: L
 /** Reading hours in Japan, `HH:mm` to `HH:mm`. */
 data class Hours(val from: String, val to: String)
 
-/** A placement as the studio lists it (API-LOCAL-MATERIALS「掲載の項目」). */
+/** A placement as the studio lists it (API-LOCAL-MATERIALS「スタジオの項目」). */
 data class Placement(
     val id: String,
     val providerName: String,
