@@ -91,7 +91,7 @@ class RelayClient(
 
     /**
      * A token of this install's session, for another service that accepts the relay's sessions
-     * (the studio, platform API-STUDIO ST-2). Opens a session when there is none.
+     * (the studio, platform API-LOCAL-MATERIALS ST-2). Opens a session when there is none.
      */
     suspend fun token(): String = withContext(Dispatchers.IO) { session() }
 

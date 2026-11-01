@@ -15,7 +15,7 @@ import java.security.MessageDigest
 import kotlin.coroutines.resume
 
 /**
- * Placements' audio kept in the app's cache, named by its SHA-256 (API-STUDIO D-22): fetched with
+ * Placements' audio kept in the app's cache, named by its SHA-256 (API-LOCAL-MATERIALS D-22): fetched with
  * the cell list, before the user comes near, and used only when its hash matches.
  */
 class ClipCache(private val dir: File, private val http: OkHttpClient = OkHttpClient()) : ClipFetcher {

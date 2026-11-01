@@ -19,7 +19,7 @@
 
 ## 目的・背景
 
-[ADR-CHANNEL-CURATION](../decisions/ADR-CHANNEL-CURATION.md) で、第三者が配信するチャンネルは、システム運営が審査し、基準を満たしたものだけ取り込むことにした。審査と公開は、アプリとは別の **チャンネル管理システム** で行う。
+[ADR-CHANNELS](../decisions/ADR-CHANNELS.md) で、第三者が配信するチャンネルは、システム運営が審査し、基準を満たしたものだけ取り込むことにした。審査と公開は、アプリとは別の **チャンネル管理システム** で行う。
 
 本書は、チャンネル管理システムとアプリの境界、つまり **アプリが取得する承認済みチャンネル・リストの形式と、アプリがそれをどう確かめて使うか** を定める。本書に準拠していれば、管理システムの実装方法と置き場所は問わない（API-SECRET-MESSAGES の D-5 と同じ考え方）。
 
@@ -29,7 +29,7 @@
 - リストの発行元（チャンネル・リストを公開する運営）の検出と、署名の鍵
 - 承認済みチャンネル・リストの形式と署名
 - 取り下げ（リストからの削除と `revoked`）
-- 第三者の素材集（[ADR-MATERIAL-PRODUCERS](../decisions/ADR-MATERIAL-PRODUCERS.md)）の掲載・取得・取り下げ
+- 第三者の素材集（[ADR-MATERIALS](../decisions/ADR-MATERIALS.md)）の掲載・取得・取り下げ
 - チャンネル提供者が審査前に自分の端末で試すための試用チケット
 - アプリの振る舞い（取得の時期、確認の手順、失敗したときの扱い）
 - アプリの設定画面でのリストの扱い
@@ -44,9 +44,9 @@
 
 | 対応元ID | 内容 | 対応状況 |
 |---|---|---|
-| ADR-CHANNEL-CURATION | 第三者のチャンネルは運営の審査と署名を経たものだけ取り込む（C-1〜C-8） | 本書で取り込みの形式を定める |
+| ADR-CHANNELS | 第三者のチャンネルは運営の審査と署名を経たものだけ取り込む（C-1〜C-8） | 本書で取り込みの形式を定める |
 | API-SECRET-MESSAGES | アカウントID（`sg1…`）の作り方、Ed25519、D-5 | 流用 |
-| ADR-MATERIAL-PRODUCERS | D-7（素材集をリストに載せる）、D-8（使う版はリストが決める）、D-12（取り下げ）、D-17（`producerChange`） | `collections[]`・`revokedCollections[]` として形式にする |
+| ADR-MATERIALS | D-7（素材集をリストに載せる）、D-8（使う版はリストが決める）、D-12（取り下げ）、D-17（`producerChange`） | `collections[]`・`revokedCollections[]` として形式にする |
 | API-CHANNEL-PACKAGE | 取得の前に示す情報（使う素材の種類と大きさ） | `media`・`resourcesSize` として載せる（P-14） |
 
 ## 方針・決定事項
@@ -59,7 +59,7 @@
 | L-2 | アプリの取り込み経路 | 通常は承認済みチャンネル・リストだけ。加えて、チャンネル提供者が審査前に自分の端末で試せる試用チケット（開発者モードのときだけ、QR コードで読み込む） |
 | L-3 | リストへの署名 | 管理システムの中で、承認したときに自動で署名する。秘密鍵はクラウドの鍵管理サービス（KMS）に置く |
 | L-4 | リストの取得先 | 設定で変えられる。既定はアプリに内蔵したリスト。ほかのリストは、設定で URL と鍵の指紋を足して使う |
-| L-5 | 内蔵のリストを運営する人 | 当面は開発者本人（ADR-CHANNEL-CURATION C-10） |
+| L-5 | 内蔵のリストを運営する人 | 当面は開発者本人（ADR-CHANNELS C-10） |
 
 ### 鍵・署名・取り下げ
 
@@ -78,11 +78,11 @@
 | No. | 論点 | 決定 |
 |---|---|---|
 | P-8 | リストの署名の形（P-3 の補足） | リストは、本体に直接署名せず、本体の SHA-256 を含む小さな**要約**（`channel-list-digest`）に署名する。AWS KMS の Ed25519 は一度に 4,096 バイトまでしか署名できず、リスト（最大 1MB）に直接署名できないため。要約は通常の Ed25519 で署名するので、アプリは API-SECRET-MESSAGES と同じ Tink だけで確かめられる。鍵セット・試用チケットは小さいので、P-3 の形のまま。どの文書がどちらの形かは `type` で固定し、文書の側から選べないようにする |
-| P-9 | チャンネル提供者の鍵の移し替え | チャンネル提供者が鍵をなくした・漏れたときは、運営が本人確認のうえで、チャンネルを別の鍵（別のアカウントID）に移せる（ADR-CHANNEL-CURATION C-11）。移したことはリストの `publisherChange` で示す。アプリは運営が署名したリストを正とし、移し替えを受け入れてアプリ利用者に一度知らせる |
+| P-9 | チャンネル提供者の鍵の移し替え | チャンネル提供者が鍵をなくした・漏れたときは、運営が本人確認のうえで、チャンネルを別の鍵（別のアカウントID）に移せる（ADR-CHANNELS C-11）。移したことはリストの `publisherChange` で示す。アプリは運営が署名したリストを正とし、移し替えを受け入れてアプリ利用者に一度知らせる |
 
 ### 素材集
 
-[ADR-MATERIAL-PRODUCERS](../decisions/ADR-MATERIAL-PRODUCERS.md)・[API-MATERIAL-PRODUCER](API-MATERIAL-PRODUCER.md) による。
+[ADR-MATERIALS](../decisions/ADR-MATERIALS.md)・[API-MATERIALS](API-MATERIALS.md) による。
 
 | No. | 論点 | 決定 |
 |---|---|---|
@@ -91,7 +91,7 @@
 | P-12 | 形式の版 | 項目の追加では `format` を上げない（知らない項目は無視する）。素材集を使うチャンネルは、素材集に対応していないアプリには、必要な版（P-20）で「アプリの更新が必要」と出る |
 | P-13 | 素材提供者の鍵の移し替え | `collections[].producerChange` を、P-9 の `publisherChange` と同じ決まりで載せる |
 | P-14 | 取得の前に示す情報 | `channels[].media`（使う素材の種類）と `channels[].resourcesSize`（チャンネルを選んだときに前もって取得する大きさの合計。宣言した素材集の分を含む）を載せる。管理システムが計算する |
-| P-15 | 基準で選ぶための情報（ADR-MATERIAL-PRODUCERS D-23・D-24） | `collections[]` に `tags`（素材のタグの和集合）・`regions`（素材の題材から計算した geohash の 3 文字の一覧）・`grants`（素材集の利用許諾の写し）を載せる。すべて管理システムが素材集のパッケージから作る。アプリは、基準に合い、地域が重なり、利用許諾が合う素材集だけを取得できる（取得してから捨てる無駄と、余分な地域を伝えることを避ける）。取得したあと、パッケージの値と一致するかを確かめる |
+| P-15 | 基準で選ぶための情報（ADR-MATERIALS D-23・D-24） | `collections[]` に `tags`（素材のタグの和集合）・`regions`（素材の題材から計算した geohash の 3 文字の一覧）・`grants`（素材集の利用許諾の写し）を載せる。すべて管理システムが素材集のパッケージから作る。アプリは、基準に合い、地域が重なり、利用許諾が合う素材集だけを取得できる（取得してから捨てる無駄と、余分な地域を伝えることを避ける）。取得したあと、パッケージの値と一致するかを確かめる |
 
 ### エコシステム
 
@@ -100,7 +100,7 @@
 | No. | 論点 | 決定 |
 |---|---|---|
 | P-19 | 絞り込みの情報 | `channels[]` に `activities`・`genres`・`requires`（`features` の配列）を載せる。管理システムがパッケージの `channel.json` から写す。アプリはパッケージを取得する前に、リストの値で絞り込める（API-CHANNEL-PACKAGE G-4）。取得したあと、パッケージの値と一致するかを確かめる |
-| P-20 | アプリごとの必要な版 | アプリごとに versionCode が違うため、`channels[].minAppVersions`・`collections[].minAppVersions`（アプリの ID → versionCode）を載せる。アプリの ID は `core-format` の一覧（`sanpoguide`・`cycleguide`）。アプリは自分の ID の値を使い、値がなければ版の条件はない。チャンネルの過ごし方・必要な機能が合わないアプリ、素材集の `grants.apps`（API-MATERIAL-PRODUCER）が含まないアプリは載せない（そのアプリは P-19 と `grants.apps` で使わない） |
+| P-20 | アプリごとの必要な版 | アプリごとに versionCode が違うため、`channels[].minAppVersions`・`collections[].minAppVersions`（アプリの ID → versionCode）を載せる。アプリの ID は `core-format` の一覧（`sanpoguide`・`cycleguide`）。アプリは自分の ID の値を使い、値がなければ版の条件はない。チャンネルの過ごし方・必要な機能が合わないアプリ、素材集の `grants.apps`（API-MATERIALS）が含まないアプリは載せない（そのアプリは P-19 と `grants.apps` で使わない） |
 
 ### 全体の構成
 
@@ -114,7 +114,7 @@ flowchart LR
         PUB --> REV --> K
     end
     K -- "署名済みのリスト・試用チケット" --> H["置き場所（問わない）<br/>静的ファイル・CDN"]
-    H -- "HTTPS" --> A["アプリ<br/>ルート鍵 → 署名鍵 → リスト → パッケージの順に確認<br/>ADR-CHANNEL-CURATION C-7 の上限を強制"]
+    H -- "HTTPS" --> A["アプリ<br/>ルート鍵 → 署名鍵 → リスト → パッケージの順に確認<br/>ADR-CHANNELS C-7 の上限を強制"]
 ```
 
 ## エンドポイント一覧
@@ -286,8 +286,8 @@ flowchart LR
 | `expiresAt` | string | `issuedAt` から 14 日以内。管理システムは、内容が変わらなくても期限が切れる前に作り直して公開する |
 | `channels[].id` | string | リストの中で一意。英小文字・数字・`-`、3〜40 文字。アプリの中では「リストID＋id」で区別する |
 | `channels[].version` | int | 審査を通るたびに増える。リストに載せるのは各チャンネルの最新の承認済みの版 1 つだけ |
-| `channels[].publisher` | string | チャンネル提供者のアカウントID（API-SECRET-MESSAGES と同じ鍵）。ADR-CHANNEL-CURATION C-4 のとおり、パッケージにはチャンネル提供者の署名も付く（形式は API-CHANNEL-PACKAGE） |
-| `channels[].publisherChange` | object? | 運営がチャンネル提供者の鍵を移し替えた（P-9・ADR-CHANNEL-CURATION C-11）ときだけ付ける。`from` は前のアカウントID、`at` は移し替えた日時、`reason` はアプリ利用者に見せる理由。移し替え後の最初の版から、少なくとも 90 日は載せ続ける |
+| `channels[].publisher` | string | チャンネル提供者のアカウントID（API-SECRET-MESSAGES と同じ鍵）。ADR-CHANNELS C-4 のとおり、パッケージにはチャンネル提供者の署名も付く（形式は API-CHANNEL-PACKAGE） |
+| `channels[].publisherChange` | object? | 運営がチャンネル提供者の鍵を移し替えた（P-9・ADR-CHANNELS C-11）ときだけ付ける。`from` は前のアカウントID、`at` は移し替えた日時、`reason` はアプリ利用者に見せる理由。移し替え後の最初の版から、少なくとも 90 日は載せ続ける |
 | `channels[].regions` | string[]? | 地域に限ったチャンネルの geohash の接頭辞。省略するとどこでも使える。アプリは一覧の並び順に使うだけで、地域の外でも使える |
 | `channels[].package.format` | int | パッケージの形式の版（API-CHANNEL-PACKAGE）。アプリが知らない版のチャンネルは一覧に出さない |
 | `channels[].minAppVersions` | object | （P-20）アプリの ID → 必要な versionCode。満たさなければ一覧に「アプリの更新が必要」と出す。自分の ID の値がなければ版の条件はない |
@@ -296,17 +296,17 @@ flowchart LR
 | `channels[].requires` | string[] | （P-19）パッケージの `requires.features` |
 | `revoked[]` | object[] | 問題があって止めたチャンネル。`versions` を省略するとすべての版 |
 | `channels[].media` | string[] | チャンネルが使う素材の種類（`text`・`image`・`audio`・`video`）。同梱の素材と、宣言した素材集の参照する素材を合わせたもの。組み込みの素材提供者の分は含めない |
-| `channels[].resourcesSize` | int | チャンネルを選んだときに前もって取得する大きさの合計（バイト）。パッケージの外の素材のうち、きっかけで使うもの（映像を除く）と、宣言した素材集のパッケージ・素材を含む。リストに載っている素材集の版で計算する。基準で選ぶ素材（`selectors`）は含めない（取得する地域で変わるため。上限は API-MATERIAL-PRODUCER P-6） |
+| `channels[].resourcesSize` | int | チャンネルを選んだときに前もって取得する大きさの合計（バイト）。パッケージの外の素材のうち、きっかけで使うもの（映像を除く）と、宣言した素材集のパッケージ・素材を含む。リストに載っている素材集の版で計算する。基準で選ぶ素材（`selectors`）は含めない（取得する地域で変わるため。上限は API-MATERIALS P-6） |
 | `collections[]` | object[] | 承認済みの素材集（P-10）。空でも載せる。各素材集の最新の承認済みの版 1 つだけ |
-| `collections[].id` | string | リストの中で一意。チャンネルの `id` とは別の名前空間。書式はチャンネルの `id` と同じ。取り下げ・退会のあとも再利用しない（ADR-MATERIAL-PRODUCERS D-17） |
+| `collections[].id` | string | リストの中で一意。チャンネルの `id` とは別の名前空間。書式はチャンネルの `id` と同じ。取り下げ・退会のあとも再利用しない（ADR-MATERIALS D-17） |
 | `collections[].version` | int | 審査を通るたびに増える |
 | `collections[].producer` | string | 素材提供者のアカウントID。素材集の `signature.json` の公開鍵と、`collection.json` の `producer` と一致すること |
 | `collections[].producerName` | string | 素材提供者の表示名。アプリは素材の出典の横に出す |
 | `collections[].producerChange` | object? | 素材提供者の鍵を移し替えたときだけ（P-13）。決まりは `publisherChange` と同じ |
-| `collections[].tags` | string[] | （P-15）素材に付いたタグの和集合（API-MATERIAL-PRODUCER「タグ」） |
-| `collections[].regions` | string[]? | （P-15）素材の題材（`about`）の位置（スポットも地点も `lat`・`lon` を持つ。API-MATERIAL-PRODUCER）を geohash の 3 文字にしたものの一覧。重複なし・辞書順。題材を持つ素材がなければ省略（地域を問わない） |
+| `collections[].tags` | string[] | （P-15）素材に付いたタグの和集合（API-MATERIALS「タグ」） |
+| `collections[].regions` | string[]? | （P-15）素材の題材（`about`）の位置（スポットも地点も `lat`・`lon` を持つ。API-MATERIALS）を geohash の 3 文字にしたものの一覧。重複なし・辞書順。題材を持つ素材がなければ省略（地域を問わない） |
 | `collections[].grants` | object | （P-15）`collection.json` の `grants` の写し。アプリは取得後に一致を確かめ、違えば `collection_rejected` |
-| `collections[].package` | object | 素材集のパッケージ（API-MATERIAL-PRODUCER「素材集の形式」）。`format` は素材集の形式の版 |
+| `collections[].package` | object | 素材集のパッケージ（API-MATERIALS「素材集の形式」）。`format` は素材集の形式の版 |
 | `collections[].media`・`resourcesSize` | | 素材集の全体での値 |
 | `collections[].minAppVersions` | object | （P-20）`channels[].minAppVersions` と同じ。満たさない素材集は、使うチャンネルの候補として「出せない」になる |
 | `revokedCollections[]` | object[] | 問題があって止めた素材集（P-11）。空でも載せる。`versions` を省略するとすべての版。取り下げから 7 日載せる（チャンネルと同じ） |
@@ -332,8 +332,8 @@ flowchart LR
 - QR コードには、署名付き文書の形（`payload`・`keyId`・`sig`）をそのまま入れる。鍵セットはリストから取得して確かめる
 - アプリは開発者モードのときだけ読み込む。有効期限は 7 日以内
 - 試用中のチャンネルには、画面と最初の話しかけで「審査前の試用」と示す。ほかの人に共有する機能はない
-- 審査前でも ADR-CHANNEL-CURATION C-7（安全の案内、共通ルール、上限）は同じに強制する
-- 試用のチャンネルが使える素材集は、リストに載っている承認済みのものだけ。審査前の素材集を試す方法は、まだ定めない（API-MATERIAL-PRODUCER の未決事項）
+- 審査前でも ADR-CHANNELS C-7（安全の案内、共通ルール、上限）は同じに強制する
+- 試用のチャンネルが使える素材集は、リストに載っている承認済みのものだけ。審査前の素材集を試す方法は、まだ定めない（API-MATERIALS の未決事項）
 
 ## 呼び出しシーケンス
 
@@ -357,7 +357,7 @@ sequenceDiagram
     A->>A: size・SHA-256 を確認 → API-CHANNEL-PACKAGE の確認 → 保存
     A->>H: GET collections[].package.url（宣言した素材集）
     H-->>A: 素材集のパッケージ
-    A->>A: size・SHA-256 を確認 → API-MATERIAL-PRODUCER の確認 → 保存<br/>きっかけで使う外の素材を前もって取得
+    A->>A: size・SHA-256 を確認 → API-MATERIALS の確認 → 保存<br/>きっかけで使う外の素材を前もって取得
 ```
 
 ### アプリの振る舞い
@@ -371,9 +371,9 @@ sequenceDiagram
 | 取り下げ | `revoked` に載った、またはリストから消えたチャンネルは使わない。`revoked` に載ったものはパッケージを消し、理由を知らせる。散歩中に分かったら（散歩の開始時の取得で）その時点で標準に戻す |
 | 位置情報 | 取得の要求に位置情報を含めない。`regions` による並べ替えは端末で行う |
 | 素材集の取得 | チャンネルのパッケージを取得したときに、そのチャンネルが宣言した素材集のパッケージと、きっかけで使う素材をまとめて取得する（API-CHANNEL-PACKAGE F-10）。一覧には `resourcesSize` を出し、従量制の回線では取得の前に確かめる |
-| 基準で選ぶ素材集の取得 | 使っているチャンネルに `selectors` があれば、リストの `tags`・`regions`・`grants` で対象の素材集を選び、API-MATERIAL-PRODUCER P-6 の範囲（今いる地域と隣の地域、従量制でない回線、50MB まで）で前もって取得する。リストの取得のあとと、地域が変わったあとの次の Wi-Fi のときに取り直す。散歩中は取得しない |
+| 基準で選ぶ素材集の取得 | 使っているチャンネルに `selectors` があれば、リストの `tags`・`regions`・`grants` で対象の素材集を選び、API-MATERIALS P-6 の範囲（今いる地域と隣の地域、従量制でない回線、50MB まで）で前もって取得する。リストの取得のあとと、地域が変わったあとの次の Wi-Fi のときに取り直す。散歩中は取得しない |
 | 素材集の更新 | 使っている素材集に新しい版が出たら、チャンネルと同じく次の取得時（既定は Wi-Fi のときだけ）に取得し、確認できてから入れ替える。入れ替えまでは前の版を使う |
-| 素材集の取り下げ | `revokedCollections` に載った、またはリストから消えた素材集は使わず、パッケージと素材を消す。それを参照する候補は「出せない」になり、チャンネルは使い続ける（ADR-MATERIAL-PRODUCERS D-12）。アプリ利用者には知らせない（チャンネルは変わらないため。設定画面のチャンネルの詳細に出す） |
+| 素材集の取り下げ | `revokedCollections` に載った、またはリストから消えた素材集は使わず、パッケージと素材を消す。それを参照する候補は「出せない」になり、チャンネルは使い続ける（ADR-MATERIALS D-12）。アプリ利用者には知らせない（チャンネルは変わらないため。設定画面のチャンネルの詳細に出す） |
 | 素材提供者の鍵の移し替え | `publisherChange` と同じ扱い。`producerChange` の裏付けなく素材提供者が変わった素材集は、その版を使わず前の版を使い続ける（`producer_changed`） |
 | チャンネル提供者の鍵の移し替え | 使っているチャンネルの `publisher` が、保存しているパッケージのチャンネル提供者と違うとき、`publisherChange.from` が保存しているチャンネル提供者と一致すれば受け入れ、新しい版を取得して、理由とともに一度知らせる。一致しない（`publisherChange` がない、`from` が違う）ときは、その版を使わず `publisher_changed` として前の版を使い続ける（P-9） |
 
@@ -402,7 +402,7 @@ sequenceDiagram
 | `hash_mismatch` | パッケージ・アイコンの SHA-256 か大きさがリストと違う | そのファイルを捨てる。古い版があれば使い続ける |
 | `package_rejected` | パッケージの中身の確認（API-CHANNEL-PACKAGE）に失敗した | そのチャンネルを使わない |
 | `publisher_changed` | 使っているチャンネル提供者が、`publisherChange` の裏付けなく変わった | その版を使わない。前の版を使い続ける |
-| `collection_rejected` | 素材集のパッケージの確認（API-MATERIAL-PRODUCER の `collection_invalid`）に失敗した | その素材集を使わない。参照する候補は「出せない」 |
+| `collection_rejected` | 素材集のパッケージの確認（API-MATERIALS の `collection_invalid`）に失敗した | その素材集を使わない。参照する候補は「出せない」 |
 | `producer_changed` | 使っている素材提供者が、`producerChange` の裏付けなく変わった | その版を使わない。前の版を使い続ける |
 | `ticket_invalid` | 試用チケットの署名・期限・開発者モードの条件を満たさない | 読み込まない |
 
@@ -467,7 +467,7 @@ sequenceDiagram
 
 ## 関連ドキュメント・参照リンク
 
-- [ADR-CHANNEL-CURATION](../decisions/ADR-CHANNEL-CURATION.md): 第三者のチャンネルは運営の審査と署名を経たものだけ取り込む
+- [ADR-CHANNELS](../decisions/ADR-CHANNELS.md): 第三者のチャンネルは運営の審査と署名を経たものだけ取り込む
 - [API-SECRET-MESSAGES.md（API-SECRET-MESSAGES）](API-SECRET-MESSAGES.md): アカウントID、Ed25519、D-5
-- [ADR-MATERIAL-PRODUCERS](../decisions/ADR-MATERIAL-PRODUCERS.md)・[API-MATERIAL-PRODUCER.md（API-MATERIAL-PRODUCER）](API-MATERIAL-PRODUCER.md): 素材の素材提供者と素材集
+- [ADR-MATERIALS](../decisions/ADR-MATERIALS.md)・[API-MATERIALS.md（API-MATERIALS）](API-MATERIALS.md): 素材の素材提供者と素材集
 - [エコシステム TODO](../work/ecosystem-todo.md): エコシステム全体の残りの作業

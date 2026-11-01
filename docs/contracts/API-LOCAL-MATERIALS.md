@@ -1,12 +1,13 @@
-# スタジオ API 契約書
+# その場の素材 API 契約書
 
 ## 文書情報
 
 | 項目 | 内容 |
 |---|---|
-| 文書ID | API-STUDIO |
+| 文書ID | API-LOCAL-MATERIALS |
+| 旧文書ID | API-STUDIO |
 | ドキュメント種別 | API契約書 |
-| 対象システム/機能 | yorisoi エコシステムのアプリと、スタジオのサーバー（一言と掲載の置き場と配信。[REQ-STUDIO](../requirements/REQ-STUDIO.md)、[ADR-STUDIO](../decisions/ADR-STUDIO.md)） |
+| 対象システム/機能 | yorisoi エコシステムのアプリと、スタジオのサーバー（一言と掲載の置き場と配信。[REQ-STUDIO](../requirements/REQ-STUDIO.md)、[ADR-MATERIALS](../decisions/ADR-MATERIALS.md)） |
 | 関連Skill | 020_api-contract-design |
 | 作成日 | 2026-10-31 |
 | 作成者 | Claude（開発者との検討） |
@@ -19,8 +20,8 @@
 
 スタジオでは、アプリ利用者が一言を置き、運営が承認した提供者（チャンネル提供者・素材提供者）が掲載を載せ、近くに来た人のアプリが区画ごとに取って読み上げる（REQ-STUDIO）。本書は、そのための次のことを定める。
 
-1. 運営の AI の中継と同じ端末の確認で、一言を置く・聞く・通報する・ブロックすること（ADR-STUDIO S-4・S-7）
-2. 区画の一覧に置いた人を表す値を入れないこと（ADR-STUDIO S-5）
+1. 運営の AI の中継と同じ端末の確認で、一言を置く・聞く・通報する・ブロックすること（ADR-MATERIALS D-42・D-51）
+2. 区画の一覧に置いた人を表す値を入れないこと（ADR-MATERIALS D-43）
 3. サーバーが知る位置を、取るときの区画（geohash6）までにとどめること
 4. 置けなかった・使えないときに、アプリが理由に合わせて動けるよう、理由をエラーで返すこと
 
@@ -44,13 +45,13 @@
 
 | 対応元ID | 内容 | 対応状況 |
 |---|---|---|
-| ADR-STUDIO S-4・S-7 | インストール ID と API-AI-RELAY のセッション | [認証](#認証) |
-| ADR-STUDIO S-5 | 一覧に置いた人の値を入れない。ブロックと自分の一言はサーバーで判定 | [GET /v1/studio/cells](#get-v1studiocells)、[ブロック](#post-v1studioblocks) |
-| REQ-STUDIO D-3〜D-6、F-1〜F-4 | 一言の長さ・区画・期限・置く前の確認・上限 | [POST /v1/studio/notes](#post-v1studionotes) |
+| ADR-MATERIALS D-42・D-51 | インストール ID と API-AI-RELAY のセッション | [認証](#認証) |
+| ADR-MATERIALS D-43 | 一覧に置いた人の値を入れない。ブロックと自分の一言はサーバーで判定 | [GET /v1/studio/cells](#get-v1studiocells)、[ブロック](#post-v1studioblocks) |
+| REQ-NOTES D-3〜D-6、F-1〜F-4 | 一言の長さ・区画・期限・置く前の確認・上限 | [POST /v1/studio/notes](#post-v1studionotes) |
 | REQ-STUDIO D-7・D-8・D-22・N-6 | 区画ごとの取得、5 分おき、掲載の音声を一緒に取る | [GET /v1/studio/cells](#get-v1studiocells) |
 | REQ-STUDIO D-9・D-15・D-23 | 聞いた数・いいねの概数 | [概数](#概数)、[POST /v1/studio/reactions](#post-v1studioreactions) |
-| REQ-STUDIO D-24・F-22・F-23 | 利用規約の同意、ブロック | `termsVersion`、[ブロック](#post-v1studioblocks) |
-| REQ-STUDIO F-5 | 自分の一言の一覧と、期限の前に消す | [GET /v1/studio/notes/mine](#get-v1studionotesmine)、[DELETE](#delete-v1studionotesid) |
+| REQ-NOTES D-24・F-22・F-23 | 利用規約の同意、ブロック | `termsVersion`、[ブロック](#post-v1studioblocks) |
+| REQ-NOTES F-5 | 自分の一言の一覧と、期限の前に消す | [GET /v1/studio/notes/mine](#get-v1studionotesmine)、[DELETE](#delete-v1studionotesid) |
 | REQ-STUDIO F-12・F-13 | 通報、3 台以上で届けない | [POST /v1/studio/reports](#post-v1studioreports) |
 | REQ-STUDIO F-14・F-15 | 締め出し、置けない区画 | エラー `author_banned`・`area_closed` |
 | REQ-STUDIO N-1・N-2 | 送るもの・残すもの | [サーバーが残すもの](#サーバーが残すもの) |
@@ -63,7 +64,7 @@
 | ST-1 | 接続先 | 接続先の URL はアプリに組み込む（API-AI-RELAY AR-1 と同じ）。デバッグ版は開発用、リリース版は本番用。アプリ利用者には設定させない |
 | ST-2 | 認証 | API-AI-RELAY の `POST /v1/session` で受け取ったトークンを、`Authorization: Bearer {token}` で送る。サーバーはトークンのハッシュから中継のセッションを引き、インストール ID の HMAC を得る。セッションの作り方・期限・エラー（`token_invalid`・`integrity_failed`）は API-AI-RELAY に従う |
 | ST-3 | 位置 | アプリが送る位置は、取るときの区画（geohash6）と、一言を置くときの区画（geohash7）だけ。緯度・経度は送らない |
-| ST-4 | 置いた人の値 | 区画の一覧の一言には、置いた人を表す値を入れない。自分の一言かどうかは `mine` で返す（ADR-STUDIO S-5） |
+| ST-4 | 置いた人の値 | 区画の一覧の一言には、置いた人を表す値を入れない。自分の一言かどうかは `mine` で返す（ADR-MATERIALS D-43） |
 | ST-5 | 聞いた・開いた・いいねを送る時期 | 散歩・走行を終えたとき（と、終えたときに送れなかった分を次の散歩・走行を始めたとき）にまとめて送る。その場で送ると、送った時刻から約 150 m の区画にいたことが分かるため |
 | ST-6 | 通報を送る時期 | すぐに送る。安全のため、届けるのを早く止めることを優先する |
 | ST-7 | 一言の確認と AI の回数 | 一言の確認は運営の AI を使うが、API-AI-RELAY の 1 日の回数には数えない。運営の月の予算（ADR-AI-RELAY R-10）には含める |
@@ -196,7 +197,7 @@ GET /v1/studio/cells?cells=xn76ur,xn76us,…（geohash6 を 1〜9 個、カン�
 
 - `ttl` は `1h`・`24h`・`7d`
 - `termsVersion` は、アプリ利用者が同意した一言の利用規約の版。今の版（`GET /v1/studio/terms`）より古いと `terms_not_accepted`
-- サーバーは、長さ・形式を確かめたあと、運営の AI で置く前の確認（REQ-STUDIO D-6）をして、結果を返す。確認は 5 秒以内（N-4）
+- サーバーは、長さ・形式を確かめたあと、運営の AI で置く前の確認（REQ-NOTES D-6）をして、結果を返す。確認は 5 秒以内（N-4）
 
 ```json
 { "id": "01JBX…", "expiresAt": "2026-11-01T05:00:00Z", "remainingToday": 9 }
@@ -343,7 +344,7 @@ GET /v1/studio/cells?cells=xn76ur,xn76us,…（geohash6 を 1〜9 個、カン�
 ## 制約
 
 - 認証は API-AI-RELAY のセッションに頼る。中継のセッションの決まり（1 日 5 つまで、24 時間）がそのまま及ぶ
-- サーバーは yorisoi-console の新しいスタックに置く（ADR-STUDIO S-7）
+- サーバーは yorisoi-console の新しいスタックに置く（ADR-MATERIALS D-51）
 - 運営の AI は Bedrock を東京で使う（ADR-AI-RELAY R-5）
 
 ## 未決事項・リスク
@@ -355,13 +356,13 @@ GET /v1/studio/cells?cells=xn76ur,xn76us,…（geohash6 を 1〜9 個、カン�
 | 3 | 散歩・走行の終わりにまとめて送ると、アプリを強制終了したときの分が次の散歩・走行まで遅れる。数の遅れが掲載者に問題になるか | 検証のとき |
 
 リスク:
-- インストールし直すと、締め出し・1 日の上限・ブロックが効かなくなる（ADR-STUDIO の注意点）
+- インストールし直すと、締め出し・1 日の上限・ブロックが効かなくなる（ADR-MATERIALS の注意点）
 - 一覧から一言の場所（geohash7）と期限が分かるので、多くの区画を取って集めれば、一言の置かれた場所の地図は作れる。置いた人はつながらないが、一言の中身に個人の情報があると問題になる（置く前の確認 D-6 ③と通報で防ぐ）
 
 ## 関連ドキュメント・参照リンク
 
 - [REQ-STUDIO](../requirements/REQ-STUDIO.md)
-- [ADR-STUDIO](../decisions/ADR-STUDIO.md)
+- [ADR-MATERIALS](../decisions/ADR-MATERIALS.md)
 - [API-AI-RELAY](API-AI-RELAY.md)（セッション、トークン、エラーの形）
 - [ADR-AI-RELAY](../decisions/ADR-AI-RELAY.md)（予算 R-10、Bedrock R-5）
 - [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457)

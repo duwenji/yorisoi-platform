@@ -1,6 +1,6 @@
 # kit-studio
 
-スタジオ（[REQ-STUDIO](../docs/requirements/REQ-STUDIO.md)・[ADR-STUDIO](../docs/decisions/ADR-STUDIO.md)・[API-STUDIO](../docs/contracts/API-STUDIO.md)）のアプリ側の部品です（Android）。散歩・走行の間に近くの一言と掲載を取り、語りの合間に読み上げ、一言を声で置きます。SanpoGuide と CycleGuide が使います。
+スタジオ（[REQ-STUDIO](../docs/requirements/REQ-STUDIO.md)・[ADR-MATERIALS](../docs/decisions/ADR-MATERIALS.md)・[API-LOCAL-MATERIALS](../docs/contracts/API-LOCAL-MATERIALS.md)）のアプリ側の部品です（Android）。散歩・走行の間に近くの一言と掲載を取り、語りの合間に読み上げ、一言を声で置きます。SanpoGuide と CycleGuide が使います。
 
 > 状態: 設計は承認済み（2026-10-31）。A1（この kit）は実装済み。
 
@@ -8,11 +8,11 @@
 
 | 部品 | 受け持つこと |
 |---|---|
-| `StudioClient` | API-STUDIO の HTTP。トークンは kit-llm の `RelayClient` から借りる（API-STUDIO ST-2）。`token_invalid` で 1 回だけセッションを作り直して送り直す |
+| `StudioClient` | API-LOCAL-MATERIALS の HTTP。トークンは kit-llm の `RelayClient` から借りる（API-LOCAL-MATERIALS ST-2）。`token_invalid` で 1 回だけセッションを作り直して送り直す |
 | `StudioFeed` | 散歩・走行 1 回分の頭脳。位置を受け取り、区画の一覧を取り、近づいたものを上限と順番に従って 1 つずつ渡す。聞いた・開いた・いいねをためる |
 | `StudioMemory` | 端末に残すもの（読み上げた一言・今日読み上げた掲載・送れていない反応・ブロックしたときの一言の文）。ファイル 1 つ、バックアップしない |
-| `ClipPlayer` | 掲載の音声（M4A）を、読み上げが終わってから流す。音声は一覧を取ったときに先に取っておく（API-STUDIO D-22） |
-| `NoteRecognizer` | 一言を声で話して、端末の中で文字にする（Android 12 以上の端末内の音声認識。REQ-STUDIO F-2・U-4） |
+| `ClipPlayer` | 掲載の音声（M4A）を、読み上げが終わってから流す。音声は一覧を取ったときに先に取っておく（API-LOCAL-MATERIALS D-22） |
+| `NoteRecognizer` | 一言を声で話して、端末の中で文字にする（Android 12 以上の端末内の音声認識。REQ-NOTES F-2・U-4） |
 | `StudioSettings` | 一言を聞く・掲載を聞くの設定、初めての説明を済ませたか、同意した利用規約の版 |
 
 kit-llm の `RelayClient` に、ほかの部品がトークンを使うための `suspend fun token(): String` と `fun forgetToken()` を足す（今は中で使っているだけ）。
@@ -46,7 +46,7 @@ sequenceDiagram
     F->>C: POST /v1/studio/reactions（まとめて。ST-5）
 ```
 
-### 取る（REQ-STUDIO D-8、API-STUDIO）
+### 取る（REQ-STUDIO D-8、API-LOCAL-MATERIALS）
 
 - 区画は、今いる位置の geohash6 と、その周りの 8 区画（kit-geo `Geohash`）
 - 取るのは、区画の組が変わったときと、前に取ってから `refetchAfterSec`（300 秒）たったとき。`too_many_requests` のときは次の機会まで待つ
@@ -76,14 +76,14 @@ sequenceDiagram
 - 一言: 「この辺りを通った人の一言です。」に続けて文。スポットの名前があれば「〇〇のそばで。」を前に足す
 - 掲載: 「〇〇（掲載者）からのお知らせです。」に続けて文。音声があれば、読み上げが終わってから流す
 - 読み上げるのは、`TalkDecider` が「話すことなし」と決め、読み上げ中でないときだけ（語りと語りの間）。AI の呼び出しには数えない
-- 画面の会話の一覧には、AI の発言と分けて「一言」「お知らせ」の印を付けて出す（ADR-STUDIO S-1）
+- 画面の会話の一覧には、AI の発言と分けて「一言」「お知らせ」の印を付けて出す（ADR-MATERIALS D-38）
 
-### 反応（API-STUDIO ST-5・ST-6）
+### 反応（API-LOCAL-MATERIALS ST-5・ST-6）
 
 - 読み上げたら `heard`、画面で開いたら `opened`、いいねは `liked` としてためる。散歩・走行を終えたときにまとめて送り、送れなかった分は残して次の開始のときに送る
 - 通報とブロックはその場で送る
 
-## 一言を置く（REQ-STUDIO F-1〜F-5）
+## 一言を置く（REQ-NOTES F-1〜F-5）
 
 1. マイクのボタンを押して話す（`NoteRecognizer`。端末内の音声認識が使えない端末では、ボタンを出さない）
 2. 文字にしたものと、期限（1 時間・24 時間・7 日。既定は 24 時間）、近くのスポットの名前を付けるかを出す。何もしなければ 3 秒で送る。送る前は取り消せる
@@ -113,7 +113,7 @@ CycleGuide では、走行中は一言を置く・いいね・通報・ブロッ
 
 ## 接続先と版
 
-- 接続先の URL はアプリに組み込む（API-STUDIO ST-1）。中継と同じく、今はどのビルドも開発用のスタジオを使う
+- 接続先の URL はアプリに組み込む（API-LOCAL-MATERIALS ST-1）。中継と同じく、今はどのビルドも開発用のスタジオを使う
 - platform は kit-studio を足した版を出し、両アプリはそれに上げる。一言・掲載の送り先と保存を、各アプリのプライバシーポリシーとデータ セーフティに書き足す（REQ-STUDIO N-3）
 
 ## 実装の順番
@@ -129,6 +129,6 @@ CycleGuide では、走行中は一言を置く・いいね・通報・ブロッ
 
 | No. | 内容 | 決める時期 |
 |---|---|---|
-| 1 | 端末内の音声認識の精度（屋外・風）。悪ければ決まった言葉から選ぶ形に替える（REQ-STUDIO U-4） | A2 の試験のとき |
+| 1 | 端末内の音声認識の精度（屋外・風）。悪ければ決まった言葉から選ぶ形に替える（REQ-NOTES U-4） | A2 の試験のとき |
 | 2 | 一言の近づいた範囲（周りの 8 区画まで広げる）が広すぎないか | 実機の確認のとき |
 | 3 | 読み上げの合間の間隔。語りの直後にすぐ読み上げると詰まって聞こえるなら、語りから 1 分あける | A2 の試験のとき |

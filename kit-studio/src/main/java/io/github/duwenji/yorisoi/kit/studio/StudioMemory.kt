@@ -10,7 +10,7 @@ import java.time.Instant
 /**
  * What the device keeps of the studio, in one file that isn't backed up: the notes already read
  * (7 days), the placements read and on which day, reactions not sent yet, and the text of the note
- * each block was made from (the studio never says whom a block is of, API-STUDIO).
+ * each block was made from (the studio never says whom a block is of, API-LOCAL-MATERIALS).
  */
 class StudioMemory(private val file: File) {
     private val heardNotes = mutableMapOf<String, Long>()
@@ -56,7 +56,7 @@ class StudioMemory(private val file: File) {
     @Synchronized
     fun isLiked(noteId: String): Boolean = noteId in liked
 
-    /** A like counts once per device (API-STUDIO); this keeps the button from sending it twice. */
+    /** A like counts once per device (API-LOCAL-MATERIALS); this keeps the button from sending it twice. */
     @Synchronized
     fun like(noteId: String, now: Instant) {
         if (!liked.add(noteId)) return
@@ -64,7 +64,7 @@ class StudioMemory(private val file: File) {
         save(now)
     }
 
-    /** Reactions waiting to be sent, at most [max] (API-STUDIO: 200 a request). */
+    /** Reactions waiting to be sent, at most [max] (API-LOCAL-MATERIALS: 200 a request). */
     @Synchronized
     fun pending(max: Int = 200): Pending {
         val heard = pendingHeard.take(max)
@@ -119,7 +119,7 @@ class StudioMemory(private val file: File) {
     }
 
     private fun save(now: Instant) {
-        // Notes are read once; after a week they are gone from the studio anyway (API-STUDIO).
+        // Notes are read once; after a week they are gone from the studio anyway (API-LOCAL-MATERIALS).
         val keepFrom = now.toEpochMilli() - KEEP_MS
         heardNotes.values.removeAll { it < keepFrom }
         val today = StudioFeed.dayOf(now)

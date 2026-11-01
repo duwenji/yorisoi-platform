@@ -26,7 +26,7 @@
 |---|---|---|
 | 意思決定記録（ADR） | エコシステムの方針と設計判断 | [決定記録一覧](../decisions/README.md) |
 | 技術契約（API） | 形式、境界、相互運用上の振る舞い | [技術契約一覧](../contracts/README.md) |
-| ポリシー | 合意した方針に基づく審査・運用基準 | [チャンネル審査基準](../policies/channel-review.md)、[一言の利用規約](../policies/studio-note-terms.md)、[掲載の決まり](../policies/studio-placement.md) |
+| ポリシー | 合意した方針に基づく審査・運用基準 | [チャンネル審査基準](../policies/channel-review.md)、[一言の利用規約](../policies/notes-terms.md)、[掲載の決まり](../policies/studio-rules.md) |
 | 用語・関係者 | エコシステムの共通概念と呼び方 | [関係者と用語](roles-and-vocabulary.md) |
 | アプリ別手順 | 個別アプリの操作・試用・運用 | [SanpoGuide 手引き](../apps/sanpoguide/manual/README.md) |
 | 未完了の作業 | エコシステムに関する未完了事項と検討項目 | [エコシステム TODO](../work/ecosystem-todo.md) |

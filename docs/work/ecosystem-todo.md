@@ -25,7 +25,7 @@
 
 ## スタジオ
 
-[REQ-STUDIO](../requirements/REQ-STUDIO.md)・[ADR-STUDIO](../decisions/ADR-STUDIO.md)・[API-STUDIO](../contracts/API-STUDIO.md)。サーバーは開発用（yorisoi-console の `YorisoiStudio-dev`）だけで、両アプリ（1.8.0）も開発用を使っています。アプリ側の部品は [kit-studio](../../kit-studio/README.md)。
+[REQ-STUDIO](../requirements/REQ-STUDIO.md)・[ADR-MATERIALS](../decisions/ADR-MATERIALS.md)・[API-LOCAL-MATERIALS](../contracts/API-LOCAL-MATERIALS.md)。サーバーは開発用（yorisoi-console の `YorisoiStudio-dev`）だけで、両アプリ（1.8.0）も開発用を使っています。アプリ側の部品は [kit-studio](../../kit-studio/README.md)。
 
 - [ ] 両アプリの内部テストへの送信と、実機での確認（声で一言を置く、掲載の音声の再生、走行中の読み上げ。kit-studio README の A4）
 - [ ] 実際の M4A で、掲載の確認（Transcribe・運営の AI）から配信・アプリでの再生までを通しで確かめる
@@ -42,7 +42,7 @@
 - [ ] 審査にかかる期間の目安と、運営が複数になる場合（承認を 2 人にするか、権限を分けるか）
 
 決めること:
-- ADR-CHANNEL-CURATION の未決事項（第三者のチャンネルのカスタマイズ）
+- ADR-CHANNELS の未決事項（第三者のチャンネルのカスタマイズ）
 
 ## よく通る道
 
@@ -61,7 +61,7 @@
 
 決めること:
 - 位置の偽装（位置情報の偽装アプリ）で開けられることへの対策をどこまでやるか
-- 公開メッセージの不適切な投稿への対策（通報・削除）。スタジオの一言の仕組み（通報・自動で隠す・締め出し・置けない区画）を使えるか、ADR-STUDIO U-2 とあわせて決める
+- 公開メッセージの不適切な投稿への対策（通報・削除）。スタジオの一言の仕組み（通報・自動で隠す・締め出し・置けない区画）を使えるか、ADR-MATERIALS U-2 とあわせて決める
 - 私有地・危険な場所に置かせない配慮
 
 ## 共通の検討事項

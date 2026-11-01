@@ -27,7 +27,7 @@ sealed interface Reading {
     }
 }
 
-/** Where a placement's audio is kept on the device once fetched (API-STUDIO D-22). */
+/** Where a placement's audio is kept on the device once fetched (API-LOCAL-MATERIALS D-22). */
 fun interface ClipFetcher {
     /** The local file of [audio], fetched and checked against its SHA-256; null when it can't be. */
     suspend fun fetch(audio: PlacementAudio): File?
@@ -61,7 +61,7 @@ class StudioFeed(
     /** What was read out on this walk or ride, newest last, for the screen. */
     val heard: StateFlow<List<Reading>> = _heard.asStateFlow()
 
-    /** Sends what an earlier walk couldn't (API-STUDIO ST-5). */
+    /** Sends what an earlier walk couldn't (API-LOCAL-MATERIALS ST-5). */
     suspend fun start() = flush()
 
     /** Sends this walk's reactions; what can't be sent waits for the next start. */
@@ -82,7 +82,7 @@ class StudioFeed(
 
     /**
      * A new position: refetches when the cells around changed, or the studio's wait has passed.
-     * Failures leave the last list; the walk goes on without the studio (API-STUDIO エラー表).
+     * Failures leave the last list; the walk goes on without the studio (API-LOCAL-MATERIALS エラー表).
      */
     suspend fun onLocation(lat: Double, lon: Double) = lock.withLock {
         this.lat = lat
@@ -156,7 +156,7 @@ class StudioFeed(
         null
     }
 
-    /** A note or placement opened on the screen (API-STUDIO `opened`). */
+    /** A note or placement opened on the screen (API-LOCAL-MATERIALS `opened`). */
     fun opened(reading: Reading) = memory.markOpened(refOf(reading), now())
 
     fun like(note: Note) = memory.like(note.id, now())

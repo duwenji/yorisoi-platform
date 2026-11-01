@@ -83,7 +83,7 @@ class Station(
 
     val sound: SoundChoice get() = overrides.sound ?: manifest.sound
 
-    /** Built-in channels can be adjusted by the user; a third party's are as its publisher made them (ADR-CHANNEL-CURATION). */
+    /** Built-in channels can be adjusted by the user; a third party's are as its publisher made them (ADR-CHANNELS). */
     val isBuiltIn: Boolean get() = manifest.publisher == null
 
     fun withOverrides(overrides: StationOverrides) =
