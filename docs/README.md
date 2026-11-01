@@ -14,7 +14,8 @@
 | 複数のアプリにまたがる機能の要件を読む | [よく通る道](requirements/REQ-FREQUENT-WAYS.md)、[スタジオ](requirements/REQ-STUDIO.md)、[一言](requirements/REQ-NOTES.md) |
 | システム境界の形式・動作を確認する | [API 契約一覧](contracts/README.md) |
 | チャンネル審査の基準を確認する | [審査ポリシー](policies/channel-review.md) |
-| スタジオと一言の決まりを確認する | [一言の利用規約](policies/notes-terms.md)、[スタジオの決まりと素材提供者の承認の基準](policies/studio-rules.md) |
+| スタジオの決まりを確認する | [スタジオの決まりと素材提供者の承認の基準](policies/studio-rules.md) |
+| 一言の決まりを確認する | [一言の利用規約](policies/notes-terms.md) |
 | SanpoGuide の操作・試用・運用手順を読む | [SanpoGuide 手引き](apps/sanpoguide/manual/README.md) |
 | エコシステムの未完了作業を確認する | [エコシステム TODO](work/ecosystem-todo.md) |
 | 秘密メッセージ OpenAPI を検証する | [OpenAPI 手順](api/README.md) |

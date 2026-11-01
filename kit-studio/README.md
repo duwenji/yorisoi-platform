@@ -1,6 +1,6 @@
 # kit-studio
 
-スタジオと一言（[REQ-STUDIO](../docs/requirements/REQ-STUDIO.md)・[REQ-NOTES](../docs/requirements/REQ-NOTES.md)・[ADR-MATERIALS](../docs/decisions/ADR-MATERIALS.md)・[API-LOCAL-MATERIALS](../docs/contracts/API-LOCAL-MATERIALS.md)）のアプリ側の部品です（Android）。散歩・走行の間に近くのスタジオと一言を取り、語りの合間に読み上げ、一言を声で置きます。SanpoGuide と CycleGuide が使います。
+区画ごとに運営から取る素材（今はスタジオと一言。[REQ-STUDIO](../docs/requirements/REQ-STUDIO.md)・[REQ-NOTES](../docs/requirements/REQ-NOTES.md)・[ADR-MATERIALS](../docs/decisions/ADR-MATERIALS.md)・[API-LOCAL-MATERIALS](../docs/contracts/API-LOCAL-MATERIALS.md)）のアプリ側の部品です（Android）。散歩・走行の間に近くのスタジオと一言を取り、語りの合間に読み上げ、一言を声で置きます。SanpoGuide と CycleGuide が使います。
 
 > 状態: 設計は承認済み（2026-10-31）。A1（この kit）は実装済み。
 

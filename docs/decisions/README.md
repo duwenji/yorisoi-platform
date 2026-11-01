@@ -17,24 +17,24 @@
 
 ## 旧 ID の決定の番号
 
-ADR-CHANNEL-CURATION の C-1〜C-14 と、ADR-MATERIAL-PRODUCERS の D-1〜D-27 は、番号を変えずに ADR-CHANNELS・ADR-MATERIALS にあります。ADR-STUDIO と ADR-STUDIO-MATERIAL の決定は、次の番号で ADR-MATERIALS にあります。
+ADR-CHANNEL-CURATION の C-1〜C-14 と、ADR-MATERIAL-PRODUCERS の D-1〜D-27 は、番号を変えずに ADR-CHANNELS・ADR-MATERIALS にあります。ADR-STUDIO と ADR-STUDIO-MATERIAL の決定は、次の番号で ADR-MATERIALS にあります。ADR-MATERIALS では、スタジオと一言を組にせず、種類ごとの節と、素材の性質ごとの決まりに分けて書いています。
 
 | 旧 ID | ADR-MATERIALS | 主題 |
 |---|---|---|
-| ADR-STUDIO S-1 | D-38 | 人の発言の層 |
+| ADR-STUDIO S-1 | D-38 | 人の言葉をそのまま出す素材（人の発言の層） |
 | ADR-STUDIO S-2 | D-39 | スタジオを出す人と責任 |
 | ADR-STUDIO S-3 | D-41 | 一言を置いた人の責任と運営の役割 |
 | ADR-STUDIO S-4 | D-42 | 一言を置いた人の識別 |
 | ADR-STUDIO S-5 | D-43 | 配る一覧とブロック |
 | ADR-STUDIO S-6 | D-40 | 宣伝との関係 |
-| ADR-STUDIO S-7 | D-51 | 配信の契約と置き場所 |
-| ADR-STUDIO-MATERIAL M-1・M-8 | D-44 | 素材提供者の種類と属性 |
+| ADR-STUDIO S-7 | D-51 | 区画ごとに運営から取る素材の配信の契約と置き場所 |
+| ADR-STUDIO-MATERIAL M-1・M-8 | D-44 | 区画ごとに運営から取る素材（組み込みの素材提供者と属性） |
 | ADR-STUDIO-MATERIAL M-2 | D-45 | きっかけ |
-| ADR-STUDIO-MATERIAL M-3 | D-46 | チャンネルが決められること |
+| ADR-STUDIO-MATERIAL M-3 | D-46・D-55 | チャンネルが決められること、スタジオの分類 |
 | ADR-STUDIO-MATERIAL M-4 | D-47 | チャンネルが変えられないこと |
-| ADR-STUDIO-MATERIAL M-5 | D-48 | 書かないチャンネル |
+| ADR-STUDIO-MATERIAL M-5 | D-48・D-53・D-54 | 書いていない種類、スタジオの省略形、一言の省略形 |
 | ADR-STUDIO-MATERIAL M-6 | D-49 | 前置き |
-| ADR-STUDIO-MATERIAL M-7 | D-50 | 責任と審査 |
+| ADR-STUDIO-MATERIAL M-7 | D-50 | 条件で選ぶ素材の責任と審査 |
 | ADR-STUDIO-MATERIAL M-9 | D-40 | 宣伝との関係 |
 | ADR-STUDIO-MATERIAL M-10 | D-2・D-52 | 素材の種類、用語 |
 
