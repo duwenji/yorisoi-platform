@@ -114,6 +114,7 @@ sequenceDiagram
 |---|---|---|
 | `id` | string | スタジオの ID（ULID） |
 | `providerName` | string | 素材提供者の名前（40 字まで。個人は屋号・活動名のことがある）。読み上げの「〇〇からのお知らせです。」に使う |
+| `category` | string | [スタジオの分類](API-MATERIALS.md#スタジオの分類)の 1 つ（素材提供者が選ぶ）。アプリは、チャンネルの `categories`（API-MATERIALS「組み込みの素材提供者」）で絞るのに使う |
 | `text` | string | 200 字まで |
 | `audio` | object | 任意。`url`（CloudFront の URL）、`durationSec`（30 以下）、`bytes`、`contentType`（`audio/mp4`。AAC）、`sha256` |
 | `cells` | string[] | 載せる区画の geohash6（1〜9 個） |
@@ -174,7 +175,7 @@ GET /v1/studio/cells?cells=xn76ur,xn76us,…（geohash6 を 1〜9 個、カン�
       "spotName": "富士見坂", "expiresAt": "2026-11-01T03:00:00Z", "mine": false }
   ],
   "placements": [
-    { "id": "01JBY…", "providerName": "谷中銀座商店会", "text": "今日 15 時から、夕やけだんだんで豆まきをします。",
+    { "id": "01JBY…", "providerName": "谷中銀座商店会", "category": "event", "text": "今日 15 時から、夕やけだんだんで豆まきをします。",
       "audio": { "url": "https://…/placements/01JBY…/audio.m4a", "durationSec": 24, "bytes": 196000,
                  "contentType": "audio/mp4", "sha256": "…" },
       "cells": ["xn77h2"], "startsAt": "2026-10-31T00:00:00Z", "endsAt": "2026-11-02T15:00:00Z",
@@ -339,7 +340,7 @@ GET /v1/studio/cells?cells=xn76ur,xn76us,…（geohash6 を 1〜9 個、カン�
 ## 互換性方針・移行メモ
 
 - パスは `/v1`。応答に項目を足すことは互換の変更とし、アプリは知らない項目を無視する
-- エラーの `code`、通報の `reason`、一覧の種類（`kinds`）を足すことは互換の変更とする。アプリは知らない `code` を HTTP の状態で扱い、知らない種類を無視する
+- エラーの `code`、通報の `reason`、一覧の種類（`kinds`）、スタジオの分類を足すことは互換の変更とする。アプリは知らない分類のスタジオを、分類で絞らないチャンネルでだけ出す。アプリは知らない `code` を HTTP の状態で扱い、知らない種類を無視する
 - 画像・映像・即時の配信（REQ-STUDIO・REQ-NOTES U-10）は、項目とエンドポイントを足す形で `/v1` に入れる
 - 項目の削除・意味の変更は `/v2` で行う
 

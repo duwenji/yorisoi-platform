@@ -13,7 +13,7 @@
 | 作成者 | Claude（開発者との検討） |
 | 承認者 | 開発者 |
 | ステータス | 承認済 |
-| 版 | 1.0 |
+| 版 | 1.1 |
 
 本書はアプリ間で共有するチャンネル・パッケージ形式を定めます。SanpoGuide の画面名や固有の動作例は、共通要件と混同しないよう本文で示します。
 
@@ -162,6 +162,7 @@ resources/                   パッケージに入れる素材（任意）
 | `cues` | object[] | 任意 | きっかけ（[きっかけ](#きっかけcues)） |
 | `collections` | object[] | 任意 | 使う第三者の素材集（[素材集の宣言](#素材集の宣言collections)） |
 | `selectors` | object[] | 任意 | 素材を選ぶ基準（[基準での選択](#基準での選択selectors)） |
+| `shorthands` | object | 任意 | 組み込みの素材提供者の省略形を使わない種類（`{ "builtin:studio": false }` など。値は `false` だけ）。書かなければ、`cues` で指していない種類は省略形に展開する（API-MATERIALS「省略形の展開」）。今のところ `builtin:studio`・`builtin:note` だけを書ける |
 | `mood.sound` | string | ○ | 背景音の選び方。`auto`（雰囲気から選ぶ）/ `rain` / `waves` / `wind` / `birds` / `insects` / `temple`。背景音を流すか・音量・イヤホンだけかはアプリ利用者の設定のまま（チャンネルでは変えられない） |
 
 知らない項目は無視する（互換性のため）。ただし、上の項目に列挙の外の値が入っていたら拒む（F-5）。アプリは、列挙の外の値を[アプリでの知らない値](#アプリでの知らない値)の表のとおりに扱う（G-3）。
@@ -213,6 +214,7 @@ ADR-ECOSYSTEM-PLATFORM E-24 のとおり、実装するアプリを作ると決�
 | `talk.events` の知らない出来事 | その出来事を無視する（6 つの出来事は必須） |
 | `mood.sound` | `auto` として扱う |
 | `cues[].trigger` の知らない種類・出来事 | そのきっかけを使わない |
+| `shorthands` の知らない素材提供者 | その値を無視する |
 | `cues[].present[].as` | その見せ方を飛ばす。残りがなければそのきっかけを使わない |
 | `prompts/` の下の知らないファイル | そのファイルを使わない（`prompts/` の外の知らないファイルは今どおり拒む） |
 
@@ -430,7 +432,10 @@ ADR-ECOSYSTEM-PLATFORM E-24 のとおり、実装するアプリを作ると決�
     "present": [ { "as": "card", "resource": "old-photo" } ] },
   { "id": "kotokuin", "trigger": { "type": "spot", "osm": "way/234567", "name": "高徳院" },
     "present": [ { "as": "speak", "source": ["kamakura", "builtin:ai-guide", "builtin:fallback-text"] },
-                 { "as": "card", "source": ["kamakura#daibutsu-photo", "builtin:commons-photo"] } ] }
+                 { "as": "card", "source": ["kamakura#daibutsu-photo", "builtin:commons-photo"] } ] },
+  { "id": "temple-news", "trigger": { "type": "event", "event": "idle" },
+    "present": [ { "as": "speak", "source": ["builtin:studio"],
+                   "params": { "categories": ["shrine-temple", "event"], "prelude": "by-the-way" } } ] }
 ]
 ```
 
@@ -439,10 +444,11 @@ ADR-ECOSYSTEM-PLATFORM E-24 のとおり、実装するアプリを作ると決�
 | `trigger.type` | `spot`（スポットに近づいた）/ `point`（地点の半径内に入った）/ `event`（出来事）。どれを使うかはチャンネルが決める（M-3） |
 | `spot` | `osm`（`node/…`・`way/…`・`relation/…`）。任意で `name` を付けると、ID が違っても同じ名前で 200m 以内なら同じスポットとみなす（再訪の判定と同じ規則）。近づいたかの判定は、アプリのスポット案内と同じ（60m、広さのあるスポットは境界から）。1.2 から、`osm` の代わりに `"any": true` と `categories`（[スポットの種類](#スポットの種類)を 1〜8 個）を書くと、その種類のどのスポットでも出す（題材を問わないきっかけ） |
 | `point` | `lat`・`lon`・`radiusM`（20〜300） |
-| `event` | `select`（このチャンネルを選んだ）/ `start`（散歩の開始）/ `finish`（散歩の終了）。`start`・`finish` では、AI のあいさつ・振り返りの後に出す |
+| `event` | `select`（このチャンネルを選んだ）/ `start`（散歩の開始）/ `finish`（散歩の終了）/ `idle`（語りの合間。アプリが話すことがないと決め、前の発言から間が空いたとき）。`start`・`finish` では、AI のあいさつ・振り返りの後に出す。`idle` で使えるのは `fetch=area` の素材提供者（`builtin:studio`・`builtin:note`）を指す `source` だけで、`repeat` は書けない（同じものを繰り返さない決まりと上限は種類ごとに API-MATERIALS P-8 と各要件で決まる） |
 | `narration` | `spot` だけ。`replace`（AI の解説の代わりに出す。既定）/ `add`（AI の解説の後に出す） |
 | `repeat` | `oncePerWalk`（既定）/ `oncePerDay` / `once`（その端末で 1 度だけ） |
 | `present` | 見せ方と素材の組（1〜4 個）。上から順に出す。素材は `resource`（同梱の素材 1 つ）か `source`（素材提供者への参照の候補、下表）のどちらかで指す。`sheet` は `resources`（同梱）か `sources`（参照の候補の配列を並べる）で複数の素材を並べられる |
+| `present[].params` | 任意。`source` の候補に並べた組み込みの素材提供者への指示（API-MATERIALS I-8）。その素材提供者が[宣言した指示](API-MATERIALS.md#組み込みの素材提供者)だけを書ける（`builtin:studio` の `categories`・`prelude`、`builtin:note` の `prelude` など）。宣言にない指示・値は拒む（`bad_cue`） |
 
 `source` の書き方（API-MATERIALS「参照の書き方」）:
 
@@ -494,6 +500,7 @@ ADR-ECOSYSTEM-PLATFORM E-24 のとおり、実装するアプリを作ると決�
 - きっかけの場所: `point` が車道・線路・私有地・立入禁止・危険な場所にないか。立ち止まりやすい場所か
 - 素材の出典とライセンスが正しいか。人の顔・個人の家が写っていないか
 - 書き起こし・代替テキストが中身と合っているか
+- 条件で選ぶ素材（`builtin:studio`・`builtin:note`・基準で選ぶ素材集）: どのきっかけで出すか、スタジオの分類、前置きが、チャンネルの雰囲気と散策者の安全に合っているか。どれが出るかは確かめない（ADR-MATERIALS D-50）
 
 ## signature.json（第三者のみ）
 
