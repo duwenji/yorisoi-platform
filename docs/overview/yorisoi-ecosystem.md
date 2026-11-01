@@ -16,7 +16,7 @@
 |---|---|---|
 | **yorisoi-platform** | 付き添いアプリ間で共有するライブラリ、形式、語彙を提供する | このリポジトリの [共通文書](../README.md) と実装 |
 | **アプリ** | 共通基盤を使い、対象の過ごし方に合った体験を提供する | 各アプリのリポジトリ（[yorisoi-sanpoguide](https://github.com/duwenji/yorisoi-sanpoguide)・[yorisoi-cycleguide](https://github.com/duwenji/yorisoi-cycleguide)）。SanpoGuide は[アプリ別手引き](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/manual/README.md)も参照 |
-| **yorisoi-console** | チャンネルや素材集の申請・審査・配信を扱う管理システム。運営の AI の中継、スポットのタイルの配信、スタジオ（場所に残る一言と提供者のスタジオ）も置く | [yorisoi-console の文書](https://github.com/duwenji/yorisoi-console/tree/main/docs) |
+| **yorisoi-console** | チャンネルや素材集の申請・審査・配信を扱う管理システム。運営の AI の中継、スポットのタイルの配信、その場の素材（スタジオと一言）の配信も置く | [yorisoi-console の文書](https://github.com/duwenji/yorisoi-console/tree/main/docs) |
 | **yorisoi-tutorial** | 仕組みを学ぶための説明を提供する。規範や契約の正本にはしない | [yorisoi-tutorial](https://github.com/duwenji/yorisoi-tutorial) |
 
 ## 決まり
@@ -28,9 +28,9 @@
 | No. | 論点 | 決定 |
 |---|---|---|
 | E-1 | 目的 | 付き添いアプリを、要望に応じて作れるプラットフォームにする。SanpoGuide はその最初のアプリ。チャンネル提供者・素材提供者・運営はアプリをまたいで共通 |
-| E-2 | 層 | 3 層に分ける。**コア**（JVM、Android に依存しない。アプリと管理システムが同じコードを使う）、**Android キット**（AAR）、**アプリ**。下の層は上の層を知らない |
+| E-2 | 層 | 3 層に分ける。**コア**（JVM、Android に依存しない。アプリと管理システムが同じコードを使う）、**キット**（Android の AAR。Android に依存しない `kit-companion`・`kit-channel` は JVM）、**アプリ**。下の層は上の層を知らない |
 | E-3 | コア | `core-format`（チャンネルの形式の骨格・スロット・署名・ZIP の確認・きっかけ・エコシステム共通の語彙。素材提供者の記述と方針・素材集・地域・タグの一覧と、リストの検証もパッケージとして含む）、`core-prompt`（`PromptTemplates`） |
-| E-4 | キット | `kit-llm`（`LlmClient`・Claude／OpenAI 互換・`KeyCipher`・運営の AI の中継の `RelayClient`・`OperatorAi`・自分のキーの 1 日の呼び出しの数 `AiUsage`・使わない返事の判定 `OutputCheck`）、`kit-voice`（`Speaker`・オーディオフォーカス・`AmbientPlayer`・`Voices`）、`kit-geo`（運営のスポットのタイル `SpotTiles`・Overpass・`Poi`・`Shape`・`SpotFacts`・よく通る道 `FrequentWay`・ルート・`SpotPhotos`・地図・天気・日の入り）、`kit-mood`（`Mood`・`MoodSource`・`MoodTheme`・`MoodScene`）、`kit-ui`（どのアプリにも共通の見た目: よりそいの緑の配色 `YorisoiTheme`・画面の上部のバー `ScreenBar`・ホーム画面のアイコンの緑の背景。アプリどうしは同じ緑にし、見分けはアイコンの絵に任せる）、`kit-companion`（話す判断のエンジンと、開発者モードの記録 `SessionRecorder`。JVM）、`kit-channel`（チャンネルの扱い: `Station`・スロットからのプロンプトの組み立て・組み込みのチャンネルの読み込み・第三者のチャンネルの取り込み・前もって取る素材の計画・素材提供者・通報）。アプリにあったコードは、2 本目のアプリ（CycleGuide）が使う段階の前に、使うものから移す。移すときに散歩だけの前提（間隔の値・散歩の記録・散歩の状態）を外し、値はアプリが持つ。画面はアプリに置く（共通の見た目の部品は `kit-ui`） |
+| E-4 | キット | `kit-llm`（`LlmClient`・Claude／OpenAI 互換・`KeyCipher`・運営の AI の中継の `RelayClient`・`OperatorAi`・自分のキーの 1 日の呼び出しの数 `AiUsage`・使わない返事の判定 `OutputCheck`）、`kit-voice`（`Speaker`・オーディオフォーカス・`AmbientPlayer`・`Voices`）、`kit-geo`（運営のスポットのタイル `SpotTiles`・Overpass・`Poi`・`Shape`・`SpotFacts`・よく通る道 `FrequentWay`・ルート・`SpotPhotos`・地図・天気・日の入り）、`kit-mood`（`Mood`・`MoodSource`・`MoodTheme`・`MoodScene`）、`kit-ui`（どのアプリにも共通の見た目: よりそいの緑の配色 `YorisoiTheme`・画面の上部のバー `ScreenBar`・ホーム画面のアイコンの緑の背景。アプリどうしは同じ緑にし、見分けはアイコンの絵に任せる）、`kit-companion`（話す判断のエンジンと、開発者モードの記録 `SessionRecorder`。JVM）、`kit-channel`（チャンネルの扱い: `Station`・スロットからのプロンプトの組み立て・組み込みのチャンネルの読み込み・第三者のチャンネルの取り込み・前もって取る素材の計画・素材提供者・通報）、`kit-local-materials`（区画ごとに運営から取る素材のアプリ側: 組み込みの素材提供者 `builtin:studio`・`builtin:note`・`LocalFeed`・API-LOCAL-MATERIALS の `LocalClient`・スタジオの音声・一言を声で置く）。アプリにあったコードは、2 本目のアプリ（CycleGuide）が使う段階の前に、使うものから移す。移すときに散歩だけの前提（間隔の値・散歩の記録・散歩の状態）を外し、値はアプリが持つ。画面はアプリに置く（共通の見た目の部品は `kit-ui`） |
 | E-5 | アプリが持つもの | プロファイル（E-6）、判定のルール（散歩なら施設の案内・スポットの選び方）、プロンプトの固定部分の中身と定型文、組み込みのチャンネル、画面と常駐サービスのつなぎ込み |
 | E-6 | アプリのプロファイル | アプリごとに 1 つ持ち、次を宣言する。① **できること**: 過ごし方（`activities` の値）、実装している出来事・スロット・題材の種類・見せ方。② **安全**: 止められない出来事（散歩なら天気の急変・日の入り・施設の案内）と共通の指示。③ **絞り込みの方針**（E-10 の②）。④ **素材の方針**: コアの方針より厳しくするだけ（映像を出さない、など） |
 | E-7 | 話す判断のエンジン | 判定を「ルールの並び」（優先順位・安全かどうか・どの間隔を守るか・判定）として表し、調停（読み上げ中は判定しない、1 件ずつ、切り替えの直後は控える、間隔）を `kit-companion` が受け持つ。アプリはルールを並べるだけにする。安全のルールは頻度とチャンネルを無視する |
@@ -52,7 +52,7 @@
 | No. | 論点 | 決定 |
 |---|---|---|
 | E-14 | 素材集とアプリの関係 | 素材集は**既定でどのアプリでも使える**。素材提供者は、利用許諾（`grants`）に使ってよいアプリを任意で書ける（書かなければ全アプリ）。素材集の審査はアプリをまたいで 1 回にする |
-| E-15 | タグの一覧 | エコシステム共通の 1 つにし、コア（`core-material`）に置く。アプリごとの拡張は認めない（同じ素材集が、アプリによって当たったり当たらなかったりするのを避けるため） |
+| E-15 | タグの一覧 | エコシステム共通の 1 つにし、コア（`core-format`）に置く。アプリごとの拡張は認めない（同じ素材集が、アプリによって当たったり当たらなかったりするのを避けるため） |
 | E-16 | 素材の方針 | `ProducerPolicy`（第三者は前もって取得するだけ・題材を外に伝えない・生成しない）はコアに置き、アプリは緩められない（厳しくするだけ。E-6 ④）。素材提供者には「どのアプリに出しても扱いが同じ」こと、アプリ利用者には「どのアプリでも位置が漏れない」ことを保証する。素材の要求の文脈（`MaterialContext`）は汎用にし、散歩の情報（`WalkSession`・天気など）はアプリが組み込みの素材提供者に渡す。題材の「出来事」はプロファイルが実装する出来事に限る（素材集の `about` はスポット・地点だけなので、素材集の形式は変わらない） |
 
 ### 管理システム
@@ -66,7 +66,7 @@
 
 | No. | 論点 | 決定 |
 |---|---|---|
-| E-19 | リポジトリ | 共通パッケージ（コアとキット）は `yorisoi-platform`、アプリはアプリごとのリポジトリ（SanpoGuide は `yorisoi-sanpoguide`）、管理システムは `yorisoi-console` に置く。アプリと管理システムは、`yorisoi-platform` が GitHub Packages に公開した版と、アプリが公開するプロンプト・パックを版で固定して使う。コアとアプリを同時に直すときは、手元の Gradle の設定で `yorisoi-platform` のソースに差し替える（composite build）。エコシステム全体の文書（本書・CHANNELS・MATERIALS・API-CHANNEL-LIST・API-CHANNEL-PACKAGE・API-MATERIALS・共通用語・関係者の課題）は `yorisoi-platform` に置く。理由: アプリごとに出す時期・権限・Play の設定が変わり、1 つのアプリの変更がほかのアプリの CI を壊すのを避ける。アプリが自分の都合で共通パッケージの版を上げられる |
+| E-19 | リポジトリ | 共通パッケージ（コアとキット）は `yorisoi-platform`、アプリはアプリごとのリポジトリ（SanpoGuide は `yorisoi-sanpoguide`）、管理システムは `yorisoi-console` に置く。アプリと管理システムは、`yorisoi-platform` が GitHub Packages に公開した版と、アプリが公開するプロンプト・パックを版で固定して使う。コアとアプリを同時に直すときは、手元の Gradle の設定で `yorisoi-platform` のソースに差し替える（composite build）。エコシステム全体の文書（方針・要件・契約・規程・共通用語・関係者の課題。[docs の案内](../README.md#文書の置き場所)）は `yorisoi-platform` に置く。理由: アプリごとに出す時期・権限・Play の設定が変わり、1 つのアプリの変更がほかのアプリの CI を壊すのを避ける。アプリが自分の都合で共通パッケージの版を上げられる |
 | E-20 | 進め方 | 共通部分は、2 本目のアプリ（E-23）を作りながら直す。散歩だけに合わせた抽象を先に固めない |
 
 ### 名前・2 本目のアプリ・語彙
@@ -99,7 +99,7 @@ flowchart TB
     end
     POOL --> F1 & F2
     subgraph PF["プラットフォーム（yorisoi）"]
-        K["キット<br/>llm・voice・geo・mood・companion"]
+        K["キット<br/>llm・voice・geo・mood・ui・companion・channel・local-materials"]
         C["コア（JVM）<br/>format・prompt<br/>エコシステム共通の語彙・素材の方針"]
     end
     A1 & A2 --> K --> C
