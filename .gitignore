@@ -4,4 +4,4 @@ local.properties
 .idea/
 *.iml
 .kotlin/
-docs/api/api.html
+docs/contracts/api/api.html

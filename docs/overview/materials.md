@@ -173,4 +173,4 @@ flowchart TB
 - [スタジオの決まり](../policies/studio-rules.md)、[一言の利用規約](../policies/notes-terms.md)
 - [API-SECRET-MESSAGES](../contracts/API-SECRET-MESSAGES.md)（公開メッセージ）
 - [Google Play のユーザー生成コンテンツのポリシー](https://support.google.com/googleplay/android-developer/answer/9876937)
-- [channels.md](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/channels.md): アプリ側の設計
+- [channels.md](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/design/channels.md): アプリ側の設計

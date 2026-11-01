@@ -461,4 +461,4 @@ resources/
 - [MATERIALS](../overview/materials.md): 素材提供者を切り出す判断
 - [API-CHANNEL-PACKAGE.md（API-CHANNEL-PACKAGE）](API-CHANNEL-PACKAGE.md): 素材・きっかけ・見せ方
 - [API-CHANNEL-LIST.md（API-CHANNEL-LIST）](API-CHANNEL-LIST.md): 承認済みチャンネル・リスト
-- [channels.md](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/channels.md): アプリ側の設計
+- [channels.md](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/design/channels.md): アプリ側の設計

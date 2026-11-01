@@ -205,4 +205,4 @@
 - [電気通信事業参入マニュアル［追補版］](https://www.soumu.go.jp/main_content/000477428.pdf)（総務省）
 - [特定電気通信による情報の流通によって発生する権利侵害等への対処に関する法律](https://laws.e-gov.go.jp/law/413AC0000000137)（e-Gov 法令検索）
 - [「一般消費者が事業者の表示であることを判別することが困難である表示」の運用基準](https://www.caa.go.jp/notice/assets/representation_cms216_230328_03.pdf)（消費者庁）
-- [yorisoi-cycleguide 要件定義](https://github.com/duwenji/yorisoi-cycleguide/blob/main/docs/requirements.md)（走行中の操作の制限 S-2、メディアボタン F-21）
+- [yorisoi-cycleguide 要件定義](https://github.com/duwenji/yorisoi-cycleguide/blob/main/docs/requirements/cycleguide.md)（走行中の操作の制限 S-2、メディアボタン F-21）

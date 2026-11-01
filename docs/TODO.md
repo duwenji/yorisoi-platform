@@ -4,12 +4,12 @@
 
 ## 共通基盤
 
-- [ ] CycleGuide（ECOSYSTEM E-23。要件は [yorisoi-cycleguide の要件定義](https://github.com/duwenji/yorisoi-cycleguide/blob/main/docs/requirements.md)）。段階 1・2 は内部テストに出ている。残りは各アプリの TODO
+- [ ] CycleGuide（ECOSYSTEM E-23。要件は [yorisoi-cycleguide の要件定義](https://github.com/duwenji/yorisoi-cycleguide/blob/main/docs/requirements/cycleguide.md)）。段階 1・2 は内部テストに出ている。残りは各アプリの TODO
 - [ ] 新しいアプリの雛形と、要望からプロファイル・ルール・プロンプト・組み込みのチャンネルを生成するスキル（CycleGuide の後。ECOSYSTEM E-20）
 
 ## 運営の AI（中継）
 
-[API-AI-RELAY](../contracts/API-AI-RELAY.md)。中継は開発用（yorisoi-console の `YorisoiAiRelay-dev`）だけを配備し、両アプリのリリース版も開発用を使っています。
+[API-AI-RELAY](contracts/API-AI-RELAY.md)。中継は開発用（yorisoi-console の `YorisoiAiRelay-dev`）だけを配備し、両アプリのリリース版も開発用を使っています。
 
 - [ ] 中継のモデルを Claude Haiku 4.5 に切り替えることがあれば、その前にアカウントで Anthropic のユースケースを申告する
 - [ ] 運営の AI 全体の 1 か月の予算を決める（本番に出す前。API-AI-RELAY 未決事項 No.2）
@@ -17,7 +17,7 @@
 
 ## スポットのタイル
 
-[API-SPOT-TILES](../contracts/API-SPOT-TILES.md)。配信は開発用（yorisoi-console の `YorisoiSpotTiles-dev`）で、両アプリのリリース版も開発用を使っています。
+[API-SPOT-TILES](contracts/API-SPOT-TILES.md)。配信は開発用（yorisoi-console の `YorisoiSpotTiles-dev`）で、両アプリのリリース版も開発用を使っています。
 
 - [ ] 実機での確認: 散歩・走行の記録で、スポットの `source` が `tiles`・`kept_tiles` になり、空白や待ちが減ったこと
 - [ ] 技術チュートリアルの追従
@@ -25,11 +25,11 @@
 
 ## その場の素材（スタジオ・一言）
 
-[REQ-STUDIO](../requirements/REQ-STUDIO.md)・[REQ-NOTES](../requirements/REQ-NOTES.md)・[MATERIALS](../overview/materials.md)・[API-LOCAL-MATERIALS](../contracts/API-LOCAL-MATERIALS.md)。サーバーは開発用（yorisoi-console の `YorisoiLocalMaterials-dev`）だけです。アプリ側の部品は [kit-local-materials](../../kit-local-materials/README.md)。
+[REQ-STUDIO](requirements/REQ-STUDIO.md)・[REQ-NOTES](requirements/REQ-NOTES.md)・[MATERIALS](overview/materials.md)・[API-LOCAL-MATERIALS](contracts/API-LOCAL-MATERIALS.md)。サーバーは開発用（yorisoi-console の `YorisoiLocalMaterials-dev`）だけです。アプリ側の部品は [kit-local-materials](../kit-local-materials/README.md)。
 
 - [ ] 両アプリの内部テストへの送信と、実機での確認（声で一言を置く、スタジオの音声の再生、走行中の読み上げ、チャンネルのきっかけと省略形）
 - [ ] 実際の M4A で、スタジオの確認（Transcribe・運営の AI）から配信・アプリでの再生までを通しで確かめる
-- [ ] 本番の配備（中継の本番の後）。Play のデータ セーフティとコンテンツのレーティングを、各アプリの `docs/play-console.md` のとおりに入れ直す（REQ-STUDIO・REQ-NOTES N-3）
+- [ ] 本番の配備（中継の本番の後）。Play のデータ セーフティとコンテンツのレーティングを、各アプリの `docs/operations/play-console.md` のとおりに入れ直す（REQ-STUDIO・REQ-NOTES N-3）
 - [ ] 技術チュートリアルの追従
 
 決めること（REQ-STUDIO の未決事項）:
@@ -38,7 +38,7 @@
 
 ## 第三者のチャンネル
 
-- [ ] 関係者ごとの対応案（[関係者の課題と対応案](../overview/stakeholder-needs.md)）を承認し、公開の前に要るもの（W-1 内蔵のリスト）を進める
+- [ ] 関係者ごとの対応案（[関係者の課題と対応案](overview/stakeholder-needs.md)）を承認し、公開の前に要るもの（W-1 内蔵のリスト）を進める
 - [ ] 審査にかかる期間の目安と、運営が複数になる場合（承認を 2 人にするか、権限を分けるか）
 
 決めること:
@@ -46,7 +46,7 @@
 
 ## よく通る道
 
-要件は [REQ-FREQUENT-WAYS](../requirements/REQ-FREQUENT-WAYS.md)。両アプリに入っている。
+要件は [REQ-FREQUENT-WAYS](requirements/REQ-FREQUENT-WAYS.md)。両アプリに入っている。
 
 - [ ] CycleGuide のプロンプト・パック 0.1.2 の公開（`prompts-v0.1.2`。前に話した見どころの見本 `ride-guide-again` が増える）と、yorisoi-console の validator の追従（今は 0.1.0）
 - [ ] 実機での確認: 3 回通った道がよく通る道になる、Overpass が混んでいる日にも前方の見どころが空白にならない、前の日に話した見どころを別の話で話す
@@ -54,7 +54,7 @@
 
 ## 位置に紐づく秘密メッセージ
 
-契約は [API-SECRET-MESSAGES](../contracts/API-SECRET-MESSAGES.md)（OpenAPI は [api/](../api/README.md)）。接続先は URL で設定し、API に準拠していればサーバーの実装方法・置き場所は問わない。アプリでの実装は各アプリの TODO で進める。
+契約は [API-SECRET-MESSAGES](contracts/API-SECRET-MESSAGES.md)（OpenAPI は [api/](contracts/api/README.md)）。接続先は URL で設定し、API に準拠していればサーバーの実装方法・置き場所は問わない。アプリでの実装は各アプリの TODO で進める。
 
 - [ ] 準拠テスト: 任意のサーバーの URL に対して流せるテスト（API-SECRET-MESSAGES の確認観点 V-01〜V-18）。Kotlin（JVM）＋ Tink を想定
 - [ ] 参照実装のサーバー（開発・テスト用。技術は自由）
@@ -66,5 +66,5 @@
 
 ## 共通の検討事項
 
-- **収益化**: 広告、有料プラン、提携。既存の広告 SDK は、位置情報を外部に送らない方針（API-CHANNEL-PACKAGE F-10）と合わないので使わない方向。だれに何を提供し、だれが費用を持つかは[提供価値と事業の検討](../overview/value-proposition.md)で検討中
+- **収益化**: 広告、有料プラン、提携。既存の広告 SDK は、位置情報を外部に送らない方針（API-CHANNEL-PACKAGE F-10）と合わないので使わない方向。だれに何を提供し、だれが費用を持つかは[提供価値と事業の検討](overview/value-proposition.md)で検討中
 - **公開サーバーの負荷**: スポットは運営のタイルを先に使い、Overpass は予備（[スポットのタイル](#スポットのタイル)）。Open-Meteo の公開サーバーは、アプリ利用者が増える前に利用ポリシーを確認し、自前のサーバーや商用のサービスを検討する
