@@ -326,7 +326,7 @@ resources/
 | `format` | 本書は `1` |
 | `id` | 英小文字・数字・`-`、3〜40 文字。リストの中で一意。最初に登録した素材提供者が持ち、取り下げ・退会のあとも再利用しない（ADR-MATERIAL-PRODUCERS D-17）。チャンネルの ID とは別の名前空間 |
 | `version` | 1 以上 |
-| `producer` | 素材提供者のアカウントID（`sg1…`）。`signature.json` の公開鍵から計算した値と一致し、リストの `collections[].producer` とも一致すること（API-CHANNEL-PACKAGE F-6 と同じ確かめ方）。鍵を移し替えたあとの版は新しいアカウントIDで署名する。前の鍵で署名した承認済みの版は、リストが同じ素材集の版として載せている限り使える |
+| `producer` | 素材提供者のアカウントID（`sg1…`）。`signature.json` の公開鍵から計算した値と一致し、リストの `collections[].producer` とも一致すること（API-CHANNEL-PACKAGE F-6 と同じ確かめ方）。鍵を移し替えたあとの版は、新しいアカウントIDの鍵（その秘密鍵）で署名する。前の鍵で署名した承認済みの版は、リストが同じ素材集の版として載せている限り使える |
 | `name` / `summary` / `lang` | API-CHANNEL-PACKAGE の `channel.json` と同じ決まり |
 | `grants.publishers` | 使ってよいチャンネル提供者。`"*"`（誰でも）か、アカウントIDの配列（1〜50 個）（ADR-MATERIAL-PRODUCERS D-9） |
 | `grants.apps` | （I-11）使ってよいアプリの ID の配列（1〜20 個）。省略はすべてのアプリ |
