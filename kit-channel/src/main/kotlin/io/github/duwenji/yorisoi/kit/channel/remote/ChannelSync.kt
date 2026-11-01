@@ -39,7 +39,7 @@ import java.time.Duration
 import java.time.Instant
 import java.util.Base64
 
-/** Fetches a URL, giving up past [maxBytes] (API-002 大きさの上限). Blocking; call it off the main thread. */
+/** Fetches a URL, giving up past [maxBytes] (API-CHANNEL-LIST 大きさの上限). Blocking; call it off the main thread. */
 fun interface ProviderHttp {
     @Throws(IOException::class)
     fun get(url: String, maxBytes: Int): ByteArray
@@ -68,17 +68,17 @@ data class ProviderView(
 )
 
 /**
- * Third-party channels (API-002 アプリの振る舞い): the providers the user
+ * Third-party channels (API-CHANNEL-LIST アプリの振る舞い): the providers the user
  * added, their lists, and the packages the user chose. Plain JVM so it is tested without a device;
  * [ThirdPartyChannels] runs it on Android. Not thread-safe: the caller serializes calls.
  *
  * @param appVersion the app's versionCode, against `minAppVersions`.
  * @param allowLocalHttp debug builds may use `http://localhost` and `http://10.0.2.2` (the emulator's host).
- * @param mediaStage the material this app shows (API-003 M-1: 1 text and images, 2 audio, 3 video).
- * @param region the device's region and the eight around it (API-004 P-6), for the collections
+ * @param mediaStage the material this app shows (API-CHANNEL-PACKAGE M-1: 1 text and images, 2 audio, 3 video).
+ * @param region the device's region and the eight around it (API-MATERIALS P-6), for the collections
  *   selectors draw from; null while the location is unknown.
- * @param profile what this app is, for choosing the channels it can use (API-003 G-4) and the
- *   version it is against `minAppVersions` (API-002 P-20).
+ * @param profile what this app is, for choosing the channels it can use (API-CHANNEL-PACKAGE G-4) and the
+ *   version it is against `minAppVersions` (API-CHANNEL-LIST P-20).
  */
 class ChannelSync(
     private val store: ChannelStore,
@@ -108,7 +108,7 @@ class ChannelSync(
     // ---- providers ----
 
     /**
-     * Adds a provider from its URL and the id the user got by another route (API-002: never taken
+     * Adds a provider from its URL and the id the user got by another route (API-CHANNEL-LIST: never taken
      * from the server), after its discovery document checks out against that id.
      */
     fun addProvider(url: String, providerId: String) {
@@ -159,7 +159,7 @@ class ChannelSync(
 
     /**
      * Fetches the provider's discovery document and list. A list that fails a check is dropped and
-     * the last one kept (until it expires); the reason shows in the settings (API-002 確認に失敗したとき).
+     * the last one kept (until it expires); the reason shows in the settings (API-CHANNEL-LIST 確認に失敗したとき).
      */
     fun refresh(providerId: String, unmetered: Boolean) {
         val record = state.providers.firstOrNull { it.id == providerId } ?: return
@@ -240,7 +240,7 @@ class ChannelSync(
     /**
      * Fetches, checks and keeps a package; replaces [previous] only once the new one checks out.
      * A new publisher is accepted only with the list's `publisherChange` from the one on the device (P-9).
-     * The material its cues may show is fetched with it (API-003 F-10).
+     * The material its cues may show is fetched with it (API-CHANNEL-PACKAGE F-10).
      */
     private fun download(providerId: String, entry: ListedChannel, previous: InstalledChannel?, list: ChannelList, unmetered: Boolean) {
         if (previous != null && entry.publisher != previous.publisher) {
@@ -306,7 +306,7 @@ class ChannelSync(
             name = valid?.first?.name ?: p.name ?: p.id,
             listValid = valid != null,
             expiresAt = list?.expiresAt,
-            // Channels for another activity, or needing what this app lacks, aren't offered (API-003 G-4).
+            // Channels for another activity, or needing what this app lacks, aren't offered (API-CHANNEL-PACKAGE G-4).
             channels = list?.channels.orEmpty().filter { Compatibility.reasons(it, profile).isEmpty() }.map { entry ->
                 val installed = mine.firstOrNull { it.id == entry.id }
                 val status = when {
@@ -325,7 +325,7 @@ class ChannelSync(
 
     fun dismissNotices() = update { it.copy(notices = emptyList()) }
 
-    // ---- test tickets (API-002 試用チケット) ----
+    // ---- test tickets (API-CHANNEL-LIST 試用チケット) ----
 
     /**
      * Reads a test ticket from a QR code: signed by a provider the user added, valid now (7 days at
@@ -414,12 +414,12 @@ class ChannelSync(
         return Opened(pkg, PackageArchive.open(zip))
     }
 
-    /** API-002 P-20: this app's own minimum, if the list has one. */
+    /** API-CHANNEL-LIST P-20: this app's own minimum, if the list has one. */
     private fun needsUpdate(entry: ListedChannel): Boolean = (entry.minAppVersionFor(profile.id) ?: 0) > appVersion
 
     private val collectionCache = HashMap<String, Pair<CollectionPackage, StationFiles>>()
 
-    /** A collection on the device, with its own checks (API-004 手順 1・2); the list's are the caller's. */
+    /** A collection on the device, with its own checks (API-MATERIALS 手順 1・2); the list's are the caller's. */
     private fun openCollection(sha256: String): Pair<CollectionPackage, StationFiles>? = collectionCache.getOrPut(sha256) {
         val zip = store.readCollection(sha256) ?: return null
         val files = runCatching { PackageArchive.open(zip) }.getOrNull() ?: return null
@@ -466,7 +466,7 @@ class ChannelSync(
     /**
      * Fetches what [pkg] may show and the device doesn't have: the collections it declares, at
      * the version [list] names; on an [unmetered] network, the collections its selectors draw
-     * from around here (API-004 P-6); then the outside resources of [MaterialPlan]. Each failure
+     * from around here (API-MATERIALS P-6); then the outside resources of [MaterialPlan]. Each failure
      * leaves just that material out (its cue moves on to the next candidate) until the next try.
      */
     private fun fetchMaterials(providerId: String, list: ChannelList, pkg: StationPackage, publisher: String, unmetered: Boolean) {
@@ -491,8 +491,8 @@ class ChannelSync(
 
     /**
      * On an unmetered network at start-up and when a walk starts: the collections the channels'
-     * selectors draw from where the device is now (API-004 P-6). Only the region is used, and
-     * nothing is fetched on coming near a spot (API-003 F-10).
+     * selectors draw from where the device is now (API-MATERIALS P-6). Only the region is used, and
+     * nothing is fetched on coming near a spot (API-CHANNEL-PACKAGE F-10).
      */
     private fun fetchNearby() {
         for (c in state.installed) {
@@ -596,7 +596,7 @@ class ChannelSync(
         return pair.takeIf { now().isBefore(it.second.expiresAt) }
     }
 
-    /** API-002: an expired list's channels stop from the next walk; say so once, if one was in use. */
+    /** API-CHANNEL-LIST: an expired list's channels stop from the next walk; say so once, if one was in use. */
     private fun noticeExpiredLists() {
         for (p in state.providers) {
             if (p.list == null || p.expiryNoticed || validList(p.id) != null) continue

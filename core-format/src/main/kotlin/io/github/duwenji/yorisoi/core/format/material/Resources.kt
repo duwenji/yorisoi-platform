@@ -18,27 +18,27 @@ import io.github.duwenji.yorisoi.core.format.string
 import io.github.duwenji.yorisoi.core.format.strings
 import org.json.JSONObject
 
-/** Who made a resource and under what license (API-003 F-11). */
+/** Who made a resource and under what license (API-CHANNEL-PACKAGE F-11). */
 data class ResourceCredit(val author: String, val license: String, val source: String?)
 
-/** Where a resource's bytes are: in the package, or outside it with a hash (API-003 F-9). */
+/** Where a resource's bytes are: in the package, or outside it with a hash (API-CHANNEL-PACKAGE F-9). */
 sealed interface ResourceLocation {
     data class File(val path: String) : ResourceLocation
     data class External(val url: String, val sha256: String, val size: Long, val mime: String) : ResourceLocation
 }
 
-/** What a resource is about (API-004 `about`), for choosing by subject. */
+/** What a resource is about (API-MATERIALS `about`), for choosing by subject. */
 sealed interface About {
     /**
      * [osm] is `node/…`, `way/…` or `relation/…`; with [name], a spot of the same name within 200m
      * of [lat], [lon] matches too. The position is approximate: in the spot or within 100m of it
-     * (API-004), enough for its region and for that match.
+     * (API-MATERIALS), enough for its region and for that match.
      */
     data class Spot(val osm: String, val name: String?, val lat: Double, val lon: Double) : About
     data class Point(val lat: Double, val lon: Double, val radiusM: Int) : About
 }
 
-/** One resource (API-003 `resources[]`; in a collection also [about] and [tags], API-004). */
+/** One resource (API-CHANNEL-PACKAGE `resources[]`; in a collection also [about] and [tags], API-MATERIALS). */
 data class Resource(
     val id: String,
     val type: MaterialType,
@@ -51,11 +51,11 @@ data class Resource(
     val poster: String?,
     val credit: ResourceCredit?,
     val about: About?,
-    /** As written; tags this version doesn't know are kept and simply never match (API-004「タグ」). */
+    /** As written; tags this version doesn't know are kept and simply never match (API-MATERIALS「タグ」). */
     val tags: List<String>,
 )
 
-/** The tags of API-004「タグ」. */
+/** The tags of API-MATERIALS「タグ」. */
 object Tags {
     val KNOWN = setOf("history", "faith", "architecture", "nature", "landscape", "season", "festival", "food", "craft", "art", "folklore")
 }
@@ -64,7 +64,7 @@ object Tags {
 data class Resources(val items: List<Resource>, val texts: Map<String, String>) {
     operator fun get(id: String): Resource? = items.firstOrNull { it.id == id }
 
-    /** Bytes fetched ahead when the channel is chosen (API-003: all outside resources but video). */
+    /** Bytes fetched ahead when the channel is chosen (API-CHANNEL-PACKAGE: all outside resources but video). */
     val prefetchBytes: Long get() = items.filter { it.type != MaterialType.VIDEO }.sumOf { (it.location as? ResourceLocation.External)?.size ?: 0L }
 
     val externalBytes: Long get() = items.sumOf { (it.location as? ResourceLocation.External)?.size ?: 0L }
@@ -75,8 +75,8 @@ data class Resources(val items: List<Resource>, val texts: Map<String, String>) 
 }
 
 /**
- * Reads and checks `resources` (API-003「素材（resources）」, 確認の手順 8). Every failure is
- * `bad_resource`. [inCollection] allows `about` and `tags` (API-004), which a channel's own
+ * Reads and checks `resources` (API-CHANNEL-PACKAGE「素材（resources）」, 確認の手順 8). Every failure is
+ * `bad_resource`. [inCollection] allows `about` and `tags` (API-MATERIALS), which a channel's own
  * resources don't use (ignored there, like any unknown field).
  */
 object ResourceReader {
@@ -130,7 +130,7 @@ object ResourceReader {
         return resources
     }
 
-    /** Paths under `resources/` that some resource points at; any other file there is unexpected (API-003). */
+    /** Paths under `resources/` that some resource points at; any other file there is unexpected (API-CHANNEL-PACKAGE). */
     fun files(resources: Resources): Set<String> =
         resources.items.mapNotNull { (it.location as? ResourceLocation.File)?.path }.toSet()
 
@@ -237,7 +237,7 @@ object ResourceReader {
         return tags
     }
 
-    /** Plain text only: no headings, links, images or URLs, read out or shown as is (API-003). */
+    /** Plain text only: no headings, links, images or URLs, read out or shown as is (API-CHANNEL-PACKAGE). */
     private fun checkText(id: String, path: String, bytes: ByteArray): String {
         val text = decodeUtf8(bytes, path, CODE)
         if (text.startsWith('﻿') || '\r' in text) reject(CODE, "$id: $path must be UTF-8 without BOM, with LF")

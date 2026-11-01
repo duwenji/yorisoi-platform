@@ -1,7 +1,7 @@
 package io.github.duwenji.yorisoi.core.format
 
 /**
- * The places in the app's prompts where a channel may put its own text (API-003). Everything
+ * The places in the app's prompts where a channel may put its own text (API-CHANNEL-PACKAGE). Everything
  * else in the prompts — the shared rules, safety and privacy — is the app's and can't be changed.
  */
 enum class Slot(val path: String, val maxChars: Int) {

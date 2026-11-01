@@ -17,7 +17,7 @@ import io.github.duwenji.yorisoi.core.format.StationMedia
 import io.github.duwenji.yorisoi.kit.channel.SelectedCollection
 
 /**
- * The producer a selector makes (API-004 I-10): material from [collections], best first, that the
+ * The producer a selector makes (API-MATERIALS I-10): material from [collections], best first, that the
  * selector asks for and that is about the cue's subject (or about nothing, for `subject: none`).
  * Like the channel's own resources it was fetched ahead and checked, so producing only reads the
  * device (P-1). The order is fixed, so a spot gets the same material each time on a walk.

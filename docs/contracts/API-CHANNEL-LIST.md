@@ -5,12 +5,8 @@
 | 項目 | 内容 |
 |---|---|
 | 文書ID | API-CHANNEL-LIST |
-| 旧文書ID | API-002 |
 | ドキュメント種別 | API契約書 |
 | 対象システム/機能 | yorisoi エコシステムのチャンネル管理システムとアプリの間で、第三者のチャンネルを配信する承認済みチャンネル・リスト（最初のアプリは SanpoGuide。詳細は [ADR-ECOSYSTEM-PLATFORM](../decisions/ADR-ECOSYSTEM-PLATFORM.md)） |
-| 関連Skill | 020_api-contract-design |
-| 作成日 | 2026-10-03 |
-| 作成者 | Claude（開発者との検討） |
 | 承認者 | 開発者 |
 | ステータス | 承認済 |
 | 版 | 1.0 |

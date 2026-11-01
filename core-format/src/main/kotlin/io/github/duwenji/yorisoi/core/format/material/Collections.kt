@@ -27,8 +27,8 @@ import io.github.duwenji.yorisoi.core.format.verifyPackageSignature
 import org.json.JSONArray
 
 /**
- * Which publishers may use a collection (API-004 `grants`, ADR-002 D-9), and in which apps (API-004
- * 1.5 I-11). Null means any. [grounding]: whether the AI may take its texts as grounds (API-004
+ * Which publishers may use a collection (API-MATERIALS `grants`, ADR-002 D-9), and in which apps (API-MATERIALS
+ * 1.5 I-11). Null means any. [grounding]: whether the AI may take its texts as grounds (API-MATERIALS
  * I-13, ADR-004 H-4).
  */
 data class Grants(val publishers: Set<String>?, val apps: Set<String>? = null, val grounding: Boolean = false) {
@@ -42,7 +42,7 @@ data class Grants(val publishers: Set<String>?, val apps: Set<String>? = null, v
     }
 }
 
-/** `collection.json` of a third-party collection (API-004「素材集の形式」). */
+/** `collection.json` of a third-party collection (API-MATERIALS「素材集の形式」). */
 data class CollectionManifest(
     val format: Int,
     val id: String,
@@ -58,20 +58,20 @@ data class CollectionManifest(
 data class CollectionPackage(val manifest: CollectionManifest, val resources: Resources)
 
 /**
- * What the approved list says about a collection (API-002 `collections[]`); the package must
+ * What the approved list says about a collection (API-CHANNEL-LIST `collections[]`); the package must
  * agree. A version signed before the producer moved to a new key names a former id
- * ([formerProducers], from `producerChange`), and is still the listed version (API-004 D-17).
+ * ([formerProducers], from `producerChange`), and is still the listed version (API-MATERIALS D-17).
  */
 data class CollectionListedAs(val id: String, val version: Int, val producer: String, val formerProducers: Set<String> = emptySet())
 
 sealed interface CollectionCheck {
     data class Ok(val collection: CollectionPackage) : CollectionCheck
-    /** The codes are API-003's ([RejectCode]); API-004 groups them as `collection_invalid`. */
+    /** The codes are API-CHANNEL-PACKAGE's ([RejectCode]); API-MATERIALS groups them as `collection_invalid`. */
     data class Rejected(val code: RejectCode, val detail: String) : CollectionCheck
 }
 
 /**
- * The checks of a collection package (API-004 確かめる手順 1・2), shared by the app and the
+ * The checks of a collection package (API-MATERIALS 確かめる手順 1・2), shared by the app and the
  * review tools: the ZIP, the files, the producer's signature, `collection.json` and the resources.
  * Its size and SHA-256 against the list are the caller's, as for channels.
  */
@@ -111,7 +111,7 @@ object CollectionValidator {
         if (signed.subject != manifest.id || signed.version != manifest.version) {
             reject(RejectCode.BAD_SIGNATURE, "signed for ${signed.subject}@${signed.version}, not ${manifest.id}@${manifest.version}")
         }
-        // The key that signed must be the producer the package and the list name (as API-003 F-6).
+        // The key that signed must be the producer the package and the list name (as API-CHANNEL-PACKAGE F-6).
         if (signed.accountId != signed.owner || signed.accountId != manifest.producer) {
             reject(RejectCode.PUBLISHER_MISMATCH, "signed by ${signed.accountId}, package says ${manifest.producer}")
         }
@@ -152,7 +152,7 @@ object CollectionValidator {
         )
     }
 
-    /** `"*"` for anyone, or 1–50 publishers' account ids; and optionally 1–20 app ids (API-004 I-11). */
+    /** `"*"` for anyone, or 1–50 publishers' account ids; and optionally 1–20 app ids (API-MATERIALS I-11). */
     private fun readGrants(g: org.json.JSONObject, strictness: Strictness): Grants {
         val publishers = when (val publishers = g.required("publishers")) {
             "*" -> null
@@ -176,8 +176,8 @@ object CollectionValidator {
     }
 
     /**
-     * The texts a grounding collection gives the AI (API-004 I-15) follow the slots' rules
-     * (API-003 F-2), so they can't reach into the app's prompt templates or point elsewhere.
+     * The texts a grounding collection gives the AI (API-MATERIALS I-15) follow the slots' rules
+     * (API-CHANNEL-PACKAGE F-2), so they can't reach into the app's prompt templates or point elsewhere.
      */
     private fun checkGroundingTexts(resources: Resources) {
         val texts = resources.texts.map { (id, text) -> id to text } +

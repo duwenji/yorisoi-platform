@@ -2,9 +2,9 @@ openapi: 3.1.0
 info:
   title: 秘密メッセージ サーバー API
   version: 1.0.0
-  summary: 位置に紐づく秘密メッセージの管理と配信（API-001）
+  summary: 位置に紐づく秘密メッセージの管理と配信（API-SECRET-MESSAGES）
   description: |
-    [secret-messages-api.md](../secret-messages-api.md)（API-001 1.0）を機械で読める形にしたもの。
+    [API-SECRET-MESSAGES](../contracts/API-SECRET-MESSAGES.md)（1.0）を機械で読める形にしたもの。
     文言・判断の根拠は契約書が正本で、食い違いがあれば契約書に合わせてこのファイルを直す。
     使い方とシーケンス図は [README.md](README.md) を参照。
 

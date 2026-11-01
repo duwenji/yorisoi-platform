@@ -52,7 +52,7 @@ class Station(
 ) {
     val manifest: StationManifest get() = pkg.manifest
 
-    /** The channel's cues with the built-in producers' shorthand cues added (API-004「省略形の展開」). */
+    /** The channel's cues with the built-in producers' shorthand cues added (API-MATERIALS「省略形の展開」). */
     val cueMedia: StationMedia by lazy { Shorthands.expand(materials?.media ?: pkg.media) }
     val name: String get() = manifest.name
 

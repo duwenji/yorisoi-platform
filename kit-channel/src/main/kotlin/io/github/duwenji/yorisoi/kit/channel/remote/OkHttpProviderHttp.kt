@@ -7,7 +7,7 @@ import java.io.IOException
 import java.util.concurrent.TimeUnit
 
 /**
- * [ProviderHttp] over OkHttp: no location or user data in the request (API-002 位置情報), and a byte
+ * [ProviderHttp] over OkHttp: no location or user data in the request (API-CHANNEL-LIST 位置情報), and a byte
  * limit. The app adds OkHttp to its dependencies; kit-channel only compiles against it.
  *
  * @param userAgent the app and its version, as `CycleGuide/1.2.0`

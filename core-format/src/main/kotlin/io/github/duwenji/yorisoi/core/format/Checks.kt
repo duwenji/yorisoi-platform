@@ -7,14 +7,14 @@ import java.nio.ByteBuffer
 import java.nio.charset.CharacterCodingException
 import java.nio.charset.CodingErrorAction
 
-// The pieces every package check shares (channels, API-003; collections, API-004): turning a broken
+// The pieces every package check shares (channels, API-CHANNEL-PACKAGE; collections, API-MATERIALS): turning a broken
 // rule into a rejection, and reading JSON fields strictly.
 
 /** A broken rule, caught at the top of a check and returned as its result. */
 internal open class Reject(val code: RejectCode, detail: String) : Exception(detail)
 
 /**
- * A value outside the ecosystem's lists in a cue (API-003「アプリでの知らない値」): rejected in
+ * A value outside the ecosystem's lists in a cue (API-CHANNEL-PACKAGE「アプリでの知らない値」): rejected in
  * review, but an app reading a package leaves out the cue or presentation that holds it.
  */
 internal class UnknownValue(code: RejectCode, detail: String) : Reject(code, detail)

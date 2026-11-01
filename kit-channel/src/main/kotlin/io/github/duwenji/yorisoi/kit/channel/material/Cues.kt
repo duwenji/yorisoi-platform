@@ -19,7 +19,7 @@ import java.time.ZoneId
 import kotlin.coroutines.cancellation.CancellationException
 import io.github.duwenji.yorisoi.kit.channel.ChannelMaterials
 
-/** When each cue was last shown on this device, for `oncePerDay` and `once` (API-003 `repeat`). */
+/** When each cue was last shown on this device, for `oncePerDay` and `once` (API-CHANNEL-PACKAGE `repeat`). */
 interface CueMemory {
     fun lastShown(key: String): Long?
     fun record(key: String, at: Long)
@@ -46,7 +46,7 @@ class FileCueMemory(private val file: File) : CueMemory {
 data class CueFire(val cue: Cue, val subject: Subject, val key: String)
 
 /**
- * Finds the cues of a channel that fire now (API-003「きっかけ」) and counts them for `repeat`:
+ * Finds the cues of a channel that fire now (API-CHANNEL-PACKAGE「きっかけ」) and counts them for `repeat`:
  * once a walk in the walk's own set, once a day or once ever in [memory].
  */
 class CueFinder(private val memory: CueMemory, private val zone: () -> ZoneId = { ZoneId.systemDefault() }) {
@@ -54,7 +54,7 @@ class CueFinder(private val memory: CueMemory, private val zone: () -> ZoneId = 
      * The first cue on [spot], a spot within reach: by its OSM id, or by its name (the area and
      * the node of one place have different ids, and a spot of that name within reach is the one meant).
      * A cue on any spot of its kind comes only when no cue names the spot, and counts per spot
-     * (API-003 題材を問わないきっかけ).
+     * (API-CHANNEL-PACKAGE 題材を問わないきっかけ).
      */
     fun spot(stationId: String, media: StationMedia, spot: Subject.Spot, shownThisWalk: Set<String>, now: Long): CueFire? {
         val named = media.cues.filter { cue ->
@@ -84,7 +84,7 @@ class CueFinder(private val memory: CueMemory, private val zone: () -> ZoneId = 
             fire(stationId, cue, subject, shownThisWalk, now)
         }
 
-    /** Counts [fire] as shown; an idle cue isn't counted (what it showed counts by its own kind's rule, API-004 P-8). */
+    /** Counts [fire] as shown; an idle cue isn't counted (what it showed counts by its own kind's rule, API-MATERIALS P-8). */
     fun record(fire: CueFire, shownThisWalk: MutableSet<String>, now: Long) {
         if (fire.cue.isIdle) return
         shownThisWalk += fire.key
@@ -110,10 +110,10 @@ class CueFinder(private val memory: CueMemory, private val zone: () -> ZoneId = 
 data class Shown(val presentAs: PresentAs, val items: List<Material>)
 
 /**
- * Turns a cue into material (API-003「きっかけ」`present`): each item's candidates are asked in
- * order and the first that gives something the presentation can show is used (API-004 I-7); a
+ * Turns a cue into material (API-CHANNEL-PACKAGE「きっかけ」`present`): each item's candidates are asked in
+ * order and the first that gives something the presentation can show is used (API-MATERIALS I-7); a
  * presentation with nothing is left out. `narration: add` puts the AI's narration first
- * (API-004「省略形の展開」). Presentations of a later app [stage] are left out too, and those
+ * (API-MATERIALS「省略形の展開」). Presentations of a later app [stage] are left out too, and those
  * the app doesn't show ([shows]): their material isn't made, so no AI is asked for a card a
  * cycling app never shows. A channel without material of its own still shows what built-in
  * producers make (its shorthand cues, [Station.cueMedia]).

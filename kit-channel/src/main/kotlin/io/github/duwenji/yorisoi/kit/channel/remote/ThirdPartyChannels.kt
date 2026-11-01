@@ -19,12 +19,12 @@ import java.time.Instant
 /**
  * Runs [ChannelSync] for an app: one operation at a time off the main thread, and what it holds as
  * flows for the screens. Lists are fetched at start-up and when a walk or ride starts, if a day has
- * passed; never during one (API-002 取得の時期).
+ * passed; never during one (API-CHANNEL-LIST 取得の時期).
  *
  * @param dir where the channels are kept (the app's files, `channels`)
  * @param http [OkHttpProviderHttp] in an app
  * @param verifier [TinkEd25519] in an app
- * @param profile what the app is (API-003 G-4); its `versionCode` is checked against `minAppVersions`
+ * @param profile what the app is (API-CHANNEL-PACKAGE G-4); its `versionCode` is checked against `minAppVersions`
  * @param allowLocalHttp debug builds only (ChannelSync)
  * @param unmetered whether the network is unmetered now: packages are fetched only then
  */
@@ -37,9 +37,9 @@ class ThirdPartyChannels(
     private val unmetered: () -> Boolean,
     private val standard: StationPackage,
     private val scope: CoroutineScope,
-    /** Test tickets are read, and trial channels offered, only in developer mode (API-002 試用チケット). */
+    /** Test tickets are read, and trial channels offered, only in developer mode (API-CHANNEL-LIST 試用チケット). */
     private val developerMode: StateFlow<Boolean>,
-    /** The device's region and those around it, for what selectors draw from (API-004 P-6); null when unknown. */
+    /** The device's region and those around it, for what selectors draw from (API-MATERIALS P-6); null when unknown. */
     region: () -> Set<String>? = { null },
 ) {
     private val sync = ChannelSync(

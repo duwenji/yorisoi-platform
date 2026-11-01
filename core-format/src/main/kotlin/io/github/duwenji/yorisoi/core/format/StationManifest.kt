@@ -1,6 +1,6 @@
 package io.github.duwenji.yorisoi.core.format
 
-/** `channel.json` of a channel package (API-003). Only the values the format allows can be held. */
+/** `channel.json` of a channel package (API-CHANNEL-PACKAGE). Only the values the format allows can be held. */
 data class StationManifest(
     val format: Int,
     val id: String,
@@ -20,14 +20,14 @@ data class StationManifest(
     val guideLength: GuideLength,
     val moodTone: Boolean,
     val sound: SoundChoice,
-    /** API-003: what the channel is for. */
+    /** API-CHANNEL-PACKAGE: what the channel is for. */
     val activities: Set<Activity> = setOf(Activity.WALK),
     val genres: Set<Genre> = emptySet(),
-    /** API-003: what an app must implement for this channel to make sense. */
+    /** API-CHANNEL-PACKAGE: what an app must implement for this channel to make sense. */
     val requires: Set<Feature> = emptySet(),
     /**
      * Values read with [Strictness.APP] that this core-format doesn't know, where they'd restrict
-     * the channel (API-003「アプリでの知らない値」). An app doesn't use such a channel
+     * the channel (API-CHANNEL-PACKAGE「アプリでの知らない値」). An app doesn't use such a channel
      * ([Compatibility]); empty with [Strictness.REVIEW], which turns such values away instead.
      */
     val unknownRestrictions: List<String> = emptyList(),

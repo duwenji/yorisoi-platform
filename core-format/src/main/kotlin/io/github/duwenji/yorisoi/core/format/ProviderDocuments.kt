@@ -9,13 +9,13 @@ import java.time.Instant
 import java.time.format.DateTimeParseException
 
 /**
- * The app's checks of a channel provider's documents (API-002): the discovery document and its
+ * The app's checks of a channel provider's documents (API-CHANNEL-LIST): the discovery document and its
  * keyset, the channel list, and test tickets. The same rules as the channel management system's
  * conformance checks (yorisoi-console `packages/protocol`), whose code signs the test
  * vectors these are tested against.
  */
 
-/** API-002's error codes (エラー表) that a document check can give. */
+/** API-CHANNEL-LIST's error codes (エラー表) that a document check can give. */
 enum class ProviderError(val code: String) {
     PROVIDER_MISMATCH("provider_mismatch"),
     UNSUPPORTED_VERSION("unsupported_version"),
@@ -33,7 +33,7 @@ enum class ProviderError(val code: String) {
 
 class ProviderException(val error: ProviderError, detail: String) : Exception("${error.code}: $detail")
 
-/** A provider's id: `sc1` + the SHA-256 of its root public key in base32, first 32 characters (API-002 P-2). */
+/** A provider's id: `sc1` + the SHA-256 of its root public key in base32, first 32 characters (API-CHANNEL-LIST P-2). */
 object ProviderIds {
     private val FORM = Regex("sc1[a-z2-7]{32}")
 
@@ -67,7 +67,7 @@ class FileRef(val url: String, val sha256: String)
 
 class PackageRef(val url: String, val sha256: String, val size: Int, val format: Int)
 
-/** A publisher's (or, for a collection, a producer's) move to a new key (API-002 P-9, P-13). */
+/** A publisher's (or, for a collection, a producer's) move to a new key (API-CHANNEL-LIST P-9, P-13). */
 class PublisherChange(val from: String, val at: Instant, val reason: String)
 
 /** One entry of `channels[]`. */
@@ -86,22 +86,22 @@ class ListedChannel(
     val icon: FileRef,
     val pkg: PackageRef,
     val approvedAt: Instant,
-    /** The kinds of material the channel uses (API-002 P-14). */
+    /** The kinds of material the channel uses (API-CHANNEL-LIST P-14). */
     val media: List<String>,
     /** Bytes fetched ahead when the channel is chosen, collections included (P-14). */
     val resourcesSize: Long,
-    /** API-002 P-19: as the package writes them. */
+    /** API-CHANNEL-LIST P-19: as the package writes them. */
     val activities: List<String>,
     val genres: List<String>,
     val requires: List<String>,
-    /** API-002 P-20: the version each app needs, by app id. */
+    /** API-CHANNEL-LIST P-20: the version each app needs, by app id. */
     val minAppVersions: Map<String, Int>,
 ) {
-    /** The version [appId] needs, or null if none (API-002 P-20). */
+    /** The version [appId] needs, or null if none (API-CHANNEL-LIST P-20). */
     fun minAppVersionFor(appId: String): Int? = minAppVersions[appId]
 }
 
-/** One entry of `collections[]` (API-002 P-10・P-15). */
+/** One entry of `collections[]` (API-CHANNEL-LIST P-10・P-15). */
 class ListedCollection(
     val id: String,
     val version: Int,
@@ -112,7 +112,7 @@ class ListedCollection(
     val summary: String,
     val media: List<String>,
     val resourcesSize: Long,
-    /** The tags its resources carry, for selectors (API-004「タグ」). */
+    /** The tags its resources carry, for selectors (API-MATERIALS「タグ」). */
     val tags: List<String>,
     /** Where its resources are about, as 3-letter geohashes; empty when they're about nowhere in particular. */
     val regions: List<String>,
@@ -120,7 +120,7 @@ class ListedCollection(
     val grants: Grants,
     val pkg: PackageRef,
     val approvedAt: Instant,
-    /** API-002 P-20: the version each app needs, by app id. */
+    /** API-CHANNEL-LIST P-20: the version each app needs, by app id. */
     val minAppVersions: Map<String, Int>,
 ) {
     fun minAppVersionFor(appId: String): Int? = minAppVersions[appId]
@@ -143,7 +143,7 @@ class ChannelList(
     val sha256: String,
     val channels: List<ListedChannel>,
     val revoked: List<RevokedChannel>,
-    /** Approved collections (API-002). */
+    /** Approved collections (API-CHANNEL-LIST). */
     val collections: List<ListedCollection> = emptyList(),
     /** Kept apart from [revoked]: collection ids are another namespace (P-11). */
     val revokedCollections: List<RevokedCollection> = emptyList(),
@@ -168,7 +168,7 @@ class ProviderDocuments(private val ed25519: Ed25519Verifier) {
         val TICKET_LIFETIME: Duration = Duration.ofDays(7)
         val KEY_LIFETIME: Duration = Duration.ofDays(366)
 
-        /** A list issued this far ahead of the device's clock suggests the clock is wrong (API-002 エラー表の注). */
+        /** A list issued this far ahead of the device's clock suggests the clock is wrong (API-CHANNEL-LIST エラー表の注). */
         val CLOCK_SKEW: Duration = Duration.ofDays(1)
     }
 
@@ -269,7 +269,7 @@ class ProviderDocuments(private val ed25519: Ed25519Verifier) {
     }.getOrDefault(false)
 
     /**
-     * A test ticket read from a QR code (API-002 試用チケット): signed by a valid signing key of the
+     * A test ticket read from a QR code (API-CHANNEL-LIST 試用チケット): signed by a valid signing key of the
      * provider, valid now, for at most 7 days. Whether the app is in developer mode is the app's check.
      */
     fun testTicket(json: String, keyset: Keyset, now: Instant): TestTicket = parsing("ticket") {

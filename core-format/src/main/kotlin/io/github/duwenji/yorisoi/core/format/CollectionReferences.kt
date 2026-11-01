@@ -3,7 +3,7 @@ package io.github.duwenji.yorisoi.core.format
 import io.github.duwenji.yorisoi.core.format.material.CollectionPackage
 import io.github.duwenji.yorisoi.core.format.material.MaterialType
 
-/** Whether a collection a channel declares can be used (API-004 確かめる手順 3). */
+/** Whether a collection a channel declares can be used (API-MATERIALS 確かめる手順 3). */
 sealed interface CollectionStatus {
     /** On the list and granted; [pkg] is the collection read at the listed version. */
     data class Usable(val listed: ListedCollection, val pkg: CollectionPackage) : CollectionStatus
@@ -20,7 +20,7 @@ data class CollectionResolution(val statuses: Map<String, CollectionStatus>, val
     /**
      * The first reason to turn the channel away, for callers that need every reference sound: the
      * management system when a channel is submitted, and the app when it takes a third party's
-     * channel in (API-003 手順 9a). Not yet fetched collections don't count.
+     * channel in (API-CHANNEL-PACKAGE 手順 9a). Not yet fetched collections don't count.
      */
     fun rejection(): Pair<RejectCode, String>? =
         statuses.entries.firstNotNullOfOrNull { (alias, s) -> (s as? CollectionStatus.Unusable)?.let { it.code to "$alias: ${it.detail}" } }
@@ -34,16 +34,16 @@ data class CollectionResolution(val statuses: Map<String, CollectionStatus>, val
 }
 
 /**
- * Checks the collections a channel uses against its provider's list (API-004 確かめる手順 3・4).
+ * Checks the collections a channel uses against its provider's list (API-MATERIALS 確かめる手順 3・4).
  * Shared by the management system, which needs every reference sound before approving, and the
  * app, which skips just the candidates it can't use (ADR-002 D-12).
  */
 object CollectionReferences {
     /**
      * @param publisher the channel's publisher; a grant to one of its former ids (`publisherChange`)
-     *   still counts (API-004 W-13). Null for a built-in channel, which any grant to everyone allows.
+     *   still counts (API-MATERIALS W-13). Null for a built-in channel, which any grant to everyone allows.
      * @param packages the collections read so far, by id, at the version the list names.
-     * @param appId the app resolving, whose id a collection's `grants.apps` must hold (API-004
+     * @param appId the app resolving, whose id a collection's `grants.apps` must hold (API-MATERIALS
      *   I-11); null for the management system, which reviews a channel for every app.
      */
     fun resolve(
@@ -95,7 +95,7 @@ object CollectionReferences {
         if (!granted) return CollectionStatus.Unusable(RejectCode.NOT_GRANTED, "${use.id} is not granted to this publisher")
         if (appId != null && !listed.grants.allowsApp(appId)) return CollectionStatus.Unusable(RejectCode.NOT_GRANTED, "${use.id} is not granted to $appId")
         pkg ?: return CollectionStatus.NotFetched(listed)
-        // The package is the one the list names (its own check), and the list's copy of the grants must agree (API-002 P-15).
+        // The package is the one the list names (its own check), and the list's copy of the grants must agree (API-CHANNEL-LIST P-15).
         if (pkg.manifest.id != listed.id || pkg.manifest.version != listed.version) {
             return CollectionStatus.Unusable(RejectCode.BAD_MANIFEST, "read ${pkg.manifest.id}@${pkg.manifest.version}, listed ${listed.id}@${listed.version}")
         }

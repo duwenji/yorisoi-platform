@@ -12,7 +12,7 @@ import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
 import javax.imageio.ImageIO
 
-/** API-003 素材・きっかけ (手順 8・9・10, 確認観点 V-10・V-15・V-18・V-19) and 1.2's collections and selectors. */
+/** API-CHANNEL-PACKAGE 素材・きっかけ (手順 8・9・10, 確認観点 V-10・V-15・V-18・V-19) and 1.2's collections and selectors. */
 class StationMediaTest {
     private fun manifest(change: JSONObject.() -> Unit = {}) = manifestJson(publisher = null).apply(change)
 
@@ -147,7 +147,7 @@ class StationMediaTest {
     }
 
     @Test
-    fun `declarations and narration follow API-003 1_2`() {
+    fun `declarations and narration follow API-CHANNEL-PACKAGE 1_2`() {
         // Declared but never used.
         val unused = full { put("selectors", getJSONArray("selectors").put(JSONObject().put("as", "spare")
             .put("match", JSONObject().put("type", "audio").put("tags", JSONArray().put("nature"))))) }

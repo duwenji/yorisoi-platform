@@ -27,7 +27,7 @@ import java.time.Duration
 import java.time.Instant
 
 /**
- * Selectors and cues on any spot of a kind (API-004「基準で選ぶ素材提供者」P-6, API-003):
+ * Selectors and cues on any spot of a kind (API-MATERIALS「基準で選ぶ素材提供者」P-6, API-CHANNEL-PACKAGE):
  * which collections are fetched ahead and where, in what order they are drawn from, and when a
  * cue on any shrine fires.
  */

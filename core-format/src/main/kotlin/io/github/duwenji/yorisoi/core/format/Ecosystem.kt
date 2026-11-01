@@ -1,15 +1,15 @@
 package io.github.duwenji.yorisoi.core.format
 
-/** What a channel is for (API-003 `activities`, ADR-003 E-24). */
+/** What a channel is for (API-CHANNEL-PACKAGE `activities`, ADR-003 E-24). */
 enum class Activity(override val json: String) : JsonValue { WALK("walk"), CYCLE("cycle") }
 
-/** How users look for channels (API-003 `genres`). */
+/** How users look for channels (API-CHANNEL-PACKAGE `genres`). */
 enum class Genre(override val json: String) : JsonValue {
     GENERAL("general"), HISTORY("history"), NATURE("nature"), FOOD("food"), SHOPPING("shopping"),
 }
 
 /**
- * What an app may or may not implement (API-003 `requires.features`): the prompt slots, the
+ * What an app may or may not implement (API-CHANNEL-PACKAGE `requires.features`): the prompt slots, the
  * kinds of cue triggers, and the presentations.
  */
 enum class Feature(override val json: String) : JsonValue {
@@ -33,7 +33,7 @@ enum class Feature(override val json: String) : JsonValue {
 }
 
 /**
- * How strictly a package is read (API-003 G-3). [REVIEW], the channel management system's machine
+ * How strictly a package is read (API-CHANNEL-PACKAGE G-3). [REVIEW], the channel management system's machine
  * review, turns away any value the ecosystem's lists don't hold. [APP] reads a package the
  * way an app must when newer values may be in it ("アプリでの知らない値"): never looser than the
  * channel meant, but without turning it away for what this app doesn't know yet.
@@ -41,8 +41,8 @@ enum class Feature(override val json: String) : JsonValue {
 enum class Strictness { REVIEW, APP }
 
 /**
- * The apps of the ecosystem, by the id the list (`minAppVersions`, API-002 P-20) and collections
- * (`grants.apps`, API-004 I-11) name them with.
+ * The apps of the ecosystem, by the id the list (`minAppVersions`, API-CHANNEL-LIST P-20) and collections
+ * (`grants.apps`, API-MATERIALS I-11) name them with.
  */
 object AppIds {
     const val SANPOGUIDE = "sanpoguide"
@@ -51,14 +51,14 @@ object AppIds {
 }
 
 /**
- * What an app is and does, for choosing channels (API-003 G-4, ADR-003 E-6 ①). Each app has one.
+ * What an app is and does, for choosing channels (API-CHANNEL-PACKAGE G-4, ADR-003 E-6 ①). Each app has one.
  *
- * @param versionCode this build's version, for `minAppVersions` (API-002 P-20)
+ * @param versionCode this build's version, for `minAppVersions` (API-CHANNEL-LIST P-20)
  */
 data class AppProfile(val id: String, val activity: Activity, val features: Set<Feature>, val versionCode: Int)
 
 /**
- * Whether an app can use a channel (API-003 確認の手順 5a): the channel is for the app's activity,
+ * Whether an app can use a channel (API-CHANNEL-PACKAGE 確認の手順 5a): the channel is for the app's activity,
  * needs nothing the app lacks, and holds no value the app doesn't know where that value would
  * restrict it ([StationManifest.unknownRestrictions]). Not a rejection: such a channel just isn't
  * offered.
@@ -72,7 +72,7 @@ object Compatibility {
     }
 
     /**
-     * The same from the list, before fetching the package (API-002 P-19). The list carries the
+     * The same from the list, before fetching the package (API-CHANNEL-LIST P-19). The list carries the
      * values as written, so ones this app's core-format doesn't know are judged here: an unknown
      * activity is ignored, an unknown feature means the channel can't be used.
      */

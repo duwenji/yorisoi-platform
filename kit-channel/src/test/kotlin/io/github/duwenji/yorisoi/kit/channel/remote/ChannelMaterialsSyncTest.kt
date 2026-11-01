@@ -19,7 +19,7 @@ import java.time.Duration
 import java.time.Instant
 
 /**
- * Material fetched ahead with a third party's channel (API-003 F-10): its own
+ * Material fetched ahead with a third party's channel (API-CHANNEL-PACKAGE F-10): its own
  * resources, the collections it declares at the listed version, and their outside resources.
  */
 class ChannelMaterialsSyncTest {

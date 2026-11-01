@@ -9,7 +9,7 @@ import java.util.Base64
 /**
  * Checks a pure Ed25519 signature (RFC 8032). Pluggable because the platforms differ: the JVM
  * (and Android 13+) have it built in ([JcaEd25519]); the app, from Android 8, passes one backed by
- * Tink, as for API-001.
+ * Tink, as for API-SECRET-MESSAGES.
  */
 fun interface Ed25519Verifier {
     fun verify(publicKey: ByteArray, message: ByteArray, signature: ByteArray): Boolean
@@ -32,7 +32,7 @@ object JcaEd25519 : Ed25519Verifier {
     }
 }
 
-/** A publisher's account id: `sg1` + the SHA-256 of the public key in base32, first 32 characters (API-001). */
+/** A publisher's account id: `sg1` + the SHA-256 of the public key in base32, first 32 characters (API-SECRET-MESSAGES). */
 object AccountIds {
     fun of(publicKey: ByteArray): String {
         require(publicKey.size == 32) { "an Ed25519 public key is 32 bytes" }
@@ -67,5 +67,5 @@ private val BASE64URL = Regex("[A-Za-z0-9_-]*")
 internal fun decodeBase64Url(text: String): ByteArray? =
     if (BASE64URL.matches(text)) runCatching { Base64.getUrlDecoder().decode(text) }.getOrNull() else null
 
-/** What a verified `signature.json` vouches for (API-003 F-6): the channel or collection, its version, its owner as written, and the key's account id. */
+/** What a verified `signature.json` vouches for (API-CHANNEL-PACKAGE F-6): the channel or collection, its version, its owner as written, and the key's account id. */
 internal data class SignedFiles(val subject: String, val version: Int, val owner: String, val accountId: String)

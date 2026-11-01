@@ -6,7 +6,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.util.zip.ZipEntry
 
-/** API-003 確認の手順 2（ZIP）と 4（配信元の署名）, on packages built and signed as a publisher would. */
+/** API-CHANNEL-PACKAGE 確認の手順 2（ZIP）と 4（配信元の署名）, on packages built and signed as a publisher would. */
 class PackageArchiveTest {
     private val publisher = TestPublisher()
     private val listed = ListedAs("kamakura-history", 3, publisher.accountId)

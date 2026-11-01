@@ -26,7 +26,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import io.github.duwenji.yorisoi.kit.channel.ChannelMaterials
 
-/** The grounds the AI is given (API-004「AI の根拠」, 確認観点 W-21・W-22・W-24). */
+/** The grounds the AI is given (API-MATERIALS「AI の根拠」, 確認観点 W-21・W-22・W-24). */
 class GroundingTest {
     private val publisher = TestPublisher()
     private val producer = TestPublisher()

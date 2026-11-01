@@ -9,10 +9,10 @@ import io.github.duwenji.yorisoi.core.format.material.Resources
 import io.github.duwenji.yorisoi.core.format.material.StudioCategory
 import org.json.JSONObject
 
-/** A third-party collection a channel uses, under a name of its own (API-003 `collections`). */
+/** A third-party collection a channel uses, under a name of its own (API-CHANNEL-PACKAGE `collections`). */
 data class CollectionUse(val alias: String, val id: String, val minVersion: Int)
 
-/** Choose material by what it is rather than which it is (API-003 `selectors`, API-004「基準で選ぶ素材提供者」). */
+/** Choose material by what it is rather than which it is (API-CHANNEL-PACKAGE `selectors`, API-MATERIALS「基準で選ぶ素材提供者」). */
 data class Selector(
     val alias: String,
     val type: MaterialType,
@@ -25,26 +25,26 @@ data class Selector(
     val producers: List<String>,
 )
 
-/** When a cue fires (API-003「きっかけ」). */
+/** When a cue fires (API-CHANNEL-PACKAGE「きっかけ」). */
 sealed interface Trigger {
     data class Spot(val osm: String, val name: String?) : Trigger
-    /** Any spot of these kinds (API-003, `"any": true`). */
+    /** Any spot of these kinds (API-CHANNEL-PACKAGE, `"any": true`). */
     data class AnySpot(val categories: List<SpotKind>) : Trigger
     data class Point(val lat: Double, val lon: Double, val radiusM: Int) : Trigger
     data class Event(val event: CueEvent) : Trigger
 }
 
-/** [IDLE]: between the companion's lines, when the app has nothing to say (API-003; only for producers fetched by area). */
+/** [IDLE]: between the companion's lines, when the app has nothing to say (API-CHANNEL-PACKAGE; only for producers fetched by area). */
 enum class CueEvent(override val json: String) : JsonValue { SELECT("select"), START("start"), FINISH("finish"), IDLE("idle") }
 
-/** Whether a spot cue stands in for the AI's narration or follows it (API-003 F-12). */
+/** Whether a spot cue stands in for the AI's narration or follows it (API-CHANNEL-PACKAGE F-12). */
 enum class NarrationMode(override val json: String) : JsonValue { REPLACE("replace"), ADD("add") }
 
 enum class Repeat(override val json: String) : JsonValue { ONCE_PER_WALK("oncePerWalk"), ONCE_PER_DAY("oncePerDay"), ONCE("once") }
 
 /**
  * How material is shown, with what each may show and the app stage that first shows it
- * (API-003「見せ方」, F-8). [stageOf] gives the stage for a type: video, for instance, comes later
+ * (API-CHANNEL-PACKAGE「見せ方」, F-8). [stageOf] gives the stage for a type: video, for instance, comes later
  * than images on the same sheet.
  */
 enum class PresentAs(override val json: String, val types: Set<MaterialType>) : JsonValue {
@@ -70,7 +70,7 @@ enum class PresentAs(override val json: String, val types: Set<MaterialType>) : 
     }
 }
 
-/** A reference to material (API-004「参照の書き方」). */
+/** A reference to material (API-MATERIALS「参照の書き方」). */
 sealed interface Reference {
     /** The channel's own resource (`self#id`, or the shorthand `resource`). */
     data class Self(val id: String) : Reference
@@ -81,7 +81,7 @@ sealed interface Reference {
 
 /**
  * One way of showing in a cue: candidates in order for each item (a sheet may show several items),
- * and what the cue tells the built-in producers among them (API-003 `present[].params`).
+ * and what the cue tells the built-in producers among them (API-CHANNEL-PACKAGE `present[].params`).
  */
 data class Presentation(val presentAs: PresentAs, val items: List<List<Reference>>, val params: CueParams = CueParams.NONE)
 
@@ -90,7 +90,7 @@ data class Cue(
     val trigger: Trigger,
     /** Null when not written: a cue that asks the AI itself mustn't also say how it relates to the AI. */
     val narration: NarrationMode?,
-    /** Not written for [CueEvent.IDLE]: what isn't read out twice there follows each kind's own rule (API-004 P-8). */
+    /** Not written for [CueEvent.IDLE]: what isn't read out twice there follows each kind's own rule (API-MATERIALS P-8). */
     val repeat: Repeat,
     val present: List<Presentation>,
 )
@@ -99,7 +99,7 @@ data class Cue(
  * A channel's material: its own resources, the collections and selectors it uses, and its cues.
  *
  * @param shorthandsOff built-in producers the channel turned off in `shorthands`: no shorthand cue
- *   for them (API-004「省略形の展開」). Producers the cues name get none either.
+ *   for them (API-MATERIALS「省略形の展開」). Producers the cues name get none either.
  */
 data class StationMedia(
     val resources: Resources,
@@ -116,9 +116,9 @@ data class StationMedia(
 }
 
 /**
- * Reads and checks `collections`, `selectors` and `cues` (API-003 確認の手順 9 and the part of
+ * Reads and checks `collections`, `selectors` and `cues` (API-CHANNEL-PACKAGE 確認の手順 9 and the part of
  * 9a that needs nothing outside the package). A collection's resource ids can only be checked
- * against the collection itself, which is the list's job (API-004 手順 3・4).
+ * against the collection itself, which is the list's job (API-MATERIALS 手順 3・4).
  */
 internal object CueReader {
     const val MAX_CUES = 500
@@ -131,7 +131,7 @@ internal object CueReader {
     private val OSM = Regex("(node|way|relation)/[1-9][0-9]*")
 
     /**
-     * @param lenient an app reading a package (API-003 G-3): a cue with a trigger it doesn't
+     * @param lenient an app reading a package (API-CHANNEL-PACKAGE G-3): a cue with a trigger it doesn't
      *   know is left out, and so is a presentation it doesn't know (and the cue, if none is left)
      */
     fun read(json: JSONObject, resources: Resources, lenient: Boolean = false): StationMedia {
@@ -164,7 +164,7 @@ internal object CueReader {
 
     /**
      * `shorthands`: built-in producers whose shorthand cue the channel doesn't want, each set to false
-     * (API-003). An app ignores producers it doesn't know; the review turns them away.
+     * (API-CHANNEL-PACKAGE). An app ignores producers it doesn't know; the review turns them away.
      */
     fun readShorthands(json: JSONObject, lenient: Boolean): Set<String> {
         val value = json.optNullable("shorthands") ?: return emptySet()
@@ -292,7 +292,7 @@ internal object CueReader {
             else -> p.list("sources", RejectCode.BAD_CUE).map { candidates(cue, it) }
         }
         if (asWritten.isEmpty() || asWritten.size > 10) reject(RejectCode.BAD_CUE, "$cue: ${asWritten.size} items on the sheet (1..10)")
-        // An app passes over built-in producers it doesn't know, as if they had nothing (API-004 互換性).
+        // An app passes over built-in producers it doesn't know, as if they had nothing (API-MATERIALS 互換性).
         val items = if (!lenient) asWritten else asWritten.map { c -> c.filter { it !is Reference.BuiltIn || BuiltInProducers.byId(it.id) != null } }
         if (items.any { it.isEmpty() }) unknownValue(RejectCode.BAD_CUE, "$cue: no candidate this app knows")
         items.flatten().forEach { check(cue, presentAs, it, resources, collections, selectors) }
@@ -302,7 +302,7 @@ internal object CueReader {
         return Presentation(presentAs, items, params)
     }
 
-    /** `present[].params`: only what the built-in producers among the candidates declare, with a rule for its values (API-004 I-8). */
+    /** `present[].params`: only what the built-in producers among the candidates declare, with a rule for its values (API-MATERIALS I-8). */
     private fun readParams(cue: String, o: JSONObject, items: List<List<Reference>>, lenient: Boolean): CueParams {
         val declared = items.flatten().filterIsInstance<Reference.BuiltIn>().mapNotNull { BuiltInProducers.byId(it.id) }.flatMap { it.params }.toSet()
         var params = CueParams.NONE
@@ -378,7 +378,7 @@ internal object CueReader {
 }
 
 /**
- * The app stage a channel's material needs (API-003 M-1: 1 text and images, 2 audio, 3 video).
+ * The app stage a channel's material needs (API-CHANNEL-PACKAGE M-1: 1 text and images, 2 audio, 3 video).
  * 0 means no material at all. The management system sets `minAppVersion` from it; the app turns
  * away a channel it can't show yet (`unsupported_resource`).
  *

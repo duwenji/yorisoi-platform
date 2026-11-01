@@ -9,7 +9,7 @@ import java.util.Base64
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 
-/** Builds third-party packages the way a publisher does (API-003 F-6), for tests. */
+/** Builds third-party packages the way a publisher does (API-CHANNEL-PACKAGE F-6), for tests. */
 internal class TestPublisher(private val keys: KeyPair = KeyPairGenerator.getInstance("Ed25519").generateKeyPair()) {
     /** The raw 32-byte key: the last 32 bytes of its SubjectPublicKeyInfo. */
     val publicKey: ByteArray = keys.public.encoded.takeLast(32).toByteArray()

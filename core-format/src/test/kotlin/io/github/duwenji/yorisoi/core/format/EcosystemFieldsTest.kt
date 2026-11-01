@@ -8,7 +8,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.time.Instant
 
-/** API-003: the ecosystem's fields, how review and an app read unknown values, and choosing channels (V-24〜V-28). */
+/** API-CHANNEL-PACKAGE: the ecosystem's fields, how review and an app read unknown values, and choosing channels (V-24〜V-28). */
 class EcosystemFieldsTest {
     private class MemoryFiles(val files: Map<String, ByteArray>) : StationFiles {
         override fun list() = files.keys.toList()
@@ -145,7 +145,7 @@ class EcosystemFieldsTest {
     }
 
     @Test
-    fun `the package must agree with what the list copied from it (API-002 P-19)`() {
+    fun `the package must agree with what the list copied from it (API-CHANNEL-LIST P-19)`() {
         val publisher = TestPublisher()
         val signed = MemoryStationFiles(publisher.signed(packageFiles(manifestJson(publisher.accountId) {
             put("activities", JSONArray().put("walk").put("cycle")); put("genres", JSONArray().put("history"))
@@ -167,7 +167,7 @@ class EcosystemFieldsTest {
     }
 
     @Test
-    fun `the list's values decide before fetching (API-002 P-19, P-20)`() {
+    fun `the list's values decide before fetching (API-CHANNEL-LIST P-19, P-20)`() {
         fun listed(activities: List<String> = listOf("walk"), requires: List<String> = emptyList(), versions: Map<String, Int> = emptyMap()) = ListedChannel(
             id = "c", version = 1, publisher = "p", publisherName = "p", publisherChange = null, name = "n", summary = "s", description = null,
             lang = listOf("ja"), tags = emptyList(), regions = emptyList(), icon = FileRef("u", "h"), pkg = PackageRef("u", "h", 1, 1),

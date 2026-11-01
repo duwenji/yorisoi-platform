@@ -5,12 +5,8 @@
 | 項目 | 内容 |
 |---|---|
 | 文書ID | API-CHANNEL-PACKAGE |
-| 旧文書ID | API-003 |
 | ドキュメント種別 | API契約書 |
 | 対象システム/機能 | yorisoi エコシステムのアプリで使うチャンネル・パッケージの形式（[ADR-ECOSYSTEM-PLATFORM](../decisions/ADR-ECOSYSTEM-PLATFORM.md)。最初のアプリは SanpoGuide）。第三者が配信するパッケージと、アプリに組み込みのチャンネルで共通 |
-| 関連Skill | 020_api-contract-design |
-| 作成日 | 2026-10-03 |
-| 作成者 | Claude（開発者との検討） |
 | 承認者 | 開発者 |
 | ステータス | 承認済 |
 | 版 | 1.1 |
