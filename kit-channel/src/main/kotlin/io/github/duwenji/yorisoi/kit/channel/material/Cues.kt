@@ -84,15 +84,16 @@ class CueFinder(private val memory: CueMemory, private val zone: () -> ZoneId = 
             fire(stationId, cue, subject, shownThisWalk, now)
         }
 
-    /** Counts [fire] as shown. */
+    /** Counts [fire] as shown; an idle cue isn't counted (what it showed counts by its own kind's rule, API-004 P-8). */
     fun record(fire: CueFire, shownThisWalk: MutableSet<String>, now: Long) {
+        if (fire.cue.isIdle) return
         shownThisWalk += fire.key
         if (fire.cue.repeat != Repeat.ONCE_PER_WALK) memory.record(fire.key, now)
     }
 
     private fun fire(stationId: String, cue: Cue, subject: Subject, shownThisWalk: Set<String>, now: Long, perSubject: String? = null): CueFire? {
         val key = "$stationId#${cue.id}" + (perSubject?.let { "@$it" } ?: "")
-        val allowed = when (cue.repeat) {
+        val allowed = cue.isIdle || when (cue.repeat) {
             Repeat.ONCE_PER_WALK -> key !in shownThisWalk
             Repeat.ONCE_PER_DAY -> key !in shownThisWalk && memory.lastShown(key)?.let { day(it) == day(now) } != true
             Repeat.ONCE -> memory.lastShown(key) == null
@@ -101,6 +102,8 @@ class CueFinder(private val memory: CueMemory, private val zone: () -> ZoneId = 
     }
 
     private fun day(at: Long) = Instant.ofEpochMilli(at).atZone(zone()).toLocalDate()
+
+    private val Cue.isIdle: Boolean get() = trigger == Trigger.Event(CueEvent.IDLE)
 }
 
 /** One presentation of a cue as it came out: how it's shown, and its material (a sheet may hold several). */
@@ -112,7 +115,8 @@ data class Shown(val presentAs: PresentAs, val items: List<Material>)
  * presentation with nothing is left out. `narration: add` puts the AI's narration first
  * (API-004「省略形の展開」). Presentations of a later app [stage] are left out too, and those
  * the app doesn't show ([shows]): their material isn't made, so no AI is asked for a card a
- * cycling app never shows.
+ * cycling app never shows. A channel without material of its own still shows what built-in
+ * producers make (its shorthand cues, [Station.cueMedia]).
  */
 class CuePresenter(
     private val builtIns: Producers,
@@ -121,13 +125,12 @@ class CuePresenter(
     private val shows: Set<PresentAs> = PresentAs.entries.toSet(),
 ) {
     suspend fun present(fire: CueFire, station: Station, context: MaterialContext): List<Shown> {
-        val materials = station.materials ?: return emptyList()
-        val own = producersOf(station, materials)
+        val own = station.materials?.let { producersOf(station, it) }.orEmpty()
         return expand(fire.cue).mapNotNull { p ->
             if (p.presentAs !in shows) return@mapNotNull null
             val accepts = p.presentAs.types.filter { p.presentAs.stageOf(it) <= stage }.toSet()
             if (accepts.isEmpty()) return@mapNotNull null
-            val items = p.items.mapNotNull { candidates -> first(candidates, p.presentAs, accepts, fire.subject, context, own) }
+            val items = p.items.mapNotNull { candidates -> first(candidates, p, accepts, fire.subject, context, own) }
             if (items.isEmpty()) null else Shown(p.presentAs, items)
         }
     }
@@ -136,9 +139,10 @@ class CuePresenter(
         if (cue.narration == NarrationMode.ADD) listOf(AI_NARRATION) + cue.present else cue.present
 
     private suspend fun first(
-        candidates: List<Reference>, presentAs: PresentAs, accepts: Set<MaterialType>, subject: Subject,
+        candidates: List<Reference>, presentation: Presentation, accepts: Set<MaterialType>, subject: Subject,
         context: MaterialContext, own: Map<String, Producer>,
     ): Material? {
+        val presentAs = presentation.presentAs
         var after = context.after
         for (ref in candidates) {
             val (producer, id) = when (ref) {
@@ -149,7 +153,7 @@ class CuePresenter(
             }
             if (producer == null) continue
             val type = producer.descriptor.types.firstOrNull { it in accepts } ?: continue
-            val request = MaterialRequest(subject, type, context.copy(after = after), id, accepts, presentAs.maxTextChars)
+            val request = MaterialRequest(subject, type, context.copy(after = after), id, accepts, presentAs.maxTextChars, params = presentation.params)
                 .groundedFor(producer.descriptor.generated)
             val result = try {
                 producer.produce(request)

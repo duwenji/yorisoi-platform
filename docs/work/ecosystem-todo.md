@@ -23,11 +23,11 @@
 - [ ] 技術チュートリアルの追従（T-5）
 - [ ] 本番の配信を作る時期を決める（T-6）
 
-## スタジオ
+## その場の素材（スタジオ・一言）
 
-[REQ-STUDIO](../requirements/REQ-STUDIO.md)・[ADR-MATERIALS](../decisions/ADR-MATERIALS.md)・[API-LOCAL-MATERIALS](../contracts/API-LOCAL-MATERIALS.md)。サーバーは開発用（yorisoi-console の `YorisoiStudio-dev`）だけで、両アプリ（1.8.0）も開発用を使っています。アプリ側の部品は [kit-studio](../../kit-studio/README.md)。
+[REQ-STUDIO](../requirements/REQ-STUDIO.md)・[REQ-NOTES](../requirements/REQ-NOTES.md)・[ADR-MATERIALS](../decisions/ADR-MATERIALS.md)・[API-LOCAL-MATERIALS](../contracts/API-LOCAL-MATERIALS.md)。サーバーは開発用（yorisoi-console の `YorisoiLocalMaterials-dev`）だけです。アプリ側の部品は [kit-local-materials](../../kit-local-materials/README.md)。
 
-- [ ] 両アプリの内部テストへの送信と、実機での確認（声で一言を置く、スタジオの音声の再生、走行中の読み上げ。kit-studio README の A4）
+- [ ] 両アプリの内部テストへの送信と、実機での確認（声で一言を置く、スタジオの音声の再生、走行中の読み上げ、チャンネルのきっかけと省略形）
 - [ ] 実際の M4A で、スタジオの確認（Transcribe・運営の AI）から配信・アプリでの再生までを通しで確かめる
 - [ ] 本番の配備（中継の本番の後）。Play のデータ セーフティとコンテンツのレーティングを、各アプリの `docs/play-console.md` のとおりに入れ直す（REQ-STUDIO・REQ-NOTES N-3）
 - [ ] 技術チュートリアルの追従

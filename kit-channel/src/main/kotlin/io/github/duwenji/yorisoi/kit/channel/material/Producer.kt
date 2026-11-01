@@ -1,5 +1,6 @@
 package io.github.duwenji.yorisoi.kit.channel.material
 
+import io.github.duwenji.yorisoi.core.format.material.CueParams
 import io.github.duwenji.yorisoi.core.format.material.MaterialType
 import io.github.duwenji.yorisoi.core.format.material.ProducerDescriptor
 import io.github.duwenji.yorisoi.core.format.material.ProducerPolicy
@@ -55,7 +56,8 @@ data class MaterialContext(
  * A request for one piece of material (API-004 I-4): by [id] when a cue names the resource,
  * otherwise by [subject]. Built-in producers make [type]; resources may be any of [accepts]
  * (what the presentation can show), a text no longer than [maxTextChars]. [grounding] is what a
- * generated producer may take as fact (API-004 I-14); empty for the others.
+ * generated producer may take as fact (API-004 I-14); empty for the others. [params] is what the
+ * cue tells a built-in producer (API-003 `present[].params`).
  */
 data class MaterialRequest(
     val subject: Subject,
@@ -65,6 +67,7 @@ data class MaterialRequest(
     val accepts: Set<MaterialType> = setOf(type),
     val maxTextChars: Int? = null,
     val grounding: List<Ground> = emptyList(),
+    val params: CueParams = CueParams.NONE,
 )
 
 /** The material itself. A text and a stored image are any app's; the app adds the forms it makes (a bitmap, a sound it synthesizes). */
