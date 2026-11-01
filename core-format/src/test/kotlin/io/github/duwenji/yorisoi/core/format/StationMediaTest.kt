@@ -1,6 +1,8 @@
 package io.github.duwenji.yorisoi.core.format
 
 import io.github.duwenji.yorisoi.core.format.material.MaterialType
+import io.github.duwenji.yorisoi.core.format.material.Prelude
+import io.github.duwenji.yorisoi.core.format.material.StudioCategory
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
@@ -180,5 +182,59 @@ class StationMediaTest {
         })) as StationCheck.Ok).station.media
         assertEquals(MaterialType.VIDEO, media.selectors[0].type)
         assertEquals(3, MediaStage.required(media))
+    }
+
+    private fun idle() = JSONObject().put("type", "event").put("event", "idle")
+
+    @Test
+    fun `idle cues show only producers fetched by area, with their params`() {
+        val studio = show("speak", "source", "builtin:studio")
+            .put("params", JSONObject().put("categories", JSONArray(listOf("shrine-temple", "event"))).put("prelude", "by-the-way"))
+        val media = (check(files(manifest { put("cues", JSONArray().put(cue("temple-news", idle(), studio))) }, withMedia = false)) as StationCheck.Ok).station.media
+        val p = media.cues[0].present[0]
+        assertEquals(Trigger.Event(CueEvent.IDLE), media.cues[0].trigger)
+        assertEquals(listOf(StudioCategory.SHRINE_TEMPLE, StudioCategory.EVENT), p.params.categories)
+        assertEquals(Prelude.BY_THE_WAY, p.params.prelude)
+        assertEquals(1, MediaStage.required(media))
+
+        fun one(c: JSONObject) = files(manifest { put("cues", JSONArray().put(c)) }, withMedia = false)
+        // Idle has nothing to ask the AI or a collection about, and no repeat.
+        assertEquals(RejectCode.BAD_CUE, rejected(one(cue("x", idle(), show("speak", "source", "builtin:ai-guide")))))
+        assertEquals(RejectCode.BAD_CUE, rejected(one(cue("x", idle(), show("speak", "source", "builtin:note")).put("repeat", "once"))))
+        // Only what a producer here declares, with a rule for its values.
+        assertEquals(RejectCode.BAD_CUE, rejected(one(cue("x", idle(), show("speak", "source", "builtin:note").put("params", JSONObject().put("categories", JSONArray().put("food")))))))
+        assertEquals(RejectCode.BAD_VALUE, rejected(one(cue("x", idle(), show("speak", "source", "builtin:studio").put("params", JSONObject().put("prelude", "hello"))))))
+        assertEquals(RejectCode.BAD_VALUE, rejected(one(cue("x", idle(), show("speak", "source", "builtin:studio").put("params", JSONObject().put("categories", JSONArray().put("bars")))))))
+        assertEquals(RejectCode.BAD_CUE, rejected(one(cue("x", spot(), show("speak", "source", "builtin:ai-guide").put("params", JSONObject().put("persona", "x"))))))
+        // A spot cue may show the studio around that spot too.
+        assertTrue(check(one(cue("x", spot(), show("speak", "source", "builtin:studio")))) is StationCheck.Ok)
+    }
+
+    @Test
+    fun `shorthands turn off a producer's shorthand cue, even without material`() {
+        val off = manifest { put("shorthands", JSONObject().put("builtin:studio", false)) }
+        assertEquals(setOf("builtin:studio"), (check(files(off, withMedia = false), stage = 0) as StationCheck.Ok).station.media.shorthandsOff)
+        assertEquals(setOf("builtin:studio"), (check(files(off, withMedia = false)) as StationCheck.Ok).station.media.shorthandsOff)
+        assertEquals(RejectCode.BAD_CUE, rejected(files(manifest { put("shorthands", JSONObject().put("builtin:studio", true)) }, withMedia = false)))
+        assertEquals(RejectCode.BAD_VALUE, rejected(files(manifest { put("shorthands", JSONObject().put("builtin:ai-guide", false)) }, withMedia = false)))
+    }
+
+    @Test
+    fun `an app passes over what a newer format added`() {
+        fun app(m: JSONObject) = StationValidator.check(files(m, withMedia = false), StationOrigin.BUILT_IN, mediaStage = StationValidator.ALL_STAGES, strictness = Strictness.APP)
+        val newer = manifest {
+            put("shorthands", JSONObject().put("builtin:studio", false).put("builtin:someday", false))
+            put("cues", JSONArray(listOf(
+                cue("a", idle(), show("speak", "source", "builtin:studio").put("params", JSONObject().put("categories", JSONArray(listOf("event", "someday"))).put("prelude", "someday"))),
+                cue("b", spot(), show("speak", "source", JSONArray(listOf("builtin:someday", "builtin:ai-guide")))),
+                cue("c", spot("way/2"), show("speak", "source", "builtin:someday")),
+            )))
+        }
+        val media = (app(newer) as StationCheck.Ok).station.media
+        assertEquals(setOf("builtin:studio"), media.shorthandsOff)
+        assertEquals(listOf(StudioCategory.EVENT), media.cues[0].present[0].params.categories)
+        assertEquals(Prelude.NONE, media.cues[0].present[0].params.prelude)
+        assertEquals(listOf(Reference.BuiltIn("builtin:ai-guide")), media.cues[1].present[0].items[0])
+        assertEquals(listOf("a", "b"), media.cues.map { it.id })
     }
 }

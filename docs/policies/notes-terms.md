@@ -77,5 +77,5 @@
 
 | No. | 内容 | 関係 |
 |---|---|---|
-| 1 | アプリの中で見せる URL（運営のサーバーか、GitHub Pages か） | API-LOCAL-MATERIALS `GET /v1/studio/terms` |
+| 1 | アプリの中で見せる URL（運営のサーバーか、GitHub Pages か） | API-LOCAL-MATERIALS `GET /v1/local/terms` |
 | 2 | 未成年の利用の扱い（保護者の同意を求めるか） | Play のコンテンツのレーティング（REQ-NOTES N-3） |

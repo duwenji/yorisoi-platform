@@ -164,7 +164,8 @@ object StationValidator {
         if (mediaStage <= 0) {
             MEDIA_FIELDS.firstOrNull { json.optList(it).isNotEmpty() }?.let { reject(RejectCode.UNSUPPORTED_RESOURCE, "$it are not supported yet") }
             paths.firstOrNull { it.startsWith(ResourceReader.RESOURCES_DIR) }?.let { reject(RejectCode.UNEXPECTED_FILE, it) }
-            return StationMedia.NONE
+            // Turning shorthand cues off needs no material stage: those producers are the app's own.
+            return StationMedia.NONE.copy(shorthandsOff = CueReader.readShorthands(json, lenient))
         }
         val resources = ResourceReader.read(json, files, inCollection = false)
         val pointed = ResourceReader.files(resources)
