@@ -13,6 +13,7 @@
 | `ADR-AI-RELAY` | — | [運営による AI の中継](ADR-AI-RELAY.md) | 運営の AI と自分のキー、無料の上限、Bedrock |
 | `ADR-SPOT-TILES` | — | [スポットのタイル](ADR-SPOT-TILES.md) | スポットの取り先、タイルの作り方と配り方、Overpass は予備 |
 | `ADR-STUDIO` | — | [スタジオの一言と掲載](ADR-STUDIO.md) | 人の発言の層、置いた人・掲載者の責任、識別とブロック、宣伝との関係、契約 |
+| `ADR-STUDIO-MATERIAL` | — | [スタジオと一言を素材に](ADR-STUDIO-MATERIAL.md) | 掲載（スタジオ）と一言（利用者の投稿）を組み込みの素材提供者に、チャンネルが出し方を決める、省略形、前置き、用語の切り分け |
 
 ## 文書の呼び方
 
