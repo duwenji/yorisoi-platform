@@ -10,7 +10,7 @@ import kotlin.coroutines.cancellation.CancellationException
 /**
  * What material is about (API-MATERIALS「題材」). A spot and a point are what cues and a collection's
  * `about` name; the app adds its own subjects (an event of its profile, platform
- * ADR-ECOSYSTEM-PLATFORM E-16), which only its built-in producers read.
+ * ECOSYSTEM E-16), which only its built-in producers read.
  */
 interface Subject {
     /**
@@ -36,7 +36,7 @@ interface Subject {
 
 /**
  * What the app knows of the activity (a walk, a ride: its session, the weather), for its own
- * built-in producers. The others never read it (platform ADR-ECOSYSTEM-PLATFORM E-16).
+ * built-in producers. The others never read it (platform ECOSYSTEM E-16).
  */
 interface Situation
 
@@ -98,7 +98,7 @@ sealed interface MaterialResult {
     /** The producer can't produce now; [detail] is for the log or an error message. */
     data class Unavailable(val reason: Reason, val detail: String? = null) : MaterialResult
 
-    /** [LIMIT]: today's AI calls reached the limit: the user's on their own key (platform ADR-004 H-9), the relay's on the operator's AI (ADR-AI-RELAY R-2). */
+    /** [LIMIT]: today's AI calls reached the limit: the user's on their own key (platform AI-ROLES H-9), the relay's on the operator's AI (API-AI-RELAY R-2). */
     enum class Reason { OFFLINE, METERED, NO_KEY, LIMIT, REVOKED, NOT_PREPARED, FAILED }
 }
 

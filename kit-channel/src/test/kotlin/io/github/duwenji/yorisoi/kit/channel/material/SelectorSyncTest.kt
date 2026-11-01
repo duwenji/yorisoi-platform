@@ -150,7 +150,7 @@ class SelectorSyncTest {
     }
 
     @Test
-    fun `a list's leftover promotional mark is ignored, so the collection is drawn from like any other (ADR-004 H-16)`() {
+    fun `a list's leftover promotional mark is ignored, so the collection is drawn from like any other (AI-ROLES H-16)`() {
         val shop = Col("shop-notes", templeGuild, "お店の紹介です", "history", null, null, clock.plusSeconds(60), promotional = true)
         publish(listOf(everywhere, shop))
         sync.addProvider(base, provider.id)

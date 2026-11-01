@@ -1,7 +1,7 @@
 package io.github.duwenji.yorisoi.kit.llm
 
 /**
- * Contact details the AI must not read out (ADR-AI-ROLES H-6 ③): a reply with a URL, an email
+ * Contact details the AI must not read out (AI-ROLES H-6 ③): a reply with a URL, an email
  * address or a phone number is not used, and a fixed line stands in. Stage directions the AI
  * sometimes writes for its own delivery are taken out before anything else, since they'd be read out.
  */

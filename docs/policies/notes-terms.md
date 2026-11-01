@@ -4,7 +4,7 @@
 |---|---|
 | 版 | 1 |
 | 状態 | 承認済み |
-| 根拠 | [ADR-MATERIALS](../decisions/ADR-MATERIALS.md) D-41・D-42・D-43、[REQ-NOTES](../requirements/REQ-NOTES.md) D-2〜D-6・D-11・D-24、[API-LOCAL-MATERIALS](../contracts/API-LOCAL-MATERIALS.md) |
+| 根拠 | [MATERIALS](../overview/materials.md) D-41・D-42・D-43、[REQ-NOTES](../requirements/REQ-NOTES.md) D-2〜D-6・D-11・D-24、[API-LOCAL-MATERIALS](../contracts/API-LOCAL-MATERIALS.md) |
 | 読む人 | 一言を置くアプリ利用者（アプリが初めて一言を置く前に見せる） |
 | 運営者 | duwenji |
 | 問い合わせ先 | duwenji@gmail.com |

@@ -11,7 +11,7 @@ import io.github.duwenji.yorisoi.core.format.Trigger
 import io.github.duwenji.yorisoi.core.format.material.BuiltInProducers
 
 /**
- * The shorthand cues of built-in producers (API-MATERIALS「省略形の展開」, ADR-MATERIALS D-48): a channel
+ * The shorthand cues of built-in producers (API-MATERIALS「省略形の展開」, MATERIALS D-48): a channel
  * that neither names one of [BuiltInProducers.withShorthand] in its cues nor turns it off in
  * `shorthands` shows it between the companion's lines, as an `idle` cue at the end of its own.
  */

@@ -6,7 +6,7 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
 /**
- * Who hears of a problem with a channel or with something the AI said (platform ADR-004 H-11): the
+ * Who hears of a problem with a channel or with something the AI said (platform AI-ROLES H-11): the
  * operator of the list the channel came from (its discovery document's `contact`), or the app's
  * developer for the built-in channels and lists without one.
  */
@@ -26,7 +26,7 @@ class Report(private val appName: String, private val appContact: String) {
         ReportTarget(station.name, station.key, station.source?.providerName, station.source?.contact ?: appContact)
 
     /**
-     * The draft's body: the channel and, for a line, when it was said and what (ADR-004 未決事項 No.5).
+     * The draft's body: the channel and, for a line, when it was said and what (AI-ROLES H-11).
      * Never where: the user adds it only if they want to.
      */
     fun body(target: ReportTarget, said: Pair<Long, String>?, appVersion: String): String = buildString {

@@ -1,6 +1,6 @@
 # kit-local-materials
 
-その場の素材（区画ごとに運営から取る素材。今はスタジオと一言。[ADR-MATERIALS](../docs/decisions/ADR-MATERIALS.md) D-44・D-51、[API-LOCAL-MATERIALS](../docs/contracts/API-LOCAL-MATERIALS.md)）のアプリ側の部品です（Android）。散歩・走行の間に近くのスタジオと一言を取り、チャンネルのきっかけから組み込みの素材提供者 `builtin:studio`・`builtin:note` として出し、一言を声で置きます。SanpoGuide と CycleGuide が使います。スタジオの要件は [REQ-STUDIO](../docs/requirements/REQ-STUDIO.md)、一言の要件は [REQ-NOTES](../docs/requirements/REQ-NOTES.md) です。
+その場の素材（区画ごとに運営から取る素材。今はスタジオと一言。[MATERIALS](../docs/overview/materials.md) D-44・D-51、[API-LOCAL-MATERIALS](../docs/contracts/API-LOCAL-MATERIALS.md)）のアプリ側の部品です（Android）。散歩・走行の間に近くのスタジオと一言を取り、チャンネルのきっかけから組み込みの素材提供者 `builtin:studio`・`builtin:note` として出し、一言を声で置きます。SanpoGuide と CycleGuide が使います。スタジオの要件は [REQ-STUDIO](../docs/requirements/REQ-STUDIO.md)、一言の要件は [REQ-NOTES](../docs/requirements/REQ-NOTES.md) です。
 
 ## 部品
 
@@ -71,7 +71,7 @@ sequenceDiagram
 
 上限は「直近の 60 分」で、チャンネルにかかわらずアプリ全体で数える。読み上げた一言の ID は 7 日、スタジオは日付と一緒に残し、同じものを読み上げない。
 
-### 読み上げる（ADR-MATERIALS D-38・D-49、API-MATERIALS P-8）
+### 読み上げる（MATERIALS D-38・D-49、API-MATERIALS P-8）
 
 - 前置き（チャンネルが選んだもの。なければなし）、出どころの紹介、原文の順。AI に渡さず、言い換えない。AI の呼び出しには数えない
   - スタジオ: 「〇〇（素材提供者）からのお知らせです。」に続けて文。音声があれば、読み上げが終わってから流す

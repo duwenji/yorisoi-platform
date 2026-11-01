@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 // The prompt template engine (a small subset of Mustache). Plain JVM, no dependencies, so the
-// apps and the channel management system render prompts the same way (ADR-003 E-3).
+// apps and the channel management system render prompts the same way (ECOSYSTEM E-3).
 plugins {
     alias(libs.plugins.kotlin.jvm)
 }

@@ -4,7 +4,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
 
-/** Replies the app won't read out (ADR-AI-ROLES H-6 ③). */
+/** Replies the app won't read out (AI-ROLES H-6 ③). */
 class OutputCheckTest {
     @Test
     fun `URLs, email addresses and phone numbers are caught, in any width`() {

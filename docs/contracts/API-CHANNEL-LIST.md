@@ -6,7 +6,7 @@
 |---|---|
 | 文書ID | API-CHANNEL-LIST |
 | ドキュメント種別 | API契約書 |
-| 対象システム/機能 | yorisoi エコシステムのチャンネル管理システムとアプリの間で、第三者のチャンネルを配信する承認済みチャンネル・リスト（最初のアプリは SanpoGuide。詳細は [ADR-ECOSYSTEM-PLATFORM](../decisions/ADR-ECOSYSTEM-PLATFORM.md)） |
+| 対象システム/機能 | yorisoi エコシステムのチャンネル管理システムとアプリの間で、第三者のチャンネルを配信する承認済みチャンネル・リスト（最初のアプリは SanpoGuide。詳細は [ECOSYSTEM](../overview/yorisoi-ecosystem.md)） |
 | 承認者 | 開発者 |
 | ステータス | 承認済 |
 | 版 | 1.0 |
@@ -15,7 +15,7 @@
 
 ## 目的・背景
 
-[ADR-CHANNELS](../decisions/ADR-CHANNELS.md) で、第三者が配信するチャンネルは、システム運営が審査し、基準を満たしたものだけ取り込むことにした。審査と公開は、アプリとは別の **チャンネル管理システム** で行う。
+[CHANNELS](../overview/channels.md) で、第三者が配信するチャンネルは、システム運営が審査し、基準を満たしたものだけ取り込むことにした。審査と公開は、アプリとは別の **チャンネル管理システム** で行う。
 
 本書は、チャンネル管理システムとアプリの境界、つまり **アプリが取得する承認済みチャンネル・リストの形式と、アプリがそれをどう確かめて使うか** を定める。本書に準拠していれば、管理システムの実装方法と置き場所は問わない（API-SECRET-MESSAGES の D-5 と同じ考え方）。
 
@@ -25,7 +25,7 @@
 - リストの発行元（チャンネル・リストを公開する運営）の検出と、署名の鍵
 - 承認済みチャンネル・リストの形式と署名
 - 取り下げ（リストからの削除と `revoked`）
-- 第三者の素材集（[ADR-MATERIALS](../decisions/ADR-MATERIALS.md)）の掲載・取得・取り下げ
+- 第三者の素材集（[MATERIALS](../overview/materials.md)）の掲載・取得・取り下げ
 - チャンネル提供者が審査前に自分の端末で試すための試用チケット
 - アプリの振る舞い（取得の時期、確認の手順、失敗したときの扱い）
 - アプリの設定画面でのリストの扱い
@@ -40,9 +40,9 @@
 
 | 対応元ID | 内容 | 対応状況 |
 |---|---|---|
-| ADR-CHANNELS | 第三者のチャンネルは運営の審査と署名を経たものだけ取り込む（C-1〜C-8） | 本書で取り込みの形式を定める |
+| CHANNELS | 第三者のチャンネルは運営の審査と署名を経たものだけ取り込む（C-1〜C-8） | 本書で取り込みの形式を定める |
 | API-SECRET-MESSAGES | アカウントID（`sg1…`）の作り方、Ed25519、D-5 | 流用 |
-| ADR-MATERIALS | D-7（素材集をリストに載せる）、D-8（使う版はリストが決める）、D-12（取り下げ）、D-17（`producerChange`） | `collections[]`・`revokedCollections[]` として形式にする |
+| MATERIALS | D-7（素材集をリストに載せる）、D-8（使う版はリストが決める）、D-12（取り下げ）、D-17（`producerChange`） | `collections[]`・`revokedCollections[]` として形式にする |
 | API-CHANNEL-PACKAGE | 取得の前に示す情報（使う素材の種類と大きさ） | `media`・`resourcesSize` として載せる（P-14） |
 
 ## 方針・決定事項
@@ -55,7 +55,7 @@
 | L-2 | アプリの取り込み経路 | 通常は承認済みチャンネル・リストだけ。加えて、チャンネル提供者が審査前に自分の端末で試せる試用チケット（開発者モードのときだけ、QR コードで読み込む） |
 | L-3 | リストへの署名 | 管理システムの中で、承認したときに自動で署名する。秘密鍵はクラウドの鍵管理サービス（KMS）に置く |
 | L-4 | リストの取得先 | 設定で変えられる。既定はアプリに内蔵したリスト。ほかのリストは、設定で URL と鍵の指紋を足して使う |
-| L-5 | 内蔵のリストを運営する人 | 当面は開発者本人（ADR-CHANNELS C-10） |
+| L-5 | 内蔵のリストを運営する人 | 当面は開発者本人（CHANNELS C-10） |
 
 ### 鍵・署名・取り下げ
 
@@ -74,11 +74,11 @@
 | No. | 論点 | 決定 |
 |---|---|---|
 | P-8 | リストの署名の形（P-3 の補足） | リストは、本体に直接署名せず、本体の SHA-256 を含む小さな**要約**（`channel-list-digest`）に署名する。AWS KMS の Ed25519 は一度に 4,096 バイトまでしか署名できず、リスト（最大 1MB）に直接署名できないため。要約は通常の Ed25519 で署名するので、アプリは API-SECRET-MESSAGES と同じ Tink だけで確かめられる。鍵セット・試用チケットは小さいので、P-3 の形のまま。どの文書がどちらの形かは `type` で固定し、文書の側から選べないようにする |
-| P-9 | チャンネル提供者の鍵の移し替え | チャンネル提供者が鍵をなくした・漏れたときは、運営が本人確認のうえで、チャンネルを別の鍵（別のアカウントID）に移せる（ADR-CHANNELS C-11）。移したことはリストの `publisherChange` で示す。アプリは運営が署名したリストを正とし、移し替えを受け入れてアプリ利用者に一度知らせる |
+| P-9 | チャンネル提供者の鍵の移し替え | チャンネル提供者が鍵をなくした・漏れたときは、運営が本人確認のうえで、チャンネルを別の鍵（別のアカウントID）に移せる（CHANNELS C-11）。移したことはリストの `publisherChange` で示す。アプリは運営が署名したリストを正とし、移し替えを受け入れてアプリ利用者に一度知らせる |
 
 ### 素材集
 
-[ADR-MATERIALS](../decisions/ADR-MATERIALS.md)・[API-MATERIALS](API-MATERIALS.md) による。
+[MATERIALS](../overview/materials.md)・[API-MATERIALS](API-MATERIALS.md) による。
 
 | No. | 論点 | 決定 |
 |---|---|---|
@@ -87,11 +87,11 @@
 | P-12 | 形式の版 | 項目の追加では `format` を上げない（知らない項目は無視する）。素材集を使うチャンネルは、素材集に対応していないアプリには、必要な版（P-20）で「アプリの更新が必要」と出る |
 | P-13 | 素材提供者の鍵の移し替え | `collections[].producerChange` を、P-9 の `publisherChange` と同じ決まりで載せる |
 | P-14 | 取得の前に示す情報 | `channels[].media`（使う素材の種類）と `channels[].resourcesSize`（チャンネルを選んだときに前もって取得する大きさの合計。宣言した素材集の分を含む）を載せる。管理システムが計算する |
-| P-15 | 基準で選ぶための情報（ADR-MATERIALS D-23・D-24） | `collections[]` に `tags`（素材のタグの和集合）・`regions`（素材の題材から計算した geohash の 3 文字の一覧）・`grants`（素材集の利用許諾の写し）を載せる。すべて管理システムが素材集のパッケージから作る。アプリは、基準に合い、地域が重なり、利用許諾が合う素材集だけを取得できる（取得してから捨てる無駄と、余分な地域を伝えることを避ける）。取得したあと、パッケージの値と一致するかを確かめる |
+| P-15 | 基準で選ぶための情報（MATERIALS D-23・D-24） | `collections[]` に `tags`（素材のタグの和集合）・`regions`（素材の題材から計算した geohash の 3 文字の一覧）・`grants`（素材集の利用許諾の写し）を載せる。すべて管理システムが素材集のパッケージから作る。アプリは、基準に合い、地域が重なり、利用許諾が合う素材集だけを取得できる（取得してから捨てる無駄と、余分な地域を伝えることを避ける）。取得したあと、パッケージの値と一致するかを確かめる |
 
 ### エコシステム
 
-[ADR-ECOSYSTEM-PLATFORM](../decisions/ADR-ECOSYSTEM-PLATFORM.md) E-17（リストはエコシステムで 1 本、アプリが端末で絞り込む）と API-CHANNEL-PACKAGE による。
+[ECOSYSTEM](../overview/yorisoi-ecosystem.md) E-17（リストはエコシステムで 1 本、アプリが端末で絞り込む）と API-CHANNEL-PACKAGE による。
 
 | No. | 論点 | 決定 |
 |---|---|---|
@@ -110,7 +110,7 @@ flowchart LR
         PUB --> REV --> K
     end
     K -- "署名済みのリスト・試用チケット" --> H["置き場所（問わない）<br/>静的ファイル・CDN"]
-    H -- "HTTPS" --> A["アプリ<br/>ルート鍵 → 署名鍵 → リスト → パッケージの順に確認<br/>ADR-CHANNELS C-7 の上限を強制"]
+    H -- "HTTPS" --> A["アプリ<br/>ルート鍵 → 署名鍵 → リスト → パッケージの順に確認<br/>CHANNELS C-7 の上限を強制"]
 ```
 
 ## エンドポイント一覧
@@ -210,7 +210,7 @@ flowchart LR
 - アプリは `rootKey` からリストIDを計算し、設定に登録したリストID（内蔵、またはアプリ利用者が足したもの）と一致することを確かめる。一致しなければ使わない
 - `keys` の有効期間は 1 年以内。`seq` は鍵セットを作り直すたびに増やし、アプリは小さい `seq` を拒む
 - 署名鍵の失効は `revokedKeys` に載せる。失効した鍵で署名されたリストは、署名した日時にかかわらず使わない
-- `contact`（任意）は運営の連絡先のメールアドレス。アプリは、アプリ利用者がこのリストのチャンネルや AI の発言の問題を知らせるときの宛先にする（[ADR-AI-ROLES](../decisions/ADR-AI-ROLES.md) H-11）。ないときはアプリの問い合わせ先に知らせる
+- `contact`（任意）は運営の連絡先のメールアドレス。アプリは、アプリ利用者がこのリストのチャンネルや AI の発言の問題を知らせるときの宛先にする（[AI-ROLES](../overview/ai-roles.md) H-11）。ないときはアプリの問い合わせ先に知らせる
 
 ### GET /v1/channels.json
 
@@ -282,8 +282,8 @@ flowchart LR
 | `expiresAt` | string | `issuedAt` から 14 日以内。管理システムは、内容が変わらなくても期限が切れる前に作り直して公開する |
 | `channels[].id` | string | リストの中で一意。英小文字・数字・`-`、3〜40 文字。アプリの中では「リストID＋id」で区別する |
 | `channels[].version` | int | 審査を通るたびに増える。リストに載せるのは各チャンネルの最新の承認済みの版 1 つだけ |
-| `channels[].publisher` | string | チャンネル提供者のアカウントID（API-SECRET-MESSAGES と同じ鍵）。ADR-CHANNELS C-4 のとおり、パッケージにはチャンネル提供者の署名も付く（形式は API-CHANNEL-PACKAGE） |
-| `channels[].publisherChange` | object? | 運営がチャンネル提供者の鍵を移し替えた（P-9・ADR-CHANNELS C-11）ときだけ付ける。`from` は前のアカウントID、`at` は移し替えた日時、`reason` はアプリ利用者に見せる理由。移し替え後の最初の版から、少なくとも 90 日は載せ続ける |
+| `channels[].publisher` | string | チャンネル提供者のアカウントID（API-SECRET-MESSAGES と同じ鍵）。CHANNELS C-4 のとおり、パッケージにはチャンネル提供者の署名も付く（形式は API-CHANNEL-PACKAGE） |
+| `channels[].publisherChange` | object? | 運営がチャンネル提供者の鍵を移し替えた（P-9・CHANNELS C-11）ときだけ付ける。`from` は前のアカウントID、`at` は移し替えた日時、`reason` はアプリ利用者に見せる理由。移し替え後の最初の版から、少なくとも 90 日は載せ続ける |
 | `channels[].regions` | string[]? | 地域に限ったチャンネルの geohash の接頭辞。省略するとどこでも使える。アプリは一覧の並び順に使うだけで、地域の外でも使える |
 | `channels[].package.format` | int | パッケージの形式の版（API-CHANNEL-PACKAGE）。アプリが知らない版のチャンネルは一覧に出さない |
 | `channels[].minAppVersions` | object | （P-20）アプリの ID → 必要な versionCode。満たさなければ一覧に「アプリの更新が必要」と出す。自分の ID の値がなければ版の条件はない |
@@ -294,7 +294,7 @@ flowchart LR
 | `channels[].media` | string[] | チャンネルが使う素材の種類（`text`・`image`・`audio`・`video`）。同梱の素材と、宣言した素材集の参照する素材を合わせたもの。組み込みの素材提供者の分は含めない |
 | `channels[].resourcesSize` | int | チャンネルを選んだときに前もって取得する大きさの合計（バイト）。パッケージの外の素材のうち、きっかけで使うもの（映像を除く）と、宣言した素材集のパッケージ・素材を含む。リストに載っている素材集の版で計算する。基準で選ぶ素材（`selectors`）は含めない（取得する地域で変わるため。上限は API-MATERIALS P-6） |
 | `collections[]` | object[] | 承認済みの素材集（P-10）。空でも載せる。各素材集の最新の承認済みの版 1 つだけ |
-| `collections[].id` | string | リストの中で一意。チャンネルの `id` とは別の名前空間。書式はチャンネルの `id` と同じ。取り下げ・退会のあとも再利用しない（ADR-MATERIALS D-17） |
+| `collections[].id` | string | リストの中で一意。チャンネルの `id` とは別の名前空間。書式はチャンネルの `id` と同じ。取り下げ・退会のあとも再利用しない（MATERIALS D-17） |
 | `collections[].version` | int | 審査を通るたびに増える |
 | `collections[].producer` | string | 素材提供者のアカウントID。素材集の `signature.json` の公開鍵と、`collection.json` の `producer` と一致すること |
 | `collections[].producerName` | string | 素材提供者の表示名。アプリは素材の出典の横に出す |
@@ -328,7 +328,7 @@ flowchart LR
 - QR コードには、署名付き文書の形（`payload`・`keyId`・`sig`）をそのまま入れる。鍵セットはリストから取得して確かめる
 - アプリは開発者モードのときだけ読み込む。有効期限は 7 日以内
 - 試用中のチャンネルには、画面と最初の話しかけで「審査前の試用」と示す。ほかの人に共有する機能はない
-- 審査前でも ADR-CHANNELS C-7（安全の案内、共通ルール、上限）は同じに強制する
+- 審査前でも CHANNELS C-7（安全の案内、共通ルール、上限）は同じに強制する
 - 試用のチャンネルが使える素材集は、リストに載っている承認済みのものだけ。審査前の素材集を試す方法は、まだ定めない（API-MATERIALS の未決事項）
 
 ## 呼び出しシーケンス
@@ -369,7 +369,7 @@ sequenceDiagram
 | 素材集の取得 | チャンネルのパッケージを取得したときに、そのチャンネルが宣言した素材集のパッケージと、きっかけで使う素材をまとめて取得する（API-CHANNEL-PACKAGE F-10）。一覧には `resourcesSize` を出し、従量制の回線では取得の前に確かめる |
 | 基準で選ぶ素材集の取得 | 使っているチャンネルに `selectors` があれば、リストの `tags`・`regions`・`grants` で対象の素材集を選び、API-MATERIALS P-6 の範囲（今いる地域と隣の地域、従量制でない回線、50MB まで）で前もって取得する。リストの取得のあとと、地域が変わったあとの次の Wi-Fi のときに取り直す。散歩中は取得しない |
 | 素材集の更新 | 使っている素材集に新しい版が出たら、チャンネルと同じく次の取得時（既定は Wi-Fi のときだけ）に取得し、確認できてから入れ替える。入れ替えまでは前の版を使う |
-| 素材集の取り下げ | `revokedCollections` に載った、またはリストから消えた素材集は使わず、パッケージと素材を消す。それを参照する候補は「出せない」になり、チャンネルは使い続ける（ADR-MATERIALS D-12）。アプリ利用者には知らせない（チャンネルは変わらないため。設定画面のチャンネルの詳細に出す） |
+| 素材集の取り下げ | `revokedCollections` に載った、またはリストから消えた素材集は使わず、パッケージと素材を消す。それを参照する候補は「出せない」になり、チャンネルは使い続ける（MATERIALS D-12）。アプリ利用者には知らせない（チャンネルは変わらないため。設定画面のチャンネルの詳細に出す） |
 | 素材提供者の鍵の移し替え | `publisherChange` と同じ扱い。`producerChange` の裏付けなく素材提供者が変わった素材集は、その版を使わず前の版を使い続ける（`producer_changed`） |
 | チャンネル提供者の鍵の移し替え | 使っているチャンネルの `publisher` が、保存しているパッケージのチャンネル提供者と違うとき、`publisherChange.from` が保存しているチャンネル提供者と一致すれば受け入れ、新しい版を取得して、理由とともに一度知らせる。一致しない（`publisherChange` がない、`from` が違う）ときは、その版を使わず `publisher_changed` として前の版を使い続ける（P-9） |
 
@@ -463,7 +463,7 @@ sequenceDiagram
 
 ## 関連ドキュメント・参照リンク
 
-- [ADR-CHANNELS](../decisions/ADR-CHANNELS.md): 第三者のチャンネルは運営の審査と署名を経たものだけ取り込む
+- [CHANNELS](../overview/channels.md): 第三者のチャンネルは運営の審査と署名を経たものだけ取り込む
 - [API-SECRET-MESSAGES.md（API-SECRET-MESSAGES）](API-SECRET-MESSAGES.md): アカウントID、Ed25519、D-5
-- [ADR-MATERIALS](../decisions/ADR-MATERIALS.md)・[API-MATERIALS.md（API-MATERIALS）](API-MATERIALS.md): 素材の素材提供者と素材集
+- [MATERIALS](../overview/materials.md)・[API-MATERIALS.md（API-MATERIALS）](API-MATERIALS.md): 素材の素材提供者と素材集
 - [エコシステム TODO](../work/ecosystem-todo.md): エコシステム全体の残りの作業

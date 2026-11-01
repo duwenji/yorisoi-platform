@@ -14,9 +14,9 @@ interface UsageStore {
 }
 
 /**
- * How many times the user's own key was called today, against the limit they set (ADR-AI-ROLES H-9).
+ * How many times the user's own key was called today, against the limit they set (AI-ROLES H-9).
  * The count starts again each local day. Only calls that reach the AI service count, not cached narrations;
- * the operator's AI is counted by its relay (ADR-AI-RELAY R-2).
+ * the operator's AI is counted by its relay (API-AI-RELAY R-2).
  */
 class AiUsage(private val store: UsageStore, private val today: () -> LocalDate = LocalDate::now) {
     private val _count = MutableStateFlow(current())

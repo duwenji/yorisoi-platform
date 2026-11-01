@@ -17,7 +17,7 @@ enum class StudioCategory(override val json: String, val label: String) : JsonVa
 
 /**
  * The fixed words a channel may put before where people's own words come from (API-MATERIALS「前置き」,
- * ADR-MATERIALS D-49). The same in every app; never made by the AI.
+ * MATERIALS D-49). The same in every app; never made by the AI.
  */
 enum class Prelude(override val json: String, val spoken: String) : JsonValue {
     NONE("none", ""),

@@ -6,7 +6,7 @@
 |---|---|
 | 文書ID | API-LOCAL-MATERIALS |
 | ドキュメント種別 | API契約書 |
-| 対象システム/機能 | yorisoi エコシステムのアプリと、運営の配信のサーバー（区画ごとに運営から取る素材の置き場と配信。今はスタジオと一言。[REQ-STUDIO](../requirements/REQ-STUDIO.md)、[REQ-NOTES](../requirements/REQ-NOTES.md)、[ADR-MATERIALS](../decisions/ADR-MATERIALS.md)） |
+| 対象システム/機能 | yorisoi エコシステムのアプリと、運営の配信のサーバー（区画ごとに運営から取る素材の置き場と配信。今はスタジオと一言。[REQ-STUDIO](../requirements/REQ-STUDIO.md)、[REQ-NOTES](../requirements/REQ-NOTES.md)、[MATERIALS](../overview/materials.md)） |
 | 承認者 | 開発者 |
 | ステータス | 承認済（2026-10-31） |
 
@@ -14,10 +14,10 @@
 
 ## 目的・背景
 
-アプリ利用者が一言を置き、運営が承認した素材提供者がスタジオを載せ、近くに来た人のアプリが区画ごとに取って読み上げる（REQ-STUDIO・REQ-NOTES）。スタジオと一言は互いに関係のない別の種類の素材だが、どちらも区画ごとに運営から取る性質を持つ（ADR-MATERIALS D-44）。この契約は、その性質を持つ種類を区画ごとに 1 回の要求で返す（要求の回数と、区画から伝わる情報を少なくするため。ADR-MATERIALS D-51）。本書は、そのための次のことを定める。
+アプリ利用者が一言を置き、運営が承認した素材提供者がスタジオを載せ、近くに来た人のアプリが区画ごとに取って読み上げる（REQ-STUDIO・REQ-NOTES）。スタジオと一言は互いに関係のない別の種類の素材だが、どちらも区画ごとに運営から取る性質を持つ（MATERIALS D-44）。この契約は、その性質を持つ種類を区画ごとに 1 回の要求で返す（要求の回数と、区画から伝わる情報を少なくするため。MATERIALS D-51）。本書は、そのための次のことを定める。
 
-1. 運営の AI の中継と同じ端末の確認で、一言を置く・聞く・通報する・ブロックすること（ADR-MATERIALS D-42・D-51）
-2. 区画の一覧に置いた人を表す値を入れないこと（ADR-MATERIALS D-43）
+1. 運営の AI の中継と同じ端末の確認で、一言を置く・聞く・通報する・ブロックすること（MATERIALS D-42・D-51）
+2. 区画の一覧に置いた人を表す値を入れないこと（MATERIALS D-43）
 3. サーバーが知る位置を、取るときの区画（geohash6）までにとどめること
 4. 置けなかった・使えないときに、アプリが理由に合わせて動けるよう、理由をエラーで返すこと
 
@@ -41,8 +41,8 @@
 
 | 対応元ID | 内容 | 対応状況 |
 |---|---|---|
-| ADR-MATERIALS D-42・D-51 | インストール ID と API-AI-RELAY のセッション | [認証](#認証) |
-| ADR-MATERIALS D-43 | 一覧に置いた人の値を入れない。ブロックと自分の一言はサーバーで判定 | [GET /v1/local/cells](#get-v1localcells)、[ブロック](#post-v1localblocks) |
+| MATERIALS D-42・D-51 | インストール ID と API-AI-RELAY のセッション | [認証](#認証) |
+| MATERIALS D-43 | 一覧に置いた人の値を入れない。ブロックと自分の一言はサーバーで判定 | [GET /v1/local/cells](#get-v1localcells)、[ブロック](#post-v1localblocks) |
 | REQ-NOTES D-3〜D-6、F-1〜F-4 | 一言の長さ・区画・期限・置く前の確認・上限 | [POST /v1/local/notes](#post-v1localnotes) |
 | REQ-STUDIO・REQ-NOTES D-7・D-8・N-6、REQ-STUDIO D-22 | 区画ごとの取得、5 分おき、スタジオの音声を一緒に取る | [GET /v1/local/cells](#get-v1localcells) |
 | REQ-STUDIO・REQ-NOTES D-9、REQ-NOTES D-15、REQ-STUDIO D-23 | 聞いた数・いいねの概数 | [概数](#概数)、[POST /v1/local/reactions](#post-v1localreactions) |
@@ -60,10 +60,10 @@
 | ST-1 | 接続先 | 接続先の URL はアプリに組み込む（API-AI-RELAY AR-1 と同じ）。デバッグ版は開発用、リリース版は本番用。アプリ利用者には設定させない |
 | ST-2 | 認証 | API-AI-RELAY の `POST /v1/session` で受け取ったトークンを、`Authorization: Bearer {token}` で送る。サーバーはトークンのハッシュから中継のセッションを引き、インストール ID の HMAC を得る。セッションの作り方・期限・エラー（`token_invalid`・`integrity_failed`）は API-AI-RELAY に従う |
 | ST-3 | 位置 | アプリが送る位置は、取るときの区画（geohash6）と、一言を置くときの区画（geohash7）だけ。緯度・経度は送らない |
-| ST-4 | 置いた人の値 | 区画の一覧の一言には、置いた人を表す値を入れない。自分の一言かどうかは `mine` で返す（ADR-MATERIALS D-43） |
+| ST-4 | 置いた人の値 | 区画の一覧の一言には、置いた人を表す値を入れない。自分の一言かどうかは `mine` で返す（MATERIALS D-43） |
 | ST-5 | 聞いた・開いた・いいねを送る時期 | 散歩・走行を終えたとき（と、終えたときに送れなかった分を次の散歩・走行を始めたとき）にまとめて送る。その場で送ると、送った時刻から約 150 m の区画にいたことが分かるため |
 | ST-6 | 通報を送る時期 | すぐに送る。安全のため、届けるのを早く止めることを優先する |
-| ST-7 | 一言の確認と AI の回数 | 一言の確認は運営の AI を使うが、API-AI-RELAY の 1 日の回数には数えない。運営の月の予算（ADR-AI-RELAY R-10）には含める |
+| ST-7 | 一言の確認と AI の回数 | 一言の確認は運営の AI を使うが、API-AI-RELAY の 1 日の回数には数えない。運営の月の予算（API-AI-RELAY R-10）には含める |
 | ST-8 | 読み上げの判断 | 近づいたか、読み上げの順番と上限、同じものを読み上げないことは、アプリが判定する。サーバーは、届けてよいものを一覧で返すだけ |
 
 ```mermaid
@@ -341,8 +341,8 @@ GET /v1/local/cells?cells=xn76ur,xn76us,…（geohash6 を 1〜9 個、カンマ
 ## 制約
 
 - 認証は API-AI-RELAY のセッションに頼る。中継のセッションの決まり（1 日 5 つまで、24 時間）がそのまま及ぶ
-- サーバーは yorisoi-console のスタックに置く（ADR-MATERIALS D-51）
-- 運営の AI は Bedrock を東京で使う（ADR-AI-RELAY R-5）
+- サーバーは yorisoi-console のスタックに置く（MATERIALS D-51）
+- 運営の AI は Bedrock を東京で使う（API-AI-RELAY R-5）
 
 ## 未決事項・リスク
 
@@ -353,13 +353,13 @@ GET /v1/local/cells?cells=xn76ur,xn76us,…（geohash6 を 1〜9 個、カンマ
 | 3 | 散歩・走行の終わりにまとめて送ると、アプリを強制終了したときの分が次の散歩・走行まで遅れる。数の遅れが素材提供者に問題になるか | 検証のとき |
 
 リスク:
-- インストールし直すと、締め出し・1 日の上限・ブロックが効かなくなる（ADR-MATERIALS の注意点）
+- インストールし直すと、締め出し・1 日の上限・ブロックが効かなくなる（MATERIALS の注意点）
 - 一覧から一言の場所（geohash7）と期限が分かるので、多くの区画を取って集めれば、一言の置かれた場所の地図は作れる。置いた人はつながらないが、一言の中身に個人の情報があると問題になる（置く前の確認 REQ-NOTES D-6 ③と通報で防ぐ）
 
 ## 関連ドキュメント・参照リンク
 
 - [REQ-STUDIO](../requirements/REQ-STUDIO.md)、[REQ-NOTES](../requirements/REQ-NOTES.md)
-- [ADR-MATERIALS](../decisions/ADR-MATERIALS.md)
+- [MATERIALS](../overview/materials.md)
 - [API-AI-RELAY](API-AI-RELAY.md)（セッション、トークン、エラーの形）
-- [ADR-AI-RELAY](../decisions/ADR-AI-RELAY.md)（予算 R-10、Bedrock R-5）
+- [API-AI-RELAY](../contracts/API-AI-RELAY.md)（予算 R-10、Bedrock R-5）
 - [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457)

@@ -6,7 +6,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.time.LocalDate
 
-/** The user's daily limit of AI calls (ADR-AI-ROLES H-9). */
+/** The user's daily limit of AI calls (AI-ROLES H-9). */
 class AiUsageTest {
     private class Memory : UsageStore {
         var saved: Pair<String, Int>? = null

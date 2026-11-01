@@ -14,7 +14,7 @@ interface TalkGates<G> {
  * One kind of thing the companion may say. [decide] is asked only while all of
  * [gates] are open, and returns what to say, or null to let the next rule speak.
  *
- * @param safety a channel can't switch this off (ADR-003 E-6, E-13). A declaration for the app's
+ * @param safety a channel can't switch this off (ECOSYSTEM E-6, E-13). A declaration for the app's
  *   profile and tests; the engine treats the rule like any other.
  */
 class TalkRule<S : TalkGates<G>, D : Any, G>(
