@@ -5,12 +5,8 @@
 | 項目 | 内容 |
 |---|---|
 | 文書ID | API-LOCAL-MATERIALS |
-| 旧文書ID | API-STUDIO |
 | ドキュメント種別 | API契約書 |
 | 対象システム/機能 | yorisoi エコシステムのアプリと、運営の配信のサーバー（区画ごとに運営から取る素材の置き場と配信。今はスタジオと一言。[REQ-STUDIO](../requirements/REQ-STUDIO.md)、[REQ-NOTES](../requirements/REQ-NOTES.md)、[ADR-MATERIALS](../decisions/ADR-MATERIALS.md)） |
-| 関連Skill | 020_api-contract-design |
-| 作成日 | 2026-10-31 |
-| 作成者 | Claude（開発者との検討） |
 | 承認者 | 開発者 |
 | ステータス | 承認済（2026-10-31） |
 

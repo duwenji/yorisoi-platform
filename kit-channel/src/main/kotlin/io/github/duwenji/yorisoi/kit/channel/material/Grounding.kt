@@ -7,7 +7,7 @@ import io.github.duwenji.yorisoi.core.format.material.Resource
 import io.github.duwenji.yorisoi.kit.channel.Station
 
 /**
- * A text from a reviewed collection that the AI may take as fact (API-004「AI の根拠」, platform
+ * A text from a reviewed collection that the AI may take as fact (API-MATERIALS「AI の根拠」, platform
  * ADR-004 H-3): what it says, and whose it is for the credit line.
  */
 data class Ground(
@@ -20,7 +20,7 @@ data class Ground(
 )
 
 /**
- * Gathers the grounds for a request to a generated producer (API-004「AI の根拠」): texts about the
+ * Gathers the grounds for a request to a generated producer (API-MATERIALS「AI の根拠」): texts about the
  * same subject from the collections this channel may use whose producers let the AI take them as
  * grounds (`grants.grounding`, I-13). Only what was fetched ahead is read; nothing is fetched for it.
  */
@@ -68,6 +68,6 @@ object Grounding {
         Ground(text, listed.producerName, r.credit?.author, listed.id, listed.version, id)
 }
 
-/** [this] with its grounds when [generated] producers answer it (API-004 I-14); others never see them. */
+/** [this] with its grounds when [generated] producers answer it (API-MATERIALS I-14); others never see them. */
 fun MaterialRequest.groundedFor(generated: Boolean): MaterialRequest =
     if (!generated || grounding.isNotEmpty()) this else copy(grounding = Grounding.collect(subject, context.station))

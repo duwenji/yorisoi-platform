@@ -16,7 +16,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** Trying candidates in order (API-004 I-7, 確認観点 W-02) and the policy check (P-1). */
+/** Trying candidates in order (API-MATERIALS I-7, 確認観点 W-02) and the policy check (P-1). */
 class ProducersTest {
     private val standard = TestChannels.standard()
     private val request = MaterialRequest(Subject.None, MaterialType.TEXT, MaterialContext(Station(standard, standard, "builtin:standard@1")))

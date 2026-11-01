@@ -14,7 +14,7 @@ import java.time.Duration
 import java.time.Instant
 
 /**
- * SanpoGuide choosing from a list shared by every app of the ecosystem (API-003 G-4, API-002
+ * SanpoGuide choosing from a list shared by every app of the ecosystem (API-CHANNEL-PACKAGE G-4, API-CHANNEL-LIST
  * 1.4 P-19・P-20): only walking channels it can show are offered and taken in.
  */
 class EcosystemSyncTest {
@@ -97,14 +97,14 @@ class EcosystemSyncTest {
     }
 
     @Test
-    fun `the package must agree with the list's copy (API-002 P-19)`() {
+    fun `the package must agree with the list's copy (API-CHANNEL-LIST P-19)`() {
         publish(Triple("walk-and-ride", forActivities("walk", "cycle"), copies("walk")))
         val e = assertThrows(ChannelSyncException::class.java) { sync.install(provider.id, "walk-and-ride") }
         assertTrue(e.message!!.contains("bad_manifest"))
     }
 
     @Test
-    fun `SanpoGuide's own minimum version decides (API-002 P-20)`() {
+    fun `SanpoGuide's own minimum version decides (API-CHANNEL-LIST P-20)`() {
         publish(
             Triple("for-later", forActivities("walk")) { copies("walk")(); put("minAppVersions", JSONObject().put("sanpoguide", 9)) },
             Triple("other-app-later", forActivities("walk")) { copies("walk")(); put("minAppVersions", JSONObject().put("cycle", 9)) },

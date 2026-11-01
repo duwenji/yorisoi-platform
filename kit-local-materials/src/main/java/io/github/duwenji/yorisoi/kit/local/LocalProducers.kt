@@ -13,7 +13,7 @@ import io.github.duwenji.yorisoi.kit.channel.material.Producer
 import io.github.duwenji.yorisoi.kit.channel.material.Subject
 
 /**
- * People's own words as material (API-004 P-8): [text] is what is read out, the cue's prelude and
+ * People's own words as material (API-MATERIALS P-8): [text] is what is read out, the cue's prelude and
  * where the words come from first; [reading] is the studio or note itself, for the screen (likes,
  * reports, blocks) and a studio's audio, played after the words.
  */
@@ -31,7 +31,7 @@ class NoteProducer(feed: () -> LocalFeed?) : LocalProducer(BuiltInProducers.NOTE
 }
 
 /**
- * A producer of material fetched by area from the walk's or ride's [LocalFeed] (API-004
+ * A producer of material fetched by area from the walk's or ride's [LocalFeed] (API-MATERIALS
  * `fetch=area`). Outside a walk or ride there is no feed and nothing to give.
  */
 abstract class LocalProducer(override val descriptor: ProducerDescriptor, private val feed: () -> LocalFeed?) : Producer {

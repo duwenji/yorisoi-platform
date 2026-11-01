@@ -8,8 +8,8 @@ import io.github.duwenji.yorisoi.core.format.material.Resource
 import io.github.duwenji.yorisoi.core.format.material.ResourceReader
 
 /**
- * Which collections a channel's selectors draw from (API-004「基準で選ぶ素材提供者」): listed by the
- * channel's provider, not revoked, granted to its publisher (D-27) and to this app (API-004 I-11),
+ * Which collections a channel's selectors draw from (API-MATERIALS「基準で選ぶ素材提供者」): listed by the
+ * channel's provider, not revoked, granted to its publisher (D-27) and to this app (API-MATERIALS I-11),
  * shown by this app, and carrying the kind and a tag asked for. Best first (「複数の素材が当たったとき」): the producers
  * the selector names, in its order, then the most recently approved.
  */
@@ -30,7 +30,7 @@ object SelectorPlan {
     }
 
     /**
-     * What to fetch ahead for [media]'s selectors (API-004 P-6): collections about the [region]
+     * What to fetch ahead for [media]'s selectors (API-MATERIALS P-6): collections about the [region]
      * the device is in or one next to it, and those about nowhere in particular; best first,
      * up to 50MB in all. With no [region] (the location is unknown), only the latter.
      */

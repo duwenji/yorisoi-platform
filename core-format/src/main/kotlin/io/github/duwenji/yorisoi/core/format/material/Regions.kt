@@ -1,7 +1,7 @@
 package io.github.duwenji.yorisoi.core.format.material
 
 /**
- * Regions for choosing collections by place (API-002 P-15, API-004 P-6): 3-letter geohashes,
+ * Regions for choosing collections by place (API-CHANNEL-LIST P-15, API-MATERIALS P-6): 3-letter geohashes,
  * about 150km across. The management system lists a collection's regions; the app fetches the
  * collections whose regions meet the one it's in or a neighbour, so only that coarse area is told.
  */
@@ -38,7 +38,7 @@ object Regions {
         }
     }
 
-    /** A collection's regions: where each resource with a subject is about, without repeats, in order (API-002 P-15). */
+    /** A collection's regions: where each resource with a subject is about, without repeats, in order (API-CHANNEL-LIST P-15). */
     fun of(resources: Resources): List<String> = resources.items.mapNotNull { r ->
         when (val about = r.about) {
             is About.Spot -> geohash(about.lat, about.lon)
@@ -48,7 +48,7 @@ object Regions {
     }.distinct().sorted()
 
     /**
-     * The region of [lat], [lon] and the eight around it (API-004 P-6), found by stepping one cell
+     * The region of [lat], [lon] and the eight around it (API-MATERIALS P-6), found by stepping one cell
      * each way from the cell's centre; cells past the poles are left out, and longitude wraps.
      */
     fun around(lat: Double, lon: Double): Set<String> {

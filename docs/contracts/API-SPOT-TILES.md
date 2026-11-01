@@ -7,9 +7,6 @@
 | 文書ID | API-SPOT-TILES |
 | ドキュメント種別 | API契約書 |
 | 対象システム/機能 | yorisoi エコシステムのアプリ（`kit-geo`）と、運営のスポットのタイルの配信（[ADR-SPOT-TILES](../decisions/ADR-SPOT-TILES.md)） |
-| 関連Skill | 020_api-contract-design |
-| 作成日 | 2026-10-29 |
-| 作成者 | Claude（開発者との検討） |
 | 承認者 | 開発者 |
 | ステータス | 承認済 |
 

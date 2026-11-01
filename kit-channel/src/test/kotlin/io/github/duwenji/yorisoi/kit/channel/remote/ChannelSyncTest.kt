@@ -17,7 +17,7 @@ import java.time.Duration
 import java.time.Instant
 
 /**
- * Third-party channels end to end on the JVM (API-002 アプリの振る舞い): a provider and publishers
+ * Third-party channels end to end on the JVM (API-CHANNEL-LIST アプリの振る舞い): a provider and publishers
  * sign as the channel management system and its publishers do, and Tink checks the signatures.
  */
 class ChannelSyncTest {
@@ -220,7 +220,7 @@ class ChannelSyncTest {
         assertTrue(folder.root.resolve("pkg").listFiles().orEmpty().isEmpty())
     }
 
-    /** A package on the trial path and a ticket for it, as the console issues one (API-002 試用チケット). */
+    /** A package on the trial path and a ticket for it, as the console issues one (API-CHANNEL-LIST 試用チケット). */
     private fun ticketFor(publisher: TestPublisher, version: Int, channel: String = "kamakura-history", days: Long = 7, ticketPublisher: String = publisher.accountId): String {
         val zip = publisher.packageZip("kamakura-history", version)
         val sha = sha256(zip)

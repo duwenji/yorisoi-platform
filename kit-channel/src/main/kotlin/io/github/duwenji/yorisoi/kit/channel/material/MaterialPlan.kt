@@ -11,13 +11,13 @@ import io.github.duwenji.yorisoi.core.format.Reference
 import io.github.duwenji.yorisoi.core.format.StationFiles
 import io.github.duwenji.yorisoi.core.format.StationMedia
 
-/** An outside resource to fetch when the channel is chosen (API-003 F-10). */
+/** An outside resource to fetch when the channel is chosen (API-CHANNEL-PACKAGE F-10). */
 data class Prefetch(val url: String, val sha256: String, val size: Long)
 
 /**
- * Which outside resources to fetch ahead (API-003 F-10): the ones a cue may show, of the types the
+ * Which outside resources to fetch ahead (API-CHANNEL-PACKAGE F-10): the ones a cue may show, of the types the
  * app shows at its [stage] (video is fetched when tapped, never ahead), up to 50MB in all
- * (API-004 P-6). A collection named without an id may give any of its resources, so all of those
+ * (API-MATERIALS P-6). A collection named without an id may give any of its resources, so all of those
  * its presentation can show are fetched.
  *
  * The selectors' outside resources count against a 50MB of their own (P-6), best collection first.

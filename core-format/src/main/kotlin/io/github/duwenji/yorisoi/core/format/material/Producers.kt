@@ -1,6 +1,6 @@
 package io.github.duwenji.yorisoi.core.format.material
 
-/** The kinds of material (API-004「素材」, API-003 `resources[].type`). */
+/** The kinds of material (API-MATERIALS「素材」, API-CHANNEL-PACKAGE `resources[].type`). */
 enum class MaterialType(val json: String) { TEXT("text"), IMAGE("image"), AUDIO("audio"), VIDEO("video") }
 
 /** What a producer can be asked about: a spot, a point, an event of the walk, or nothing in particular. */
@@ -12,7 +12,7 @@ enum class Trust(val json: String) { BUILTIN("builtin"), REVIEWED("reviewed"), T
 /**
  * When a producer gets its material: made on the phone, fetched when the channel is chosen, when
  * shown, or by area while walking or riding (lists of the cells around, refreshed on moving to another
- * cell and every 5 minutes; API-004 `fetch=area`).
+ * cell and every 5 minutes; API-MATERIALS `fetch=area`).
  */
 enum class Fetch(val json: String) { LOCAL("local"), PREFETCH("prefetch"), ON_DEMAND("onDemand"), AREA("area") }
 
@@ -23,12 +23,12 @@ enum class Fetch(val json: String) { LOCAL("local"), PREFETCH("prefetch"), ON_DE
 enum class Exposure(val json: String) { NONE("none"), SUBJECT("subject"), AREA("area") }
 
 /**
- * What a producer makes and how (API-004「素材提供者の記述」). Every producer — built in, a third
+ * What a producer makes and how (API-MATERIALS「素材提供者の記述」). Every producer — built in, a third
  * party's collection, or a channel's own resources — is described the same way; what the app
  * allows follows from these values ([ProducerPolicy]), not from what kind of producer it is.
  *
- * @param params the instructions a channel may give it (API-004 I-8).
- * @param verbatim people's own words, read out as they are (API-004 P-8, ADR-MATERIALS D-38): never the
+ * @param params the instructions a channel may give it (API-MATERIALS I-8).
+ * @param verbatim people's own words, read out as they are (API-MATERIALS P-8, ADR-MATERIALS D-38): never the
  *   AI's grounding, never reworded, introduced by where they come from.
  */
 data class ProducerDescriptor(
@@ -44,7 +44,7 @@ data class ProducerDescriptor(
     val verbatim: Boolean = false,
 )
 
-/** The app's rules for producers by their description (API-004 方針 P-1・P-2・P-7・P-8). Channels and producers can't change them. */
+/** The app's rules for producers by their description (API-MATERIALS 方針 P-1・P-2・P-7・P-8). Channels and producers can't change them. */
 object ProducerPolicy {
     /** The rule [descriptor] breaks, or null when it may be used. */
     fun violation(descriptor: ProducerDescriptor): String? = with(descriptor) {
@@ -62,7 +62,7 @@ object ProducerPolicy {
 }
 
 /**
- * The producers built into the app (API-004「組み込みの素材提供者」). Adding one takes an app update
+ * The producers built into the app (API-MATERIALS「組み込みの素材提供者」). Adding one takes an app update
  * (ADR-002 D-6) and a new row in that table. The management system's checks read this list to
  * know which `builtin:` references a channel may use.
  */
@@ -124,7 +124,7 @@ object BuiltInProducers {
 
     /**
      * Producers a channel gets in a shorthand cue unless it names them in its cues or turns them off
-     * in `shorthands` (API-004「省略形の展開」, ADR-MATERIALS D-53・D-54).
+     * in `shorthands` (API-MATERIALS「省略形の展開」, ADR-MATERIALS D-53・D-54).
      */
     val withShorthand: List<ProducerDescriptor> = listOf(STUDIO, NOTE)
 

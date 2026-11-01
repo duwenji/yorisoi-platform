@@ -5,11 +5,11 @@ import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.util.zip.ZipInputStream
 
-/** Why a ZIP can't be read as a channel package (API-003 確認の手順 2, `bad_archive`). */
+/** Why a ZIP can't be read as a channel package (API-CHANNEL-PACKAGE 確認の手順 2, `bad_archive`). */
 class ArchiveException(message: String) : Exception(message)
 
 /**
- * Unpacks a third-party channel package (API-003 確認の手順 2): a ZIP, stored or deflated, whose
+ * Unpacks a third-party channel package (API-CHANNEL-PACKAGE 確認の手順 2): a ZIP, stored or deflated, whose
  * entries are plain relative paths. Sizes are counted while reading, so an archive that inflates
  * beyond the limit is cut off rather than unpacked.
  */

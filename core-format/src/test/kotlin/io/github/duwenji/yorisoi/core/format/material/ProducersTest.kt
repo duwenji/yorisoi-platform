@@ -6,7 +6,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** API-004「組み込みの制作元」and 方針 P-1. */
+/** API-MATERIALS「組み込みの制作元」and 方針 P-1. */
 class ProducersTest {
     @Test
     fun builtInProducersAreAllowed() {

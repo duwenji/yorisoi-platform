@@ -16,7 +16,7 @@ import java.time.Instant
 import java.util.Base64
 
 /**
- * API-002 as the app checks it, against documents the channel management system's own code signed
+ * API-CHANNEL-LIST as the app checks it, against documents the channel management system's own code signed
  * (`provider-vectors.json`, from yorisoi-console `conformance/src/app-vectors.ts`). The
  * rejections re-sign altered documents with the same fixed, public seeds (1 = root, 2 = signing).
  */
@@ -128,7 +128,7 @@ class ProviderDocumentsTest {
         val revoked = list.revoked.single()
         assertTrue(revoked.covers(2))
         assertFalse(revoked.covers(3))
-        // API-002: a collection as the channel management system signs it, and one taken off the list.
+        // API-CHANNEL-LIST: a collection as the channel management system signs it, and one taken off the list.
         val collection = list.collections.single()
         assertEquals("kamakura-audio-guide", collection.id)
         assertEquals(2, collection.version)
@@ -182,7 +182,7 @@ class ProviderDocumentsTest {
         assertFalse(c.grants.allows(producer))
         assertEquals(setOf("sg1" + "d".repeat(32)), list.formerProducerIds(producer))
         assertTrue(list.revokedCollections.single().covers(1))
-        // Grants that leave grounding out don't let the AI take the texts as grounds (API-004 I-13).
+        // Grants that leave grounding out don't let the AI take the texts as grounds (API-MATERIALS I-13).
         assertFalse(c.grants.grounding)
         // Grants that are neither "*" nor a list make the list unreadable.
         val badGrants = listWith { it.put("collections", JSONArray().put(collection("\"everyone\""))) }
@@ -190,7 +190,7 @@ class ProviderDocumentsTest {
     }
 
     @Test
-    fun `a list copies whether a collection grounds the AI (API-004 I-13)`() {
+    fun `a list copies whether a collection grounds the AI (API-MATERIALS I-13)`() {
         val json = listWith { body ->
             body.put("collections", JSONArray().put(JSONObject(
                 """

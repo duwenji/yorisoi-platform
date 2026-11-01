@@ -17,7 +17,7 @@ import java.security.MessageDigest
 import java.util.Base64
 import javax.imageio.ImageIO
 
-/** API-004 確かめる手順 1・2 and 確認観点 W-10, on collections built and signed as a producer would. */
+/** API-MATERIALS 確かめる手順 1・2 and 確認観点 W-10, on collections built and signed as a producer would. */
 class CollectionValidatorTest {
     private val producer = TestPublisher()
     private val listed = CollectionListedAs("kamakura-audio-guide", 2, producer.accountId)
@@ -98,7 +98,7 @@ class CollectionValidatorTest {
     }
 
     @Test
-    fun `grants may name the apps that may use the collection (API-004 1_5 I-11, W-20)`() {
+    fun `grants may name the apps that may use the collection (API-MATERIALS 1_5 I-11, W-20)`() {
         fun grants(vararg apps: String) = JSONObject().put("publishers", "*").put("apps", JSONArray().apply { apps.forEach { put(it) } })
         val forSanpo = (check(signed(files(manifest { put("grants", grants("sanpoguide")) }))) as CollectionCheck.Ok).collection.manifest.grants
         assertEquals(setOf("sanpoguide"), forSanpo.apps)
@@ -115,7 +115,7 @@ class CollectionValidatorTest {
     }
 
     @Test
-    fun `grants may let the AI take the texts as grounds, which then follow the slots' rules (API-004 I-13, I-15)`() {
+    fun `grants may let the AI take the texts as grounds, which then follow the slots' rules (API-MATERIALS I-13, I-15)`() {
         fun grounding(value: Any) = JSONObject().put("publishers", "*").put("grounding", value)
         assertFalse((check(signed(files())) as CollectionCheck.Ok).collection.manifest.grants.grounding)
         assertTrue((check(signed(files(manifest { put("grants", grounding(true)) }))) as CollectionCheck.Ok).collection.manifest.grants.grounding)
@@ -161,11 +161,11 @@ class CollectionValidatorTest {
         assertEquals(RejectCode.BAD_RESOURCE, code(check(signed(files(withFirst { put("tags", JSONArray(listOf("a", "b", "c", "d"))) })))))
         assertEquals(RejectCode.BAD_RESOURCE, code(check(signed(files(withFirst { put("tags", JSONArray().put("Not A Tag")) })))))
         assertEquals(RejectCode.BAD_RESOURCE, code(check(signed(files(withFirst { put("about", JSONObject().put("type", "spot").put("osm", "street/1")) })))))
-        // A spot subject carries its approximate position (API-004).
+        // A spot subject carries its approximate position (API-MATERIALS).
         assertEquals(RejectCode.BAD_RESOURCE, code(check(signed(files(withFirst { getJSONObject("about").remove("lat") })))))
         assertEquals(RejectCode.BAD_RESOURCE, code(check(signed(files(withFirst { getJSONObject("about").put("lon", 190) })))))
         assertEquals(RejectCode.BAD_RESOURCE, code(check(signed(files(manifest { put("resources", JSONArray()) })))))
-        // A tag this version doesn't know is kept, not refused (API-004「タグ」).
+        // A tag this version doesn't know is kept, not refused (API-MATERIALS「タグ」).
         assertTrue(check(signed(files(withFirst { put("tags", JSONArray().put("pilgrimage")) }))) is CollectionCheck.Ok)
         // Nothing but collection.json, signature.json and resources/.
         assertEquals(RejectCode.UNEXPECTED_FILE, code(check(signed(files() + ("channel.json" to "{}".toByteArray())))))

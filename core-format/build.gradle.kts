@@ -1,13 +1,13 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
-// The channel and collection package formats (API-003, API-004) and the channel list (API-002):
+// The channel and collection package formats (API-CHANNEL-PACKAGE, API-MATERIALS) and the channel list (API-CHANNEL-LIST):
 // reading and checking packages, their signatures and the list. Plain JVM so the channel
 // management system's review tools run exactly the checks the apps run (ADR-003 E-3).
 plugins {
     alias(libs.plugins.kotlin.jvm)
 }
 
-description = "Channel and collection package formats, their checks and the channel list (API-002/003/004). Requires org.json on the classpath."
+description = "Channel and collection package formats, their checks and the channel list (API-CHANNEL-LIST/003/004). Requires org.json on the classpath."
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17

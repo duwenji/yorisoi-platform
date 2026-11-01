@@ -5,7 +5,7 @@ import org.json.JSONObject
 import java.io.File
 import java.time.Instant
 
-/** A provider the user added (API-002 設定画面のリスト), with the documents last accepted from it. */
+/** A provider the user added (API-CHANNEL-LIST 設定画面のリスト), with the documents last accepted from it. */
 data class ProviderRecord(
     val id: String,
     /** Where the provider is; `/.well-known/sanpo-channels` is under it. */
@@ -20,7 +20,7 @@ data class ProviderRecord(
     val listSha256: String? = null,
     val fetchedAt: Instant? = null,
     val triedAt: Instant? = null,
-    /** Why the last try failed (API-002 エラーコード: detail), or null. */
+    /** Why the last try failed (API-CHANNEL-LIST エラーコード: detail), or null. */
     val error: String? = null,
     /** The user was told the list expired, so it is said once. */
     val expiryNoticed: Boolean = false,

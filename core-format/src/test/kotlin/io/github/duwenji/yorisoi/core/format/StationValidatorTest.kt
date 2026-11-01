@@ -6,7 +6,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** API-003's checks, against small packages that each break one rule (確認観点 V-03〜V-05). */
+/** API-CHANNEL-PACKAGE's checks, against small packages that each break one rule (確認観点 V-03〜V-05). */
 class StationValidatorTest {
     private class MemoryFiles(val files: Map<String, ByteArray>) : StationFiles {
         override fun list() = files.keys.toList()

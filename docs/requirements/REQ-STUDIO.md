@@ -6,9 +6,6 @@
 | 文書ID | REQ-STUDIO |
 | ドキュメント種別 | 要件定義書 |
 | 対象システム/機能 | 素材の種類の 1 つ、スタジオ。運営が承認した素材提供者が、決めた区画と期間に出す短いお知らせを、近くに来た人に届ける。platform（共通の部品）、yorisoi-console（置き場・配信・確認のサーバーと、素材提供者の画面）、yorisoi-sanpoguide、yorisoi-cycleguide |
-| 関連Skill | requirements-refinement |
-| 作成日 | 2026-10-31 |
-| 作成者 | Claude |
 | 承認者 | 開発者（duwenji） |
 | ステータス | 承認済 |
 

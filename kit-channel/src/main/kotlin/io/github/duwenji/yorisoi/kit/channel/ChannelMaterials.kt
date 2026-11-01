@@ -15,7 +15,7 @@ class SelectedCollection(val listed: ListedCollection, val pkg: CollectionPackag
  * What a third party's channel can show on this device: its own resources, the
  * collections it declares as resolved against its provider's list, and the outside resources
  * fetched ahead. Anything missing (not fetched yet, revoked, a later app stage) reads as null,
- * and the cue moves on to its next candidate (API-004 I-7).
+ * and the cue moves on to its next candidate (API-MATERIALS I-7).
  *
  * @param collections by alias, as `CollectionReferences.resolve` gave them.
  * @param collectionFiles the files of each usable collection, by alias.

@@ -6,9 +6,6 @@
 | 文書ID | REQ-NOTES |
 | ドキュメント種別 | 要件定義書 |
 | 対象システム/機能 | 素材の種類の 1 つ、一言。アプリ利用者が声で残した短い文を、期限付きでその場所に置き、後からその場所に来た人に届ける。platform（共通の部品）、yorisoi-console（置き場・配信・確認のサーバーと、運営の画面）、yorisoi-sanpoguide、yorisoi-cycleguide |
-| 関連Skill | requirements-refinement |
-| 作成日 | 2026-10-31 |
-| 作成者 | Claude |
 | 承認者 | 開発者（duwenji） |
 | ステータス | 承認済 |
 

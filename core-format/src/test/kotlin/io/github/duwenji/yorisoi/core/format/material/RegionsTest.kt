@@ -4,7 +4,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** API-002 P-15 and API-004 P-6: regions as 3-letter geohashes, and the one around a place. */
+/** API-CHANNEL-LIST P-15 and API-MATERIALS P-6: regions as 3-letter geohashes, and the one around a place. */
 class RegionsTest {
     @Test
     fun `geohashes match the reference encoding`() {

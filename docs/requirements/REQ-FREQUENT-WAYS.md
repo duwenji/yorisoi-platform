@@ -6,9 +6,6 @@
 | 文書ID | REQ-FREQUENT-WAYS |
 | ドキュメント種別 | 要件定義書 |
 | 対象システム/機能 | よく通る道（散策・サイクルで何度も通る道）の洗い出し・入力・利用。platform kit-geo、yorisoi-sanpoguide、yorisoi-cycleguide |
-| 関連Skill | requirements-refinement |
-| 作成日 | 2026-10-28 |
-| 作成者 | Claude |
 | 承認者 | 開発者（duwenji） |
 | ステータス | 承認済（2026-10-28） |
 

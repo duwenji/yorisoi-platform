@@ -15,10 +15,10 @@ import kotlin.math.hypot
 /**
  * Material a third party made ahead: a channel's own resources (`self`) or a collection it
  * declares (by its alias). Everything was fetched and checked when the channel was chosen, so
- * producing only reads the device and tells no one the subject (API-004 P-1).
+ * producing only reads the device and tells no one the subject (API-MATERIALS P-1).
  *
- * @param stage the app stage (API-003 M-1): resources of a later one are passed over.
- * @param producerName shown beside the credit (API-002 `collections[].producerName`); null for the channel's own.
+ * @param stage the app stage (API-CHANNEL-PACKAGE M-1): resources of a later one are passed over.
+ * @param producerName shown beside the credit (API-CHANNEL-LIST `collections[].producerName`); null for the channel's own.
  */
 class ResourceProducer(
     id: String,
@@ -89,7 +89,7 @@ private fun stageOf(type: MaterialType) = when (type) {
 }
 
 /**
- * Whether material is about a cue's subject (API-004 `about`, matched as API-003 matches cues).
+ * Whether material is about a cue's subject (API-MATERIALS `about`, matched as API-CHANNEL-PACKAGE matches cues).
  * A spot is the same by its OSM id, or by its name: the spot is already within reach of the user,
  * so a spot of that name there is the one meant (the area and the node of one place have
  * different ids). A point holds what lies within its radius.
@@ -115,7 +115,7 @@ object SubjectMatch {
         return hypot(dx, dy)
     }
 
-    /** As for a revisit (API-003「きっかけ」`spot.name`). */
+    /** As for a revisit (API-CHANNEL-PACKAGE「きっかけ」`spot.name`). */
     const val SAME_NAME_WITHIN_M = 200.0
 
     private const val EARTH_RADIUS_M = 6_371_000.0

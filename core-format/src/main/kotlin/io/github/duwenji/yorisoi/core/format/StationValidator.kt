@@ -7,7 +7,7 @@ import org.json.JSONObject
 /** A channel that passed every check: its settings, the text of the slots it fills, and its material. */
 data class StationPackage(val manifest: StationManifest, val slots: Map<Slot, String>, val media: StationMedia = StationMedia.NONE)
 
-/** Why a package was turned away; the codes are the ones in API-003's error table. */
+/** Why a package was turned away; the codes are the ones in API-CHANNEL-PACKAGE's error table. */
 enum class RejectCode(val json: String) {
     BAD_ARCHIVE("bad_archive"),
     UNEXPECTED_FILE("unexpected_file"),
@@ -23,11 +23,11 @@ enum class RejectCode(val json: String) {
     BAD_CUE("bad_cue"),
     UNSUPPORTED_RESOURCE("unsupported_resource"),
     RESOURCE_MISMATCH("resource_mismatch"),
-    /** API-003 / API-004: a reference that names nothing (an undeclared alias, an unknown producer, a missing resource). */
+    /** API-CHANNEL-PACKAGE / API-MATERIALS: a reference that names nothing (an undeclared alias, an unknown producer, a missing resource). */
     UNRESOLVED_REFERENCE("unresolved_reference"),
-    /** API-003: a collection's grants leave out this channel's publisher. */
+    /** API-CHANNEL-PACKAGE: a collection's grants leave out this channel's publisher. */
     NOT_GRANTED("not_granted"),
-    /** API-003: a declared collection isn't on the provider's list, or is older than `minVersion`. */
+    /** API-CHANNEL-PACKAGE: a declared collection isn't on the provider's list, or is older than `minVersion`. */
     COLLECTION_NOT_LISTED("collection_not_listed"),
 }
 
@@ -40,7 +40,7 @@ enum class StationOrigin { BUILT_IN, THIRD_PARTY }
 
 /**
  * What the approved channel list says about a package; the package must agree. [activities],
- * [genres] and [requires] are the list's values as written (API-002 P-19); null skips the check
+ * [genres] and [requires] are the list's values as written (API-CHANNEL-LIST P-19); null skips the check
  * (a caller that doesn't have them).
  */
 data class ListedAs(
@@ -53,24 +53,24 @@ data class ListedAs(
 )
 
 /**
- * The checks of API-003 ("確認の手順"), shared by the app and the review tools.
+ * The checks of API-CHANNEL-PACKAGE ("確認の手順"), shared by the app and the review tools.
  *
  * Covers unpacking the ZIP ([checkArchive]), the files, the publisher's signature, `channel.json`,
  * the prompt slots, and the material (resources, collections, selectors and cues; 手順 8・9 and the
  * part of 9a inside the package). Not here: the package's size and SHA-256 against the list (the
  * caller has the list), rendering the prompts ([io.github.duwenji.yorisoi.sanpoguide.prompt.StationPrompts]),
- * and checking the collections a channel uses against the list (API-004 手順 3・4).
+ * and checking the collections a channel uses against the list (API-MATERIALS 手順 3・4).
  *
- * `mediaStage` is the app stage the caller can show (API-003 M-1, [MediaStage]); a channel needing
+ * `mediaStage` is the app stage the caller can show (API-CHANNEL-PACKAGE M-1, [MediaStage]); a channel needing
  * more is turned away as [RejectCode.UNSUPPORTED_RESOURCE]. At 0 (the app today) any material at all
  * is turned away without reading it. The review tools pass [ALL_STAGES] to check everything.
  */
 object StationValidator {
-    /** The package format this core-format reads (API-003). */
+    /** The package format this core-format reads (API-CHANNEL-PACKAGE). */
     const val FORMAT = 1
     const val MAX_FILES = 100
     const val MAX_TOTAL_BYTES = 2 * 1024 * 1024
-    /** Every stage of API-003 M-1; what the review tools check with. */
+    /** Every stage of API-CHANNEL-PACKAGE M-1; what the review tools check with. */
     const val ALL_STAGES = 3
     private const val MANIFEST = "channel.json"
     private const val SIGNATURE = "signature.json"
@@ -90,7 +90,7 @@ object StationValidator {
         StationCheck.Rejected(e.code, e.message.orEmpty())
     }
 
-    /** Unpacks a third-party package (API-003 確認の手順 2) and checks it like [check]. */
+    /** Unpacks a third-party package (API-CHANNEL-PACKAGE 確認の手順 2) and checks it like [check]. */
     fun checkArchive(
         zip: ByteArray, listedAs: ListedAs? = null, verifier: Ed25519Verifier, mediaStage: Int = 0, strictness: Strictness = Strictness.REVIEW,
     ): StationCheck {
@@ -113,7 +113,7 @@ object StationValidator {
         val json = readJson(files, MANIFEST, RejectCode.BAD_MANIFEST)
         val format = json.int("format")
         if (format != FORMAT) reject(RejectCode.UNSUPPORTED_FORMAT, "format $format")
-        // API-003 G-3: an app reads a package expecting values newer than it knows.
+        // API-CHANNEL-PACKAGE G-3: an app reads a package expecting values newer than it knows.
         val lenient = strictness == Strictness.APP
         val allowed = buildSet {
             add(MANIFEST)
@@ -121,7 +121,7 @@ object StationValidator {
             if (origin == StationOrigin.THIRD_PARTY) add(SIGNATURE)
         }
         // Files under resources/ are allowed when a resource points at them; checked with the material below.
-        // A slot this app doesn't have is left unused (API-003); any other unknown file is not allowed.
+        // A slot this app doesn't have is left unused (API-CHANNEL-PACKAGE); any other unknown file is not allowed.
         paths.firstOrNull { it !in allowed && !it.startsWith(ResourceReader.RESOURCES_DIR) && !(lenient && it.startsWith(PROMPTS_DIR)) }
             ?.let { reject(RejectCode.UNEXPECTED_FILE, it) }
         if (origin == StationOrigin.THIRD_PARTY && SIGNATURE !in paths) reject(RejectCode.BAD_SIGNATURE, "no $SIGNATURE")
@@ -137,7 +137,7 @@ object StationValidator {
             if (signed.subject != manifest.id || signed.version != manifest.version) {
                 reject(RejectCode.BAD_SIGNATURE, "signed for ${signed.subject}@${signed.version}, not ${manifest.id}@${manifest.version}")
             }
-            // The key that signed must be the publisher the package and the list name (API-003 F-6).
+            // The key that signed must be the publisher the package and the list name (API-CHANNEL-PACKAGE F-6).
             if (signed.accountId != signed.owner || signed.accountId != manifest.publisher) {
                 reject(RejectCode.PUBLISHER_MISMATCH, "signed by ${signed.accountId}, package says ${manifest.publisher}")
             }
@@ -147,7 +147,7 @@ object StationValidator {
                 reject(RejectCode.BAD_MANIFEST, "${manifest.id}@${manifest.version} is listed as ${listedAs.id}@${listedAs.version}")
             }
             if (manifest.publisher != listedAs.publisher) reject(RejectCode.PUBLISHER_MISMATCH, "publisher ${manifest.publisher}")
-            // API-002 P-19: the list's values are copied from the package, as written.
+            // API-CHANNEL-LIST P-19: the list's values are copied from the package, as written.
             val written = writtenEcosystemValues(json)
             listOf("activities" to listedAs.activities, "genres" to listedAs.genres, "requires" to listedAs.requires).forEach { (field, listed) ->
                 if (listed != null && listed.toSet() != written.getValue(field).toSet()) {
@@ -171,14 +171,14 @@ object StationValidator {
         val pointed = ResourceReader.files(resources)
         paths.firstOrNull { it.startsWith(ResourceReader.RESOURCES_DIR) && it !in pointed }?.let { reject(RejectCode.UNEXPECTED_FILE, it) }
         val media = CueReader.read(json, resources, lenient)
-        // Collections are known only from the list, so what they bring is counted when they are (API-004 手順 3・4).
+        // Collections are known only from the list, so what they bring is counted when they are (API-MATERIALS 手順 3・4).
         val needed = MediaStage.required(media)
         if (needed > mediaStage) reject(RejectCode.UNSUPPORTED_RESOURCE, "needs app stage $needed (this one shows up to $mediaStage)")
         return media
     }
 
     private fun readManifest(json: JSONObject, origin: StationOrigin, format: Int, lenient: Boolean): StationManifest {
-        // API-003「アプリでの知らない値」: restricting values the app doesn't know are noted, and the
+        // API-CHANNEL-PACKAGE「アプリでの知らない値」: restricting values the app doesn't know are noted, and the
         // channel isn't used (Compatibility); other unknown values are left out. Without leniency they're rejected.
         val unknownRestrictions = mutableListOf<String>()
         fun unknown(field: String, value: String, restricts: Boolean): Nothing? {
@@ -287,7 +287,7 @@ internal enum class SignedKind(val type: String, val subjectKey: String, val own
 }
 
 /**
- * `signature.json` (API-003 F-6; for collections, API-004): the owner's Ed25519 signature over the
+ * `signature.json` (API-CHANNEL-PACKAGE F-6; for collections, API-MATERIALS): the owner's Ed25519 signature over the
  * SHA-256 of every other file. Every file must be listed and match, and nothing else may be listed.
  */
 internal fun verifyPackageSignature(files: StationFiles, paths: List<String>, verifier: Ed25519Verifier, kind: SignedKind): SignedFiles {
