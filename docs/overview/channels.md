@@ -66,4 +66,4 @@ flowchart LR
 - [TODO.md「チャンネル」](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/TODO.md#チャンネル)
 - [API-CHANNEL-LIST](../contracts/API-CHANNEL-LIST.md): 承認済みチャンネル・リストの形式
 - [API-SECRET-MESSAGES](../contracts/API-SECRET-MESSAGES.md): 鍵とアカウントID、D-5
-- [prompts.md](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/prompts.md): プロンプトの構成（第三者が差し替える範囲を決める元）
+- [prompts.md](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/design/prompts.md): プロンプトの構成（第三者が差し替える範囲を決める元）

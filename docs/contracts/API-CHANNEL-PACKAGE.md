@@ -34,7 +34,7 @@
 非スコープ:
 - パッケージの取得・リスト・運営の署名（API-CHANNEL-LIST）
 - 人が確かめる審査の項目（[チャンネル審査ポリシー](../policies/channel-review.md)）
-- アプリの画面・保存・切り替えの設計（[channels.md](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/channels.md)）
+- アプリの画面・保存・切り替えの設計（[channels.md](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/design/channels.md)）
 
 ## 対応元ID（トレーサビリティ）
 
@@ -42,7 +42,7 @@
 |---|---|---|
 | CHANNELS | C-4（チャンネル提供者の署名）、C-7（アプリが強制すること）、C-8（機械で確かめる項目） | 本書で形式にする |
 | API-CHANNEL-LIST | `package.format`・パッケージの大きさの上限・`hash_mismatch`・`package_rejected` | 本書が `format` を定める |
-| [エコシステム TODO「チャンネル」](../work/ecosystem-todo.md) | チャンネルが決める軸（語り手・話題・話す場面・話す量・雰囲気） | 本書で項目にする |
+| [エコシステム TODO「チャンネル」](../TODO.md) | チャンネルが決める軸（語り手・話題・話す場面・話す量・雰囲気） | 本書で項目にする |
 | MATERIALS | D-2（同梱の素材）、D-8（参照する版）、D-11（候補の順番）、D-15（省略形）、D-17（ID だけで参照） | `collections`・`source` として形式にする |
 | API-MATERIALS | 素材提供者 IF、参照の書き方、省略形の展開、確かめる手順 3・4 | 本書から参照する |
 
@@ -54,7 +54,7 @@
 |---|---|---|
 | F-1 | 変えられる範囲の決め方 | プロンプトは、アプリが用意したスロットに文章を差し込むだけにする。システムプロンプト全体の差し替えはできない。共通ルール（`shared/speech`・`shared/facts`）と安全・プライバシーの指示は、アプリの固定部分としてスロットの後ろに必ず付く |
 | F-2 | スロットに書けるもの | プレーンな文章だけ。`{{` を含めてはいけない（変数・読み込み・条件分岐は使えない）。URL も書けない。機械で確かめやすく、アプリのテンプレートに干渉できない |
-| F-3 | 設定値 | 話す量・話す場面・話題の優先・雰囲気・解説の長さを、アプリが決めた選択肢の中から選ぶ。数値を自由に書くことはできない。選択肢の範囲そのものが上限になる（話しかけの頻度は最大で「おしゃべり」、解説は最長 450 字）。AI を呼ぶ量は、さらに 1 日の上限（自分のキーではアプリ利用者が決めた上限、運営の AI では運営が決めた上限）の中に収まる（[AI-ROLES](../overview/ai-roles.md) H-9・[API-AI-RELAY](../contracts/API-AI-RELAY.md) R-2。上限に達すると、AI の話しかけと解説は定型文と素材だけになる。止められない出来事は上限にかかわらず出す） |
+| F-3 | 設定値 | 話す量・話す場面・話題の優先・雰囲気・解説の長さを、アプリが決めた選択肢の中から選ぶ。数値を自由に書くことはできない。選択肢の範囲そのものが上限になる（話しかけの頻度は最大で「おしゃべり」、解説は最長 450 字）。AI を呼ぶ量は、さらに 1 日の上限（自分のキーではアプリ利用者が決めた上限、運営の AI では運営が決めた上限）の中に収まる（[AI-ROLES](../overview/ai-roles.md) H-9・[API-AI-RELAY](API-AI-RELAY.md) R-2。上限に達すると、AI の話しかけと解説は定型文と素材だけになる。止められない出来事は上限にかかわらず出す） |
 | F-4 | 止められない出来事 | 天気の急変・日の入り・施設の案内は、`channel.json` に項目自体がない（止める書き方がない） |
 | F-5 | ファイルの許可 | 決まった名前のファイル以外を含むパッケージは拒む。知らない値（列挙の外の値）も拒む |
 | F-6 | チャンネル提供者の署名 | パッケージ内の全ファイルの SHA-256 の一覧に、チャンネル提供者が Ed25519 で署名する（`signature.json`）。チャンネル提供者の公開鍵も同梱し、アプリは公開鍵から計算したアカウントIDが `channel.json` とリストの `publisher` に一致するかを確かめる。サーバーに問い合わせる必要がない |
@@ -528,7 +528,7 @@ ECOSYSTEM E-24 のとおり、実装するアプリを作ると決めた過ご�
 
 ## 確認の手順
 
-アプリと審査用の道具は、同じ確認を同じ順で行う。アプリの実装を、審査用の道具でも使えるように JVM のライブラリにしておく（[channels.md](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/channels.md)）。
+アプリと審査用の道具は、同じ確認を同じ順で行う。アプリの実装を、審査用の道具でも使えるように JVM のライブラリにしておく（[channels.md](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/design/channels.md)）。
 
 1. 大きさ（API-CHANNEL-LIST: 2MB 以内）と SHA-256（リストの値）を確かめる
 2. ZIP を展開する。パスに `..`・絶対パス・バックスラッシュがある、展開後の合計が 2MB を超える、ファイルが 100 個を超える場合は拒む
@@ -639,5 +639,5 @@ API-CHANNEL-LIST の `package_rejected` の詳細の理由。審査用の道具�
 - [CHANNELS](../overview/channels.md): C-4・C-7・C-8
 - [MATERIALS](../overview/materials.md): 素材の素材提供者の切り出し
 - [API-MATERIALS.md（API-MATERIALS）](API-MATERIALS.md): 素材提供者 IF・参照の書き方・省略形の展開・素材集の形式
-- [channels.md](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/channels.md): アプリ側の設計（組み込みのチャンネル・カスタマイズ・切り替え）
-- [prompts.md](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/prompts.md): SanpoGuide のプロンプトの構成
+- [channels.md](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/design/channels.md): アプリ側の設計（組み込みのチャンネル・カスタマイズ・切り替え）
+- [prompts.md](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/design/prompts.md): SanpoGuide のプロンプトの構成

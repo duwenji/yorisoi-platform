@@ -161,5 +161,5 @@
 
 ## 関連ドキュメント・参照リンク
 - [kit-geo README](../../kit-geo/README.md)（スポット検索のキャッシュ）
-- [yorisoi-cycleguide 要件定義](https://github.com/duwenji/yorisoi-cycleguide/blob/main/docs/requirements.md)（F-15〜F-17 のルート）
-- [yorisoi-sanpoguide アーキテクチャ](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/architecture.md)（`HistoryStore`・散策プラン）
+- [yorisoi-cycleguide 要件定義](https://github.com/duwenji/yorisoi-cycleguide/blob/main/docs/requirements/cycleguide.md)（F-15〜F-17 のルート）
+- [yorisoi-sanpoguide アーキテクチャ](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/design/architecture.md)（`HistoryStore`・散策プラン）

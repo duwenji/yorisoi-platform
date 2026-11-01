@@ -15,7 +15,7 @@
 | 名前 | 役割 | 文書の置き場所 |
 |---|---|---|
 | **yorisoi-platform** | 付き添いアプリ間で共有するライブラリ、形式、語彙を提供する | このリポジトリの [共通文書](../README.md) と実装 |
-| **アプリ** | 共通基盤を使い、対象の過ごし方に合った体験を提供する | 各アプリのリポジトリ（[yorisoi-sanpoguide](https://github.com/duwenji/yorisoi-sanpoguide)・[yorisoi-cycleguide](https://github.com/duwenji/yorisoi-cycleguide)）。SanpoGuide は[アプリ別手引き](../apps/sanpoguide/manual/README.md)も参照 |
+| **アプリ** | 共通基盤を使い、対象の過ごし方に合った体験を提供する | 各アプリのリポジトリ（[yorisoi-sanpoguide](https://github.com/duwenji/yorisoi-sanpoguide)・[yorisoi-cycleguide](https://github.com/duwenji/yorisoi-cycleguide)）。SanpoGuide は[アプリ別手引き](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/manual/README.md)も参照 |
 | **yorisoi-console** | チャンネルや素材集の申請・審査・配信を扱う管理システム。運営の AI の中継、スポットのタイルの配信、スタジオ（場所に残る一言と提供者のスタジオ）も置く | [yorisoi-console の文書](https://github.com/duwenji/yorisoi-console/tree/main/docs) |
 | **yorisoi-tutorial** | 仕組みを学ぶための説明を提供する。規範や契約の正本にはしない | [yorisoi-tutorial](https://github.com/duwenji/yorisoi-tutorial) |
 
@@ -78,7 +78,7 @@
 | E-24 | `activities` の最初の一覧 | `walk`・`cycle` の 2 つだけで始める。値は、そのアプリを作ると決めたときにコアのマイナー版で足す（実装しているアプリのない値は、どのアプリでも確かめられない宣言になるため） |
 | E-25 | チャンネル提供者によるアプリの除外 | 入れない。出す範囲は `activities`・`requires` で絞る。アプリ単位の除外を認めると、互換性の判定と審査の見本がアプリごとに戻るため。要望が出たら `excludeApps` を足すことを検討する（見直しの条件） |
 | E-26 | 審査の見本 | 2 段に分ける。① **組み立ての確認**は、互換性のあるすべてのアプリのプロンプト・パックで行う（AI を呼ばず、組み立てとスロット・上限の確認だけなので費用がかからない）。② **AI に話させる見本**は、`activities` の値ごとに代表のアプリ 1 つで作る（費用と運営の確認の量を、アプリの数ではなく過ごし方の数に比例させる）。最初の代表は `walk` が SanpoGuide、`cycle` が CycleGuide |
-| E-27 | アプリ利用者の呼び方 | エコシステム全体の文書では「**アプリ利用者**」と呼び、各アプリの画面と文書ではアプリの呼び方を使う（SanpoGuide は「散策者」）。対応する共通語彙は [関係者と共通用語](../overview/roles-and-vocabulary.md) に記載する。チャンネル提供者・素材提供者・運営はアプリをまたいで同じ呼び方にする |
+| E-27 | アプリ利用者の呼び方 | エコシステム全体の文書では「**アプリ利用者**」と呼び、各アプリの画面と文書ではアプリの呼び方を使う（SanpoGuide は「散策者」）。対応する共通語彙は [関係者と共通用語](roles-and-vocabulary.md) に記載する。チャンネル提供者・素材提供者・運営はアプリをまたいで同じ呼び方にする |
 
 
 ```mermaid
@@ -140,8 +140,8 @@ flowchart TB
 | 技術契約（API） | 形式、境界、相互運用上の振る舞い | [技術契約一覧](../contracts/README.md) |
 | ポリシー | 合意した方針に基づく審査・運用基準 | [チャンネル審査基準](../policies/channel-review.md)、[一言の利用規約](../policies/notes-terms.md)、[スタジオの決まり](../policies/studio-rules.md) |
 | 用語・関係者 | エコシステムの共通概念と呼び方 | [関係者と用語](roles-and-vocabulary.md) |
-| アプリ別手順 | 個別アプリの操作・試用・運用 | [SanpoGuide 手引き](../apps/sanpoguide/manual/README.md) |
-| 未完了の作業 | エコシステムに関する未完了事項と検討項目 | [エコシステム TODO](../work/ecosystem-todo.md) |
+| アプリ別手順 | 個別アプリの操作・試用・運用 | [SanpoGuide 手引き](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/manual/README.md) |
+| 未完了の作業 | エコシステムに関する未完了事項と検討項目 | [エコシステム TODO](../TODO.md) |
 
 ### 文書の権威
 
@@ -157,4 +157,4 @@ flowchart TB
 
 方針を新しく決める・変えるときは、検討している間だけ `docs/decisions/` に ADR（案と比べた理由を書く）を置きます。承認したら、決まりを上の方針の文書や契約に移し、ADR は消します。比べた案と理由は、その変更のプルリクエストに残ります。
 
-SanpoGuide 固有の現在の状態は、[SanpoGuide 手引きの案内](../apps/sanpoguide/manual/README.md)で確認できます。
+SanpoGuide 固有の現在の状態は、[SanpoGuide 手引きの案内](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/manual/README.md)で確認できます。

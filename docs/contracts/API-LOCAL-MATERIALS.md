@@ -361,5 +361,5 @@ GET /v1/local/cells?cells=xn76ur,xn76us,…（geohash6 を 1〜9 個、カンマ
 - [REQ-STUDIO](../requirements/REQ-STUDIO.md)、[REQ-NOTES](../requirements/REQ-NOTES.md)
 - [MATERIALS](../overview/materials.md)
 - [API-AI-RELAY](API-AI-RELAY.md)（セッション、トークン、エラーの形）
-- [API-AI-RELAY](../contracts/API-AI-RELAY.md)（予算 R-10、Bedrock R-5）
+- [API-AI-RELAY](API-AI-RELAY.md)（予算 R-10、Bedrock R-5）
 - [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457)

@@ -2,7 +2,7 @@
 
 [sanpo-messages.openapi.yaml](sanpo-messages.openapi.yaml) は、位置に紐づく秘密メッセージのサーバー API を OpenAPI 3.1 で書いたもの。サーバーを作る人とアプリを作る人が、同じ定義を見て実装するためのファイル。
 
-- **契約の正本**は[契約一覧](../contracts/README.md)にある各契約です。秘密メッセージ API の判断の理由・暗号方式・配信の判定規則は[API-SECRET-MESSAGES](../contracts/API-SECRET-MESSAGES.md)を参照してください。OpenAPI と食い違いがあれば契約本文に合わせて OpenAPI を直します
+- **契約の正本**は[契約一覧](../README.md)にある各契約です。秘密メッセージ API の判断の理由・暗号方式・配信の判定規則は[API-SECRET-MESSAGES](../API-SECRET-MESSAGES.md)を参照してください。OpenAPI と食い違いがあれば契約本文に合わせて OpenAPI を直します
 - サーバーは、この API に準拠していれば実装方法（言語・フレームワーク・データベース）も置き場所も問わない。アプリは設定の URL だけで接続先を選ぶ
 
 ## フォルダーの中身
@@ -10,7 +10,7 @@
 | ファイル | 内容 |
 |---|---|
 | `sanpo-messages.openapi.yaml` | API の定義（エンドポイント、リクエスト・レスポンスの形、エラー） |
-| `spot-tile.schema.json` | スポットのタイルの JSON Schema（[API-SPOT-TILES](../contracts/API-SPOT-TILES.md)）。タイルを作るバッチが書き出したものを確かめる |
+| `spot-tile.schema.json` | スポットのタイルの JSON Schema（[API-SPOT-TILES](../API-SPOT-TILES.md)）。タイルを作るバッチが書き出したものを確かめる |
 | `redocly.yaml` | 検証ツール（Redocly CLI）の設定。意図して外したルールと理由 |
 | `README.md` | このファイル |
 
@@ -19,7 +19,7 @@
 Node.js があれば、インストールなしで使える。
 
 ```sh
-cd docs/api
+cd docs/contracts/api
 
 # 検証（定義の書き間違いを見つける）
 npx @redocly/cli lint sanpo-messages.openapi.yaml
@@ -294,7 +294,7 @@ sequenceDiagram
 1. 契約書の「サーバーの準拠要件」を読む
 2. このファイルから、使う言語のサーバーのひな形を生成してもよい（例: [OpenAPI Generator](https://openapi-generator.tech/)）。生成しなくても、この定義どおりに応答すれば準拠できる
 3. 第 1 版は `x-sanpo-release: 1` の操作をすべて実装し、検出 API の `features` を `["direct", "group", "subscription"]` にする
-4. 準拠テスト（任意のサーバーの URL に対して流せるもの。まだない。[エコシステム TODO](../work/ecosystem-todo.md#位置に紐づく秘密メッセージ)）で確認する
+4. 準拠テスト（任意のサーバーの URL に対して流せるもの。まだない。[エコシステム TODO](../../TODO.md#位置に紐づく秘密メッセージ)）で確認する
 
 ### アプリを作る人
 

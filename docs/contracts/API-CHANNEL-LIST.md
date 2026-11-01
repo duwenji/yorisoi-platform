@@ -466,4 +466,4 @@ sequenceDiagram
 - [CHANNELS](../overview/channels.md): 第三者のチャンネルは運営の審査と署名を経たものだけ取り込む
 - [API-SECRET-MESSAGES.md（API-SECRET-MESSAGES）](API-SECRET-MESSAGES.md): アカウントID、Ed25519、D-5
 - [MATERIALS](../overview/materials.md)・[API-MATERIALS.md（API-MATERIALS）](API-MATERIALS.md): 素材の素材提供者と素材集
-- [エコシステム TODO](../work/ecosystem-todo.md): エコシステム全体の残りの作業
+- [エコシステム TODO](../TODO.md): エコシステム全体の残りの作業

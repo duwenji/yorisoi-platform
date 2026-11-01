@@ -1,6 +1,6 @@
 # API 契約一覧
 
-この一覧は、yorisoi エコシステムでアプリ・管理システム・外部サービスの境界に適用する契約の正本です。承認済みの契約本文を優先し、未完了の実装作業は [エコシステム TODO](../work/ecosystem-todo.md) で管理します。
+この一覧は、yorisoi エコシステムでアプリ・管理システム・外部サービスの境界に適用する契約の正本です。承認済みの契約本文を優先し、未完了の実装作業は [エコシステム TODO](../TODO.md) で管理します。
 
 ## 契約
 
@@ -18,4 +18,4 @@
 
 ## 機械可読な定義
 
-スポットのタイルの形は JSON Schema [`api/spot-tile.schema.json`](../api/spot-tile.schema.json) です。秘密メッセージ API の機械可読な定義は [`api/sanpo-messages.openapi.yaml`](../api/sanpo-messages.openapi.yaml) にあり、検証方法は [`api/README.md`](../api/README.md) にあります。OpenAPI は契約の機械可読な一部であり、判断の背景やスキーマで表現できない規則は契約本文を参照してください。
+スポットのタイルの形は JSON Schema [`api/spot-tile.schema.json`](api/spot-tile.schema.json) です。秘密メッセージ API の機械可読な定義は [`api/sanpo-messages.openapi.yaml`](api/sanpo-messages.openapi.yaml) にあり、検証方法は [`api/README.md`](api/README.md) にあります。OpenAPI は契約の機械可読な一部であり、判断の背景やスキーマで表現できない規則は契約本文を参照してください。

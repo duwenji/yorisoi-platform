@@ -6,7 +6,7 @@
 |---|---|
 | 文書ID | API-SPOT-TILES |
 | ドキュメント種別 | API契約書 |
-| 対象システム/機能 | yorisoi エコシステムのアプリ（`kit-geo`）と、運営のスポットのタイルの配信（[API-SPOT-TILES](../contracts/API-SPOT-TILES.md)） |
+| 対象システム/機能 | yorisoi エコシステムのアプリ（`kit-geo`）と、運営のスポットのタイルの配信（[API-SPOT-TILES](API-SPOT-TILES.md)） |
 | 承認者 | 開発者 |
 | ステータス | 承認済 |
 
@@ -109,7 +109,7 @@ flowchart LR
 | ST-6 | 圧縮 | タイルは gzip で置き、`Content-Encoding: gzip` で返す。アプリの HTTP クライアントが展開する |
 | ST-7 | 送るもの | アプリが送るのは、URL（層とタイルの番号）・`If-None-Match`・アプリ名と版の `User-Agent` だけ。クエリ文字列・インストール ID・位置は送らない。配信はアクセスログを残さない |
 | ST-8 | ライセンス | 各タイルに `license`（`ODbL-1.0`）と `attribution`（`© OpenStreetMap contributors`）を入れる。基点に `LICENSE.txt`（ODbL 1.0 で配っていること、出典、もとのデータの取得元と日時）を置く |
-| ST-9 | 形式の置き場所 | タイルを読むのはアプリだけなので、読み込みは `kit-geo` に置き、core-format には置かない。機械可読な形は JSON Schema [`api/spot-tile.schema.json`](../api/spot-tile.schema.json) とし、バッチは書き出したタイルをこれで確かめる |
+| ST-9 | 形式の置き場所 | タイルを読むのはアプリだけなので、読み込みは `kit-geo` に置き、core-format には置かない。機械可読な形は JSON Schema [`api/spot-tile.schema.json`](api/spot-tile.schema.json) とし、バッチは書き出したタイルをこれで確かめる |
 
 ```mermaid
 sequenceDiagram
@@ -365,9 +365,9 @@ sequenceDiagram
 
 ## 関連ドキュメント・参照リンク
 
-- [API-SPOT-TILES](../contracts/API-SPOT-TILES.md)
+- [API-SPOT-TILES](API-SPOT-TILES.md)
 - [API-CHANNEL-PACKAGE](API-CHANNEL-PACKAGE.md)（店の種類）
 - [REQ-FREQUENT-WAYS](../requirements/REQ-FREQUENT-WAYS.md)（F-6）
-- [`api/spot-tile.schema.json`](../api/spot-tile.schema.json)
+- [`api/spot-tile.schema.json`](api/spot-tile.schema.json)
 - [geohash](https://en.wikipedia.org/wiki/Geohash)
 - [OpenStreetMap の著作権とライセンス](https://www.openstreetmap.org/copyright)

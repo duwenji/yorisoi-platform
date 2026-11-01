@@ -5,7 +5,7 @@
 | 対象 | yorisoi がだれに何を提供し、その費用をだれが持つか |
 | 読む人 | 開発者、運営 |
 | 状態 | 検討中。本書の案はすべて未承認。決めるときは ADR にする |
-| 関連 | [関係者と共通用語](roles-and-vocabulary.md)、[関係者の課題と対応案](stakeholder-needs.md)、[AI-ROLES](../overview/ai-roles.md)、[API-AI-RELAY](../contracts/API-AI-RELAY.md)、[エコシステム TODO](../work/ecosystem-todo.md)「収益化」 |
+| 関連 | [関係者と共通用語](roles-and-vocabulary.md)、[関係者の課題と対応案](stakeholder-needs.md)、[AI-ROLES](ai-roles.md)、[API-AI-RELAY](../contracts/API-AI-RELAY.md)、[エコシステム TODO](../TODO.md)「収益化」 |
 
 ## 問い
 
@@ -15,7 +15,7 @@
 2. その価値の費用を、だれが持つか
 3. ほかの手段では代わりにならない理由は何か
 
-[エコシステム TODO](../work/ecosystem-todo.md) の「収益化」は 2 の手段（広告・有料プラン・提携）だけを挙げています。本書は、その前の 1 と 3 から考えます。手がかりとして、旅行会社の事業の成り立ちを参考にします。
+[エコシステム TODO](../TODO.md) の「収益化」は 2 の手段（広告・有料プラン・提携）だけを挙げています。本書は、その前の 1 と 3 から考えます。手がかりとして、旅行会社の事業の成り立ちを参考にします。
 
 ## 参考: 旅行会社の事業
 
@@ -54,7 +54,7 @@
 | 旅行者 | アプリ利用者（SanpoGuide では散策者） |
 | 着地型の企画者、観光協会 | チャンネル提供者、素材提供者 |
 | 旅行会社（仲介） | 運営 |
-| 添乗員、ガイド | 生成 AI の語り（実演の層。[AI-ROLES](../overview/ai-roles.md)） |
+| 添乗員、ガイド | 生成 AI の語り（実演の層。[AI-ROLES](ai-roles.md)） |
 
 旅行会社の価値と並べたときの yorisoi の位置です。
 
