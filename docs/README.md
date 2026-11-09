@@ -11,7 +11,7 @@
 | 関係者の課題と未承認の対応案を確認する | [関係者の課題と対応案](overview/stakeholder-needs.md) |
 | だれに何を提供し、費用をだれが持つかの検討を読む | [提供価値と事業の検討](overview/value-proposition.md) |
 | エコシステム・チャンネル・素材・生成 AI の決まりを読む | [エコシステム](overview/yorisoi-ecosystem.md#決まり)、[チャンネル](overview/channels.md)、[素材](overview/materials.md)、[生成 AI の役割](overview/ai-roles.md) |
-| 複数のアプリにまたがる機能の要件を読む | [よく通る道](requirements/REQ-FREQUENT-WAYS.md)、[スタジオ](requirements/REQ-STUDIO.md)、[一言](requirements/REQ-NOTES.md) |
+| 複数のアプリにまたがる機能の要件を読む | [よく通る道](requirements/REQ-FREQUENT-WAYS.md)、[スタジオ](requirements/REQ-STUDIO.md)、[一言](requirements/REQ-NOTES.md)、[周りの見どころと雑談](requirements/REQ-NEARBY-TALK.md)（検討中） |
 | システム境界の形式・動作を確認する | [API 契約一覧](contracts/README.md) |
 | チャンネル審査の基準を確認する | [審査ポリシー](policies/channel-review.md) |
 | スタジオの決まりを確認する | [スタジオの決まりと素材提供者の承認の基準](policies/studio-rules.md) |
