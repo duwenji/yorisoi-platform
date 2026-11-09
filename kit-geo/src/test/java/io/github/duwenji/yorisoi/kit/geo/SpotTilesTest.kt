@@ -60,10 +60,10 @@ class SpotTilesTest {
         return if (layer == "base") {
             val spots = if (!mine) "" else listOf(
                 """{"id":"node/1","lat":35.003,"lon":139.0,"tags":{"name":"近くの史跡","historic":"yes"}}""",
-                // About 900m north: too far.
-                """{"id":"node/2","lat":35.008,"lon":139.0,"tags":{"name":"遠くの寺","amenity":"place_of_worship","religion":"buddhist"}}""",
-                // A park whose centre is 900m away, its edge 400m away: found, as Overpass finds it.
-                """{"id":"way/3","lat":35.0,"lon":139.0099,"tags":{"name":"大きな公園","leisure":"park"},"shape":{"area":true,"lines":[[35.001,139.0044,35.001,139.0154,34.999,139.0154,34.999,139.0044,35.001,139.0044]]}}""",
+                // About 1.1km north: too far.
+                """{"id":"node/2","lat":35.010,"lon":139.0,"tags":{"name":"遠くの寺","amenity":"place_of_worship","religion":"buddhist"}}""",
+                // A park whose centre is 1.2km away, its edge 700m away: found, as Overpass finds it.
+                """{"id":"way/3","lat":35.0,"lon":139.013,"tags":{"name":"大きな公園","leisure":"park"},"shape":{"area":true,"lines":[[35.001,139.0075,35.001,139.0185,34.999,139.0185,34.999,139.0075,35.001,139.0075]]}}""",
             ).joinToString(",")
             val facilities = if (!mine) "" else listOf(
                 """{"id":"node/10","kind":"TOILETS","lat":35.003,"lon":139.0}""",

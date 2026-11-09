@@ -90,6 +90,29 @@ class StationValidatorTest {
     }
 
     @Test
+    fun `the preview, chat and song events are on unless a channel turns them off`() {
+        fun events(vararg off: String) = (StationValidator.check(files(manifest {
+            val events = getJSONObject("talk").getJSONObject("events")
+            off.forEach { events.put(it, false) }
+        }), StationOrigin.BUILT_IN) as StationCheck.Ok).station.manifest.events
+
+        assertTrue(events().containsAll(setOf(TalkEventKind.PREVIEW, TalkEventKind.CHAT, TalkEventKind.SONG)))
+        assertEquals(setOf(TalkEventKind.CHAT, TalkEventKind.SONG), events("preview").intersect(setOf(TalkEventKind.PREVIEW, TalkEventKind.CHAT, TalkEventKind.SONG)))
+        // A song is one of the chat's topics: no chat, no song.
+        assertTrue(events("chat").none { it == TalkEventKind.CHAT || it == TalkEventKind.SONG })
+        assertTrue(TalkEventKind.SONG !in events("song"))
+        assertEquals(RejectCode.BAD_MANIFEST, rejected(files(manifest { getJSONObject("talk").getJSONObject("events").put("chat", "no") })))
+    }
+
+    @Test
+    fun `the spot kinds of stations, bridges, slopes, libraries and theatres can be preferred`() {
+        val station = (StationValidator.check(files(manifest {
+            getJSONObject("spots").put("prefer", org.json.JSONArray(listOf("station", "bridge", "slope", "library", "theatre")))
+        }), StationOrigin.BUILT_IN) as StationCheck.Ok).station
+        assertEquals(listOf(SpotKind.STATION, SpotKind.BRIDGE, SpotKind.SLOPE, SpotKind.LIBRARY, SpotKind.THEATRE), station.manifest.prefer)
+    }
+
+    @Test
     fun `missing or mistyped fields are rejected`() {
         assertEquals(RejectCode.BAD_MANIFEST, rejected(files(manifest { remove("greeting") })))
         assertEquals(RejectCode.BAD_MANIFEST, rejected(files(manifest { put("version", "3") })))

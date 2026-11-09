@@ -32,6 +32,18 @@ internal class NearbyCollector {
     }
 
     fun spot(poi: Poi) {
+        // A slope or a bridge is mapped as a row of ways, a station as a node for each line:
+        // one place with one name (REQ-NEARBY-TALK F-5).
+        if (poi.category in OverpassClient.ONE_BY_NAME) {
+            val at = LatLon(poi.lat, poi.lon)
+            val same = spots.entries.firstOrNull { (_, s) ->
+                s.name == poi.name && s.category == poi.category && RouteGeometry.distanceM(LatLon(s.lat, s.lon), at) <= SAME_NAME_M
+            }
+            if (same != null) {
+                spots[same.key] = joined(same.value, poi)
+                return
+            }
+        }
         // The same place is often mapped both as a node and an area. Keep the area, whose
         // edge tells when the user arrives, but also the node's tags (often the wikipedia link).
         val key = "${poi.name}@${"%.3f".format(poi.lat)},${"%.3f".format(poi.lon)}"
@@ -45,8 +57,22 @@ internal class NearbyCollector {
 
     fun result() = NearbyResult(spots.values.toList(), facilities, signals)
 
+    /**
+     * One place from two pieces of it: the lines of both, and the smaller id, so that it is the
+     * same place whichever order the pieces came in (Overpass or the tiles).
+     */
+    private fun joined(a: Poi, b: Poi): Poi {
+        val (first, second) = if (a.id <= b.id) a to b else b to a
+        val lines = listOfNotNull(first.shape, second.shape).filter { !it.isArea }.flatMap { it.lines }
+        val shape = if (lines.isEmpty()) first.shape ?: second.shape else Shape(lines, isArea = false)
+        return first.copy(tags = second.tags + first.tags, shape = shape)
+    }
+
     private companion object {
         const val SAME_FACILITY_M = 20.0
+
+        /** The pieces of one slope, bridge or station are within this of each other. */
+        const val SAME_NAME_M = 300.0
     }
 }
 
@@ -60,6 +86,8 @@ class OverpassClient(
         .build(),
 ) {
     /**
+     * [radiusM]: how far to search for spots; amenities and signals no farther than [FACILITY_RADIUS_M],
+     * shops than [SHOP_RADIUS_M].
      * [shops]: eating and shopping kinds to add (`SpotKind.onlyWhenPreferred`); none by default.
      * [signals]: also the traffic signals, for apps that keep quiet near them (a cyclist's); not by default.
      * [facilities]: the amenities to search; a walker's by default.
@@ -67,7 +95,7 @@ class OverpassClient(
     suspend fun search(
         lat: Double,
         lon: Double,
-        radiusM: Int = 600,
+        radiusM: Int = SPOT_RADIUS_M,
         shops: Set<SpotKind> = emptySet(),
         signals: Boolean = false,
         facilities: Set<FacilityKind> = FacilityKind.WALK,
@@ -77,7 +105,7 @@ class OverpassClient(
     internal suspend fun fetch(
         lat: Double,
         lon: Double,
-        radiusM: Int = 600,
+        radiusM: Int = SPOT_RADIUS_M,
         shops: Set<SpotKind> = emptySet(),
         signals: Boolean = false,
         facilities: Set<FacilityKind> = FacilityKind.WALK,
@@ -125,19 +153,26 @@ class OverpassClient(
         signals: Boolean = false,
         facilities: Set<FacilityKind> = FacilityKind.WALK,
     ): String {
-        val around = "around:$radiusM,$lat,$lon"
+        val spotAround = "around:$radiusM,$lat,$lon"
+        // Amenities matter only nearer: a toilet 1km away is no help.
+        val around = "around:${minOf(radiusM, FACILITY_RADIUS_M)},$lat,$lon"
         // Benches and vending machines are everywhere; only the close ones matter.
         val closeAround = "around:${minOf(radiusM, CLOSE_RADIUS_M)},$lat,$lon"
         val spots = """
             [out:json][timeout:25];
             (
-              nwr($around)["name"]["historic"];
-              nwr($around)["name"]["tourism"~"^(attraction|museum|viewpoint|artwork|gallery)$"];
-              nwr($around)["name"]["amenity"="place_of_worship"];
-              nwr($around)["name"]["leisure"~"^(park|garden)$"];
-              nwr($around)["name"]["natural"~"^(tree|peak|spring|water|beach)$"];
+              nwr($spotAround)["name"]["historic"];
+              nwr($spotAround)["name"]["tourism"~"^(attraction|museum|viewpoint|artwork|gallery)$"];
+              nwr($spotAround)["name"]["amenity"="place_of_worship"];
+              nwr($spotAround)["name"]["leisure"~"^(park|garden)$"];
+              nwr($spotAround)["name"]["natural"~"^(tree|peak|spring|water|beach)$"];
+              nwr($spotAround)["name"]["railway"="station"];
+              nwr($spotAround)["name"]["man_made"="bridge"];
+              way($spotAround)["highway"]["bridge"]["bridge"!="no"]["name"~"橋$"];
+              way($spotAround)["highway"]["name"~"坂$"];
+              nwr($spotAround)["name"]["amenity"~"^(library|theatre)$"];
             );
-            out tags geom 80;
+            out tags geom $SPOT_LIMIT;
         """.trimIndent()
         // One output per kind, so a street full of benches can't crowd out the toilets.
         val query = spots + FacilityKind.entries.filter { it in facilities }.joinToString("") { kind ->
@@ -237,10 +272,19 @@ class OverpassClient(
     companion object {
         private const val TAG = "Overpass"
 
-        /** The search's radius: spots, and the amenities not only close by. */
-        internal const val RADIUS_M = 600
+        /** How far spots are searched for (REQ-NEARBY-TALK F-1). */
+        const val SPOT_RADIUS_M = 1000
+
+        /** The amenities not only close by, and traffic signals. */
+        internal const val FACILITY_RADIUS_M = 600
         internal const val CLOSE_RADIUS_M = 250
         internal const val SHOP_RADIUS_M = 400
+
+        /** A busy town has over a hundred spots within 1km; the answer is kept small. */
+        private const val SPOT_LIMIT = 150
+
+        /** Kinds mapped in pieces with one name, joined into one spot ([NearbyCollector]). */
+        internal val ONE_BY_NAME = setOf("駅", "橋", "坂")
 
         internal fun categoryOf(tags: Map<String, String>): String = when {
             tags["amenity"] == "place_of_worship" -> when (tags["religion"]) {
@@ -260,8 +304,17 @@ class OverpassClient(
             tags["natural"] == "beach" -> "海辺"
             tags["natural"] == "water" -> "水辺"
             tags.containsKey("natural") -> "自然"
+            tags["railway"] == "station" -> "駅"
+            tags["man_made"] == "bridge" -> "橋"
+            "highway" in tags && tags["bridge"].let { it != null && it != "no" } && nameOf(tags).endsWith("橋") -> "橋"
+            "highway" in tags && nameOf(tags).endsWith("坂") -> "坂"
+            tags["amenity"] == "library" -> "図書館"
+            tags["amenity"] == "theatre" -> "劇場"
             else -> shopKindOf(tags)?.category ?: "スポット"
         }
+
+        /** The name the Overpass query matches on; `name:ja` may be spelled otherwise. */
+        private fun nameOf(tags: Map<String, String>) = tags["name"] ?: tags["name:ja"].orEmpty()
 
         internal fun shopKindOf(tags: Map<String, String>): SpotKind? = when {
             tags["amenity"] == "restaurant" -> SpotKind.RESTAURANT
@@ -274,7 +327,7 @@ class OverpassClient(
         internal fun facilityName(kind: FacilityKind, name: String?, publicTransport: Boolean): String? =
             if (kind == FacilityKind.SHELTER && publicTransport) name ?: "バス停" else name
 
-        /** A busy town has a few hundred signals within 600m. */
+        /** A busy town has a few hundred signals within 600m ([FACILITY_RADIUS_M]). */
         private const val SIGNAL_LIMIT = 300
         private const val SHOP_LIMIT = 60
 

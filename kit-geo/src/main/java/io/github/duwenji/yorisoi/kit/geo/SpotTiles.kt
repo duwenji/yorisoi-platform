@@ -28,7 +28,7 @@ class SpotTiles(
 ) {
     private val base = baseUrl.trimEnd('/')
 
-    /** The tiles read last, so that a search every 300m doesn't read them from the disk again. */
+    /** The tiles read last, so that a search every 500m doesn't read them from the disk again. */
     private val memory = object : LinkedHashMap<String, Tile>(MEMORY_TILES, 0.75f, true) {
         override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Tile>) = size > MEMORY_TILES
     }
@@ -55,22 +55,22 @@ class SpotTiles(
         freshMs: Long,
         forceRefresh: Boolean = false,
     ): Found? {
-        val got = Geohash.covering(lat, lon, OverpassClient.RADIUS_M.toDouble(), PRECISION).flatMap { hash ->
+        val got = Geohash.covering(lat, lon, OverpassClient.SPOT_RADIUS_M.toDouble(), PRECISION).flatMap { hash ->
             layers(shops).map { layer -> tile(layer, hash, store, freshMs, forceRefresh).takeIf { it.tile != null } ?: return null }
         }
         val here = LatLon(lat, lon)
         val found = NearbyCollector()
         for (tile in got.mapNotNull { it.tile }) {
-            tile.spots.filter { distanceM(it, here) <= OverpassClient.RADIUS_M }.forEach(found::spot)
-            tile.shops.filter { OverpassClient.shopKindOf(it.tags) in shops && distanceM(it, here) <= OverpassClient.SHOP_RADIUS_M }.forEach(found::spot)
+            tile.spots.filter { it.distanceM(here) <= OverpassClient.SPOT_RADIUS_M }.forEach(found::spot)
+            tile.shops.filter { OverpassClient.shopKindOf(it.tags) in shops && it.distanceM(here) <= OverpassClient.SHOP_RADIUS_M }.forEach(found::spot)
             tile.facilities
                 .filter { it.kind in facilities }
-                .filter { RouteGeometry.distanceM(here, LatLon(it.lat, it.lon)) <= if (it.kind.near) OverpassClient.CLOSE_RADIUS_M else OverpassClient.RADIUS_M }
+                .filter { RouteGeometry.distanceM(here, LatLon(it.lat, it.lon)) <= if (it.kind.near) OverpassClient.CLOSE_RADIUS_M else OverpassClient.FACILITY_RADIUS_M }
                 .forEach(found::facility)
             if (signals) {
                 for (i in 0 until tile.signals.size - 1 step 2) {
                     val at = LatLon(tile.signals[i], tile.signals[i + 1])
-                    if (RouteGeometry.distanceM(here, at) <= OverpassClient.RADIUS_M) found.signal(at)
+                    if (RouteGeometry.distanceM(here, at) <= OverpassClient.FACILITY_RADIUS_M) found.signal(at)
                 }
             }
         }
@@ -89,7 +89,7 @@ class SpotTiles(
         max: Int,
     ): Pair<Int, Boolean> {
         var asked = 0
-        val hashes = points.flatMap { Geohash.covering(it.lat, it.lon, OverpassClient.RADIUS_M.toDouble(), PRECISION) }.distinct()
+        val hashes = points.flatMap { Geohash.covering(it.lat, it.lon, OverpassClient.SPOT_RADIUS_M.toDouble(), PRECISION) }.distinct()
         for (hash in hashes) {
             for (layer in layers(shops)) {
                 if (asked >= max) return asked to false
@@ -102,10 +102,6 @@ class SpotTiles(
     }
 
     private fun layers(shops: Set<SpotKind>) = if (shops.isEmpty()) listOf(BASE) else listOf(BASE, SHOPS)
-
-    /** A spot's distance: to its outline when it has one (as Overpass's `around` finds it), else to its point. */
-    private fun distanceM(spot: Poi, from: LatLon): Double =
-        spot.shape?.distanceM(from.lat, from.lon) ?: RouteGeometry.distanceM(from, LatLon(spot.lat, spot.lon))
 
     /** A tile read, or null; [asked] when the server answered just now, [failed] when it couldn't be asked. */
     private class Got(val tile: Tile?, val asked: Boolean, val failed: Boolean = false)
