@@ -18,6 +18,7 @@
 | [`kit-geo`](kit-geo/README.md) | Android | スポット・ルート・写真・天気・地図。運営のスポットのタイル、スポット検索のキャッシュ、よく通る道 |
 | `kit-mood` | Android | 雰囲気（時間帯・季節・空模様・場所）と、配色・絵・背景音。雰囲気がないときの配色は `kit-ui` の緑 |
 | [`kit-local-materials`](kit-local-materials/README.md) | Android | 区画ごとに運営から取る素材（スタジオ、一言）のアプリ側。組み込みの素材提供者 `builtin:studio`・`builtin:note`。近くのスタジオと一言を取って種類ごとに選ぶ（`LocalFeed`、`StudioProducer`・`NoteProducer`）、API-LOCAL-MATERIALS（`LocalClient`、トークンは運営の AI の中継から）、スタジオの音声（`ClipCache`・`ClipPlayer`）、一言を声で置く（`NoteRecognizer`）、設定（`LocalSettingsStore`） |
+| [`kit-songs`](kit-songs/README.md) | Android | 運営が配る季節の歌。一覧と音を取って端末に残す（`SongLibrary`）、季節・時間帯・天気で選ぶ、流す・止める（`SongPlayer`）。API-SONGS |
 
 コアは Android に依存しません。管理システムがアプリと同じコードで確かめるためです。
 
