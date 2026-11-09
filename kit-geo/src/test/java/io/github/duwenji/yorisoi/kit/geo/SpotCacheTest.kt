@@ -47,8 +47,8 @@ class SpotCacheTest {
         cache.put(35.0, 139.0, emptySet(), "cyclist", replaceWithinM = 150.0, facilities = cyclist)
         assertEquals("walker", cache.find(35.0, 139.0, emptySet(), 300.0, SpotCache.FRESH_MS, facilities = FacilityKind.WALK)?.body())
         assertEquals("cyclist", cache.find(35.0, 139.0, emptySet(), 300.0, SpotCache.FRESH_MS, facilities = cyclist)?.body())
-        // Kept before amenities could be chosen: the name has no amenities in it.
-        assertEquals(1, folder.root.resolve("spots").listFiles()!!.count { it.name.endsWith("_none.json") })
+        // A walker's answer has no amenities in its name, only the search's radius.
+        assertEquals(1, folder.root.resolve("spots").listFiles()!!.count { it.name.endsWith("_none+r1000.json") })
     }
 
     @Test

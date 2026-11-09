@@ -231,7 +231,8 @@ object StationValidator {
             lang = lang,
             greeting = json.string("greeting").also { checkLength("greeting", it, 1, 60) },
             talkLevel = talkLevel,
-            events = TalkEventKind.entries.filter { events.bool(it.json) }.toSet(),
+            events = TalkEventKind.entries.filter { if (it.required || events.optNullable(it.json) != null) events.bool(it.json) else true }
+                .let { if (TalkEventKind.CHAT in it) it else it - TalkEventKind.SONG }.toSet(),
             prefer = prefer,
             skip = skip,
             guideLength = guideLength,

@@ -195,7 +195,8 @@ class SpotRepository(
         var searches = 0
         for (center in centers) {
             if (searches >= maxSearches) break
-            if (cache.find(center.lat, center.lon, shops, REFETCH_DISTANCE_M, fresh, signals, facilityKinds) != null) continue
+            // The point before is [spacingM] away: only an answer nearer than half of that is this point's.
+            if (cache.find(center.lat, center.lon, shops, spacingM / 2, fresh, signals, facilityKinds) != null) continue
             if (searches > 0) delay(pauseMs)
             searches++
             val body = try {
@@ -237,15 +238,16 @@ class SpotRepository(
     }
 
     companion object {
-        private const val REFETCH_DISTANCE_M = 300.0
+        /** Spots are searched 1km around; a search every 500m keeps 500m ahead covered (REQ-NEARBY-TALK F-3). */
+        private const val REFETCH_DISTANCE_M = 500.0
 
         /** A new answer replaces the kept ones whose searches overlap it most. */
         private const val REPLACE_DISTANCE_M = 150.0
 
-        /** A kept answer searched 600m around its centre; past that it has nothing for here. */
-        private const val FALLBACK_DISTANCE_M = 600.0
+        /** A kept answer searched [OverpassClient.SPOT_RADIUS_M] around its centre; past that it has nothing for here. */
+        private const val FALLBACK_DISTANCE_M = OverpassClient.SPOT_RADIUS_M.toDouble()
 
-        /** Searches ahead of time along a way: a kept answer covers 300m around its centre, so 500m apart leaves no gap. */
+        /** Searches ahead of time along a way: a kept answer is used up to [REFETCH_DISTANCE_M] from its centre, so 500m apart leaves no gap. */
         const val PREFETCH_SPACING_M = 500.0
         const val PREFETCH_MAX_SEARCHES = 20
         const val PREFETCH_PAUSE_MS = 10_000L

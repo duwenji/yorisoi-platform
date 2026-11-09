@@ -25,6 +25,10 @@ data class Poi(
         return result[0]
     }
 
+    /** Distance in meters to the spot's edge or point, as Overpass's `around` finds it. */
+    internal fun distanceM(from: LatLon): Double =
+        shape?.distanceM(from.lat, from.lon) ?: RouteGeometry.distanceM(from, LatLon(lat, lon))
+
     /** Whether a distance from [distanceFrom] means the user is inside this spot's area. */
     fun isInside(distanceM: Number): Boolean = shape?.isArea == true && distanceM.toDouble() == 0.0
 

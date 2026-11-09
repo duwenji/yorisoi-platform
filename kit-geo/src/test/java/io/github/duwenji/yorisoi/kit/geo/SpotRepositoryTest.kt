@@ -90,8 +90,8 @@ class SpotRepositoryTest {
     fun `when every server fails, the nearest kept answer is shown`() {
         runBlocking { spots.search(35.0, 139.0) }
         up = false
-        // About 450m away: too far to use as it is, near enough to show.
-        searchFails(35.004, 139.0)
+        // About 670m away: too far to use as it is, near enough to show.
+        searchFails(35.006, 139.0)
         assertEquals(SpotSource.FALLBACK, spots.source)
         assertEquals(listOf("鶴岡八幡宮"), names())
     }
@@ -264,7 +264,7 @@ class SpotRepositoryTest {
         plain.search(35.0, 139.0)
         plain.search(35.001, 139.0)
         assertEquals(1, asked)
-        plain.search(35.004, 139.0)
+        plain.search(35.005, 139.0)
         assertEquals(2, asked)
         assertTrue(plain.spots.value.isNotEmpty())
     }

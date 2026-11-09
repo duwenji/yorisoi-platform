@@ -26,17 +26,18 @@ class OverpassFacilitiesTest {
 
     @Test
     fun `a cyclist's amenities are searched as asked, each kind with its own output`() {
+        // Amenities are searched no farther than 600m, however far the spots are.
         val query = client.query(35.0, 139.0, 800, emptySet(), facilities = cyclist)
         assertFalse(query.contains("bench"))
         assertFalse(query.contains("vending_machine"))
-        assertTrue(query.contains("""nwr(around:800,35.0,139.0)["amenity"="bicycle_parking"]"""))
-        assertTrue(query.contains("""nwr(around:800,35.0,139.0)["shop"="convenience"];""" + "\nout center 40;"))
-        assertTrue(query.contains("""nwr(around:800,35.0,139.0)["shop"="bicycle"];"""))
+        assertTrue(query.contains("""nwr(around:600,35.0,139.0)["amenity"="bicycle_parking"]"""))
+        assertTrue(query.contains("""nwr(around:600,35.0,139.0)["shop"="convenience"];""" + "\nout center 40;"))
+        assertTrue(query.contains("""nwr(around:600,35.0,139.0)["shop"="bicycle"];"""))
         // Two ways a pump is mapped, as one output.
         assertTrue(
             query.contains(
-                """(nwr(around:800,35.0,139.0)["amenity"="bicycle_repair_station"]["service:bicycle:pump"="yes"];""" +
-                    """nwr(around:800,35.0,139.0)["amenity"="compressed_air"]["access"!~"^(private|no)$"];);""" + "\nout center 40;",
+                """(nwr(around:600,35.0,139.0)["amenity"="bicycle_repair_station"]["service:bicycle:pump"="yes"];""" +
+                    """nwr(around:600,35.0,139.0)["amenity"="compressed_air"]["access"!~"^(private|no)$"];);""" + "\nout center 40;",
             ),
         )
         assertEquals(cyclist.size, Regex("out center 40;").findAll(query).count())

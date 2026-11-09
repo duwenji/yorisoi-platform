@@ -120,7 +120,9 @@ class SpotCache(
     private fun key(shops: Set<SpotKind>, signals: Boolean, facilities: Set<FacilityKind>): String =
         (if (shops.isEmpty()) "none" else shops.map { it.name }.sorted().joinToString("-")) +
             (if (signals) "+signals" else "") +
-            (if (facilities == FacilityKind.WALK) "" else "+" + facilities.map { it.name }.sorted().joinToString("-"))
+            (if (facilities == FacilityKind.WALK) "" else "+" + facilities.map { it.name }.sorted().joinToString("-")) +
+            // Answers kept from the narrower search of older versions aren't used (REQ-NEARBY-TALK F-1).
+            "+r${OverpassClient.SPOT_RADIUS_M}"
 
     companion object {
         /** Answers this new are used as they are, without asking Overpass. */

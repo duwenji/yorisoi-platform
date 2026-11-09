@@ -149,7 +149,7 @@ resources/                   パッケージに入れる素材（任意）
 | `requires.features` | string[] | 任意 | これがないアプリでは成り立たない機能。[機能](#機能requiresfeatures)から 0〜20 個。書かない機能は、アプリが実装していなければ使われないだけ |
 | `greeting` | string | ○ | 散歩中にこのチャンネルへ切り替えたとき、そのまま読み上げる一言。1〜60 文字。AI は使わない |
 | `talk.level` | string | ○ | `quiet`（控えめ）/ `normal`（ふつう）/ `chatty`（おしゃべり）。アプリの `TalkLevel` と同じ 3 段階 |
-| `talk.events` | object | ○ | 次の 6 つの出来事で話すか（真偽値、すべて必須）。`spot`（初めてのスポットの解説）・`revisit`（再訪の一言）・`milestone`（距離・時間の区切り）・`rest`（休憩）・`start`（開始のあいさつ）・`finish`（終了の振り返り）。天気の急変・日の入り・施設の案内は項目がなく、常に話す |
+| `talk.events` | object | ○ | 次の出来事で話すか（真偽値）。必須の 6 つ: `spot`（初めてのスポットの解説）・`revisit`（再訪の一言）・`milestone`（距離・時間の区切り）・`rest`（休憩）・`start`（開始のあいさつ）・`finish`（終了の振り返り）。任意の 3 つ（書かなければ真）: `preview`（少し先の見どころの予告）・`chat`（話すことがないときの雑談）・`song`（雑談の話題の 1 つとしての季節の歌。`chat` が偽なら出さない）（REQ-NEARBY-TALK）。天気の急変・日の入り・施設の案内は項目がなく、常に話す |
 | `spots.prefer` | string[] | ○（空でもよい） | 優先して話題にするスポットの種類（下表）。最大 8 個 |
 | `spots.skip` | string[] | ○（空でもよい） | 散策中に話題にしない種類。地図と一覧には出る。`prefer` と重ねない |
 | `guide.length` | string | ○ | スポット解説の長さ。`short`（100〜150 字）/ `normal`（200〜300 字）/ `long`（300〜450 字） |
@@ -235,6 +235,11 @@ ECOSYSTEM E-24 のとおり、実装するアプリを作ると決めた過ご�
 | `beach` | 海辺 | `natural=beach` |
 | `water` | 水辺 | `natural=water` |
 | `nature` | 自然 | そのほかの `natural=*`（木・山頂・湧き水） |
+| `station` | 駅 | `railway=station` |
+| `bridge` | 橋 | `man_made=bridge`、または `highway` のウェイで `bridge` が `no` でなく、名前が「橋」で終わる |
+| `slope` | 坂 | `highway` のウェイで名前が「坂」で終わる |
+| `library` | 図書館 | `amenity=library` |
+| `theatre` | 劇場 | `amenity=theatre` |
 | `restaurant` | 飲食店 | `amenity=restaurant` |
 | `cafe` | カフェ | `amenity=cafe` / `ice_cream` |
 | `sweets` | 菓子・パン | `shop=confectionery` / `pastry` / `bakery` / `chocolate` |

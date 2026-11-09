@@ -21,10 +21,10 @@ enum class SpotGroup(val label: String, val color: Color) {
         fun of(category: String): SpotGroup = when (SpotKind.entries.firstOrNull { it.category == category }) {
             SpotKind.SHRINE, SpotKind.TEMPLE, SpotKind.CHURCH, SpotKind.WORSHIP -> WORSHIP
             SpotKind.HISTORIC, SpotKind.ATTRACTION -> HISTORIC
-            SpotKind.MUSEUM, SpotKind.GALLERY, SpotKind.ARTWORK -> CULTURE
+            SpotKind.MUSEUM, SpotKind.GALLERY, SpotKind.ARTWORK, SpotKind.LIBRARY, SpotKind.THEATRE -> CULTURE
             SpotKind.VIEWPOINT, SpotKind.PARK, SpotKind.GARDEN, SpotKind.BEACH, SpotKind.WATER, SpotKind.NATURE -> NATURE
             SpotKind.RESTAURANT, SpotKind.CAFE, SpotKind.SWEETS, SpotKind.FOOD_SHOP, SpotKind.MARKET,
-            SpotKind.CRAFTS, SpotKind.SHOP, null -> OTHER
+            SpotKind.CRAFTS, SpotKind.SHOP, SpotKind.STATION, SpotKind.BRIDGE, SpotKind.SLOPE, null -> OTHER
         }
     }
 }

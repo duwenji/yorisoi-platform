@@ -44,9 +44,21 @@ internal inline fun <reified E> parseEnum(value: String): E? where E : Enum<E>, 
 /** Same three steps as the app's talk levels. */
 enum class TalkLevel(override val json: String) : JsonValue { QUIET("quiet"), NORMAL("normal"), CHATTY("chatty") }
 
-/** The events a channel may turn off; all six must be listed in `talk.events`. */
-enum class TalkEventKind(override val json: String) : JsonValue {
+/**
+ * The events a channel may turn off. The first six must be listed in `talk.events`; the [required]
+ * false ones may be left out, and are on then (REQ-NEARBY-TALK F-29).
+ */
+enum class TalkEventKind(override val json: String, val required: Boolean = true) : JsonValue {
     SPOT("spot"), REVISIT("revisit"), MILESTONE("milestone"), REST("rest"), START("start"), FINISH("finish"),
+
+    /** A spot a little ahead, told about before arriving. */
+    PREVIEW("preview", required = false),
+
+    /** A word between the other lines, when there's nothing else to say. */
+    CHAT("chat", required = false),
+
+    /** A season's song, as one of the chat's topics; off with [CHAT] too. */
+    SONG("song", required = false),
 }
 
 enum class GuideLength(override val json: String) : JsonValue { SHORT("short"), NORMAL("normal"), LONG("long") }
@@ -76,6 +88,11 @@ enum class SpotKind(override val json: String, val category: String, val onlyWhe
     BEACH("beach", "海辺"),
     WATER("water", "水辺"),
     NATURE("nature", "自然"),
+    STATION("station", "駅"),
+    BRIDGE("bridge", "橋"),
+    SLOPE("slope", "坂"),
+    LIBRARY("library", "図書館"),
+    THEATRE("theatre", "劇場"),
     RESTAURANT("restaurant", "飲食店", onlyWhenPreferred = true),
     CAFE("cafe", "カフェ", onlyWhenPreferred = true),
     SWEETS("sweets", "菓子・パン", onlyWhenPreferred = true),
