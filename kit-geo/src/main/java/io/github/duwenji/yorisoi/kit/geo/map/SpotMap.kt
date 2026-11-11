@@ -128,6 +128,8 @@ fun SpotMap(
             provider.onOsmFailing { post { tilesFailed() } }
             setMultiTouchControls(true)
             controller.setZoom(17.0)
+            // Starts where the user is, not at 0°N 0°E, which a first animateTo would fly from.
+            location?.let { controller.setCenter(GeoPoint(it.latitude, it.longitude)) }
             addMapListener(DelayedMapListener(object : MapListener {
                 override fun onScroll(event: ScrollEvent?): Boolean {
                     reportViewportOf(this@apply, reportViewport)
@@ -256,7 +258,11 @@ fun SpotMap(
             val last = centeredAt[0]
             val asked = recenterRequests != markers.recenterRequests
             markers.recenterRequests = recenterRequests
-            if (asked || last == null || last.distanceTo(location) > 150f) {
+            if (last == null) {
+                // The first fix is jumped to: a glide from wherever the map starts sweeps tiles across the screen.
+                map.controller.setCenter(GeoPoint(location.latitude, location.longitude))
+                centeredAt[0] = location
+            } else if (asked || last.distanceTo(location) > 150f) {
                 map.controller.animateTo(GeoPoint(location.latitude, location.longitude))
                 centeredAt[0] = location
             }
