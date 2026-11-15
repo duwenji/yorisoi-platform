@@ -115,6 +115,15 @@ val spots = SpotRepository(
 - 1 枚でもタイルが使えないとき（配信が止まっていて残ってもいない、範囲外の 404、読めないタイル）は、その検索は上の「検索のしかた」のとおり Overpass に問い合わせる。404 のタイルは、アプリが動いている間は問い合わせ直さない
 - 配信に送るのは URL（層とタイルの名前）・`If-None-Match`・`userAgent` だけ
 
+## スポットの情報（`SpotFacts`）と Wikidata
+
+タイルのスポットには、結び付いた Wikidata の項目の値（`Poi.wikidata`、`SpotWikidata`）が入っています（[REQ-WIKIDATA](../docs/requirements/REQ-WIKIDATA.md)）。Overpass から取ったスポットは `null` で、`Poi.fromTile` が `false` です。
+
+- `SpotFacts.of(poi)`: 解説シートと AI の手がかりに使う行。OSM のタグを先にし、OSM にない行だけを Wikidata の値（説明・種類・創建・文化財・創設者・設計・読み・Wikipedia・公式サイト）で埋める。Wikidata の種類のうち、スポットの種類（`Poi.category`）と同じものは出さない
+- `Poi.notability`: 日本語版 Wikipedia の記事（OSM の `wikipedia` タグか Wikidata）があれば 2、ほかの言語や Wikidata への結び付きだけなら 1。国の文化財の指定（OSM の `heritage` が 1・2、または Wikidata の国宝・重要文化財・史跡・名勝・天然記念物・世界遺産など）で 1、主要な種類で 1 を足す
+- `SpotPhotos`: 写真のファイルは OSM のタグ → Wikidata の画像の順に探す。タイルのスポットでは Wikidata に問い合わせない。Overpass から取ったスポットだけ、今までどおり項目の画像（P18）を問い合わせる
+- スポットを後のために残すアプリは、`SpotFacts.KEYS` のタグと `SpotWikidata.toJson()` を残し、`SpotWikidata.fromJson` で読み戻す
+
 ## 周りの見どころ（`NearbyHighlights`）
 
 要件は [REQ-NEARBY-TALK](../docs/requirements/REQ-NEARBY-TALK.md) F-6・F-7。取ったスポットから、AI に「周りに何があるか」として渡すものを選びます。

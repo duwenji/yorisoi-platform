@@ -10,8 +10,10 @@ data class SpotFact(val label: String, val value: String)
 data class SpotLink(val label: String, val url: String)
 
 /**
- * What a spot's OpenStreetMap tags say, in the user's words, for its card and sheet: there before
- * any guide is written, and without the AI. Values are rewritten to read naturally (`Tu-Su
+ * What a spot's map data says — its OpenStreetMap tags, and the values of its Wikidata item from
+ * the operator's tiles (platform REQ-WIKIDATA) — in the user's words, for its card and sheet and
+ * for the AI's guide: there before any guide is written, and without the AI. Each line takes the
+ * OSM tag first and Wikidata only where OSM has nothing (REQ-WIKIDATA D-4). Values are rewritten to read naturally (`Tu-Su
  * 09:00-16:30` → 「火〜日 9:00〜16:30」, `C13` → 「13世紀」); a value that can't be is shown as
  * it is, and one a Japanese reader can't read (an English description) is left out.
  *
@@ -29,7 +31,7 @@ data class SpotFacts(
     val isEmpty: Boolean get() = reading == null && details.isEmpty() && links.isEmpty()
 
     companion object {
-        /** The tags [of] reads; an app that keeps spots for later can keep only these. */
+        /** The tags [of] reads; an app that keeps spots for later can keep only these, with [Poi.wikidata]. */
         val KEYS = setOf(
             "name:ja-Hira", "name:ja_kana", "name:ja-Kana", "description:ja", "description",
             "religion", "denomination", "start_date", "historic:period", "heritage", "heritage:type",
@@ -37,28 +39,40 @@ data class SpotFacts(
             "inscription", "wikipedia", "website", "contact:website",
         )
 
-        fun of(tags: Map<String, String>): SpotFacts {
+        /** The spot's facts from its tags and its Wikidata values. */
+        fun of(poi: Poi): SpotFacts = of(poi.tags, poi.wikidata, poi.category)
+
+        /** [category] is the spot's kind as shown ([Poi.category]); a Wikidata kind that says the same is left out. */
+        fun of(tags: Map<String, String>, wikidata: SpotWikidata? = null, category: String? = null): SpotFacts {
+            val wd = wikidata
             val religion = religion(tags)
             val period = tags["historic:period"]?.let { PERIODS[it] }
-            val start = tags["start_date"]?.let(::startDate)
-            val heritage = heritage(tags)
+            val start = (tags["start_date"] ?: wd?.inception)?.let(::startDate)
+            val heritage = heritage(tags, wd)
+            val kinds = wd?.kinds.orEmpty().filter { it != category }.takeIf { it.isNotEmpty() }?.joinToString("・")
             val details = buildList {
-                description(tags)?.let { add(SpotFact("説明", it)) }
+                (description(tags) ?: wd?.description)?.let { add(SpotFact("説明", it)) }
+                kinds?.let { add(SpotFact("種類", it)) }
                 start?.let { add(SpotFact("創建・設置", it)) }
                 period?.let { add(SpotFact("時代", it)) }
                 religion?.let { add(SpotFact("宗教", it)) }
                 heritage?.let { add(SpotFact("文化財", it)) }
+                wd?.founders?.takeIf { it.isNotEmpty() }?.let { add(SpotFact("創設者", it.joinToString("・"))) }
                 tags["artist_name"]?.let { add(SpotFact("作者", list(it))) }
-                tags["architect"]?.let { add(SpotFact("設計", list(it))) }
+                (tags["architect"]?.let(::list) ?: wd?.architects?.takeIf { it.isNotEmpty() }?.joinToString("・"))
+                    ?.let { add(SpotFact("設計", it)) }
                 tags["opening_hours"]?.let { add(SpotFact("開いている時間", openingHours(it))) }
                 fee(tags)?.let { add(SpotFact("料金", it)) }
                 tags["inscription"]?.let { add(SpotFact("碑文", it.trim())) }
             }
             return SpotFacts(
-                reading = tags["name:ja-Hira"] ?: tags["name:ja_kana"] ?: tags["name:ja-Kana"],
+                reading = tags["name:ja-Hira"] ?: tags["name:ja_kana"] ?: tags["name:ja-Kana"] ?: wd?.reading,
                 summary = listOfNotNull(religion, period ?: start?.let { "創建 $it" }, heritage),
                 details = details,
-                links = listOfNotNull(wikipedia(tags["wikipedia"]), website(tags["website"] ?: tags["contact:website"])),
+                links = listOfNotNull(
+                    wikipedia(tags["wikipedia"]) ?: wd?.jawiki?.let { wikipedia("ja:$it") },
+                    website(tags["website"] ?: tags["contact:website"]) ?: website(wd?.website),
+                ),
             )
         }
 
@@ -89,10 +103,11 @@ data class SpotFacts(
             return v
         }
 
-        /** The kind of designation when given (国宝, 重要文化財...), else what the level says. */
-        private fun heritage(tags: Map<String, String>): String? {
+        /** The kind of designation when given (国宝, 重要文化財...) in OSM or else Wikidata, else what OSM's level says. */
+        private fun heritage(tags: Map<String, String>, wd: SpotWikidata?): String? {
+            tags["heritage:type"]?.takeIf { "heritage" in tags }?.let { return list(it) }
+            wd?.heritage?.takeIf { it.isNotEmpty() }?.let { return it.joinToString("・") }
             val level = tags["heritage"] ?: return null
-            tags["heritage:type"]?.let { return list(it) }
             return when (level.trim()) {
                 "1" -> "世界遺産"
                 "2" -> "国の指定"
