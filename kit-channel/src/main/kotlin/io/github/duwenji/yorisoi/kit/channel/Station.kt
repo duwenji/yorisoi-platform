@@ -1,5 +1,6 @@
 package io.github.duwenji.yorisoi.kit.channel
 
+import io.github.duwenji.yorisoi.core.format.CalendarKind
 import io.github.duwenji.yorisoi.core.format.GuideLength
 import io.github.duwenji.yorisoi.core.format.Slot
 import io.github.duwenji.yorisoi.core.format.SoundChoice
@@ -80,6 +81,10 @@ class Station(
 
     /** Kinds the spot search adds while this channel is in use (eating and shopping, only when preferred). */
     val searchedKinds: Set<SpotKind> get() = prefer.filter { it.onlyWhenPreferred }.toSet()
+
+    /** Calendar kinds to bring up first, and ones not to bring up (REQ-KOYOMI F-21, F-22). The user doesn't change these. */
+    val calendarPrefer: Set<CalendarKind> get() = manifest.calendarPrefer.toSet()
+    val calendarSkip: Set<CalendarKind> get() = manifest.calendarSkip.toSet()
 
     val guideLength: GuideLength get() = overrides.guideLength ?: manifest.guideLength
 

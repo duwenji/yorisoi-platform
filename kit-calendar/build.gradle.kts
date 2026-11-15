@@ -23,4 +23,6 @@ kotlin {
 dependencies {
     implementation(libs.astronomy)
     testImplementation(libs.junit)
+    // Only to check the channel format spells the kinds the same way (REQ-KOYOMI F-21).
+    testImplementation(project(":core-format"))
 }

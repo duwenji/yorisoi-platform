@@ -1,5 +1,6 @@
 package io.github.duwenji.yorisoi.kit.channel
 
+import io.github.duwenji.yorisoi.core.format.CalendarKind
 import io.github.duwenji.yorisoi.core.format.GuideLength
 import io.github.duwenji.yorisoi.core.format.Slot
 import io.github.duwenji.yorisoi.core.format.TalkLevel
@@ -23,6 +24,15 @@ class StationTest {
         assertEquals(listOf("standard", "quiet"), stations.map { it.id })
         assertEquals(listOf("builtin:standard@1", "builtin:quiet@2"), stations.map { it.key })
         assertTrue(stations.all { it.isBuiltIn })
+    }
+
+    @Test
+    fun `a channel's calendar kinds to put first and to leave out (REQ-KOYOMI F-21, F-22)`() {
+        assertEquals(setOf(CalendarKind.KOU), quiet.calendarPrefer)
+        assertEquals(setOf(CalendarKind.ROKUYOU), quiet.calendarSkip)
+        // A channel without calendar has none.
+        assertEquals(emptySet<CalendarKind>(), standard.calendarPrefer)
+        assertEquals(emptySet<CalendarKind>(), standard.calendarSkip)
     }
 
     @Test
