@@ -11,11 +11,27 @@ data class Poi(
     val tags: Map<String, String>,
     /** Outline for spots mapped as areas or lines; null for points. [lat]/[lon] is then its center. */
     val shape: Shape? = null,
+    /** Its Wikidata item's values, from the operator's tiles (platform REQ-WIKIDATA); null otherwise. */
+    val wikidata: SpotWikidata? = null,
+    /** Whether it came from the operator's tiles (not Overpass): then Wikidata isn't asked about it (REQ-WIKIDATA F-19). */
+    val fromTile: Boolean = false,
 ) {
-    /** Rough "worth talking about" score: well-documented places and major landmarks first. */
+    /**
+     * Rough "worth talking about" score (platform REQ-WIKIDATA F-20): a Japanese Wikipedia article
+     * 2 (a link to Wikipedia or Wikidata in other languages only 1), a national designation as
+     * heritage 1, a major kind 1.
+     */
     val notability: Int
-        get() = (if ("wikipedia" in tags || "wikidata" in tags) 2 else 0) +
-            (if (category in MAJOR_CATEGORIES) 1 else 0)
+        get() = documented() + (if (designated()) 1 else 0) + (if (category in MAJOR_CATEGORIES) 1 else 0)
+
+    private fun documented(): Int = when {
+        tags["wikipedia"]?.let { it.startsWith("ja:") || ':' !in it } == true || wikidata?.jawiki != null -> 2
+        "wikipedia" in tags || "wikidata" in tags -> 1
+        else -> 0
+    }
+
+    private fun designated(): Boolean =
+        tags["heritage"]?.trim() in setOf("1", "2") || wikidata?.heritage.orEmpty().any { it in NATIONAL_HERITAGE }
 
     /** Distance in meters to the spot's edge (0 when inside an area), or to its point. */
     fun distanceFrom(location: Location): Float {
@@ -34,5 +50,8 @@ data class Poi(
 
     private companion object {
         val MAJOR_CATEGORIES = setOf("神社", "寺院", "教会", "博物館", "名所", "展望スポット", "庭園")
+        val NATIONAL_HERITAGE = setOf(
+            "国宝", "重要文化財", "史跡", "特別史跡", "名勝", "特別名勝", "天然記念物", "特別天然記念物", "世界遺産",
+        )
     }
 }

@@ -45,6 +45,19 @@ object CommonsFile {
         }?.substringBefore('?')?.substringBefore('#')?.ifEmpty { null }
     }
 
+    /** Where a spot's photo can be found: a file named, its Wikidata item to ask, or nowhere. */
+    enum class Hint { FILE, ASK_WIKIDATA, NONE }
+
+    /** The file from the tags, else the tiles' Wikidata image (REQ-WIKIDATA F-19). */
+    fun fileOf(poi: Poi): String? = fromTags(poi.tags) ?: poi.wikidata?.image
+
+    /** A tile's spot names its file or has none; only a spot from Overpass has its item asked. */
+    fun hint(poi: Poi): Hint = when {
+        fileOf(poi) != null -> Hint.FILE
+        !poi.fromTile && wikidataId(poi.tags) != null -> Hint.ASK_WIKIDATA
+        else -> Hint.NONE
+    }
+
     /** "Q123" from the `wikidata` tag, if it looks like one. */
     fun wikidataId(tags: Map<String, String>): String? =
         tags["wikidata"]?.trim()?.takeIf { WIKIDATA_ID.matches(it) }
@@ -64,8 +77,9 @@ object CommonsFile {
 }
 
 /**
- * Photos of spots from Wikimedia Commons, found through the spot's tags (directly, or via its
- * Wikidata item's image, P18). Downloads a thumbnail only, keeps recent ones in memory and
+ * Photos of spots from Wikimedia Commons, found through the spot's tags, then its Wikidata image
+ * from the operator's tiles (platform REQ-WIKIDATA F-19). Only a spot that didn't come from the
+ * tiles (Overpass) has its Wikidata item asked for the image (P18). Downloads a thumbnail only, keeps recent ones in memory and
  * responses on disk, and — unless the user allows it — only on an unmetered network (Wi-Fi).
  */
 class SpotPhotos(private val context: Context) {
@@ -90,7 +104,7 @@ class SpotPhotos(private val context: Context) {
     suspend fun photoFor(poi: Poi): SpotPhoto? {
         memory.get(poi.id)?.let { return it.photo }
         val photo = try {
-            withContext(Dispatchers.IO) { find(poi.tags)?.let { fetch(it) } }
+            withContext(Dispatchers.IO) { find(poi)?.let { fetch(it) } }
         } catch (e: IOException) {
             Log.w(TAG, "Photo fetch failed for ${poi.id}", e)
             return null // Not remembered: a network error may pass.
@@ -102,11 +116,13 @@ class SpotPhotos(private val context: Context) {
         return photo
     }
 
-    fun hasPhotoHint(poi: Poi): Boolean =
-        CommonsFile.fromTags(poi.tags) != null || CommonsFile.wikidataId(poi.tags) != null
+    fun hasPhotoHint(poi: Poi): Boolean = CommonsFile.hint(poi) != CommonsFile.Hint.NONE
 
-    private fun find(tags: Map<String, String>): String? =
-        CommonsFile.fromTags(tags) ?: CommonsFile.wikidataId(tags)?.let(::imageOfItem)
+    private fun find(poi: Poi): String? = when (CommonsFile.hint(poi)) {
+        CommonsFile.Hint.FILE -> CommonsFile.fileOf(poi)
+        CommonsFile.Hint.ASK_WIKIDATA -> CommonsFile.wikidataId(poi.tags)?.let(::imageOfItem)
+        CommonsFile.Hint.NONE -> null
+    }
 
     /** The item's image (P18) on Wikidata. */
     private fun imageOfItem(id: String): String? {

@@ -229,7 +229,10 @@ class SpotTiles(
                     .filter { it.size >= 4 }
                 if (lines.isEmpty()) null else Shape(lines, s.getBoolean("area"))
             }
-            return Poi(e.getString("id"), name, e.getDouble("lat"), e.getDouble("lon"), OverpassClient.categoryOf(tags), tags, shape)
+            return Poi(
+                e.getString("id"), name, e.getDouble("lat"), e.getDouble("lon"), OverpassClient.categoryOf(tags), tags, shape,
+                wikidata = SpotWikidata.fromJson(e.optJSONObject("wikidata")), fromTile = true,
+            )
         }
 
         private fun JSONArray.objects() = (0 until length()).map(::getJSONObject)
