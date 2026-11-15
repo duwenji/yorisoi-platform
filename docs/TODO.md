@@ -21,6 +21,7 @@
 
 - [ ] 技術チュートリアルの追従
 - [ ] 本番の配信を作る時期を決める（API-SPOT-TILES 未決事項 No.2）
+- [ ] スポットの Wikidata の情報（[REQ-WIKIDATA](requirements/REQ-WIKIDATA.md)、草案）の承認。承認したら X-1（API-SPOT-TILES の変更とバッチ）から
 
 ## その場の素材（スタジオ・一言）
 
