@@ -17,6 +17,7 @@ anthropic = "2.34.0"
 tink = "1.23.0"
 json = "20240303"
 junit = "4.13.2"
+astronomy = "2.1.19"
 
 [libraries]
 compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
@@ -45,6 +46,7 @@ anthropic-java = { module = "com.anthropic:anthropic-java", version.ref = "anthr
 tink-android = { module = "com.google.crypto.tink:tink-android", version.ref = "tink" }
 json = { module = "org.json:json", version.ref = "json" }
 junit = { module = "junit:junit", version.ref = "junit" }
+astronomy = { module = "io.github.cosinekitty:astronomy", version.ref = "astronomy" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
