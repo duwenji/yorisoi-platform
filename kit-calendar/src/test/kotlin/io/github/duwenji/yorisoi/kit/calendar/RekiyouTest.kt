@@ -32,6 +32,16 @@ class RekiyouTest {
     }
 
     @Test
+    fun `the seasonal days reckoned by the Sun - 土用, 入梅, 半夏生 - of 2016-2027`() {
+        val theirs = table("sekki.tsv")
+        for (y in 2016..2027) {
+            for ((lon, what) in listOf(297.0 to "冬の土用", 27.0 to "春の土用", 117.0 to "夏の土用", 207.0 to "秋の土用", 80.0 to "入梅", 100.0 to "半夏生")) {
+                assertIn("$what $y", Astro.sunAt(lon, y), theirs.getValue(y))
+            }
+        }
+    }
+
+    @Test
     fun `the moon's quarters of 2016-2027`() {
         val theirs = table("phases.tsv")
         for (y in 2016..2027) {

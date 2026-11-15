@@ -16,6 +16,16 @@ class LunisolarTest {
     }
 
     @Test
+    fun `十三夜 of 2020-2027 is the 13th of the 9th month (一覧 by ベストカレンダー and others)`() {
+        val jusanya = listOf("2020-10-29", "2021-10-18", "2022-10-08", "2023-10-27", "2024-10-15", "2025-11-02",
+            "2026-10-23", "2027-10-12").map(LocalDate::parse)
+        for (d in jusanya) {
+            assertEquals("$d", LunarDate(9, 13, false), Lunisolar.of(d))
+            assertEquals(d, Lunisolar.dateOf(d.year, 9, 13))
+        }
+    }
+
+    @Test
     fun `a month without 中気 is the leap one of the month before (2025 閏6月, 2023 閏2月)`() {
         assertEquals(LunarDate(6, 8, true), Lunisolar.of(LocalDate.of(2025, 8, 1)))
         assertEquals(true, Lunisolar.of(LocalDate.of(2023, 4, 1)).leap)
