@@ -20,6 +20,9 @@ data class StationManifest(
     val guideLength: GuideLength,
     val moodTone: Boolean,
     val sound: SoundChoice,
+    /** Calendar kinds to bring up first, and ones not to bring up (`calendar.prefer`・`calendar.skip`; REQ-KOYOMI F-21, F-22). */
+    val calendarPrefer: List<CalendarKind> = emptyList(),
+    val calendarSkip: List<CalendarKind> = emptyList(),
     /** API-CHANNEL-PACKAGE: what the channel is for. */
     val activities: Set<Activity> = setOf(Activity.WALK),
     val genres: Set<Genre> = emptySet(),
@@ -59,12 +62,24 @@ enum class TalkEventKind(override val json: String, val required: Boolean = true
 
     /** A season's song, as one of the chat's topics; off with [CHAT] too. */
     SONG("song", required = false),
+
+    /** A word on the calendar (a solar term, a festival…), as one of the chat's topics; off with [CHAT] too (REQ-KOYOMI F-20). */
+    CALENDAR("calendar", required = false),
 }
 
 enum class GuideLength(override val json: String) : JsonValue { SHORT("short"), NORMAL("normal"), LONG("long") }
 
 enum class SoundChoice(override val json: String) : JsonValue {
     AUTO("auto"), RAIN("rain"), WAVES("waves"), WIND("wind"), BIRDS("birds"), INSECTS("insects"), TEMPLE("temple"),
+}
+
+/**
+ * The kinds of the calendar's facts a channel can put first or leave out (REQ-KOYOMI「暦の種類」,
+ * F-21, F-22). Spelled as kit-calendar's `KoyomiKind.json`; the app matches the two by that spelling.
+ */
+enum class CalendarKind(override val json: String) : JsonValue {
+    SEKKI("sekki"), KOU("kou"), ZASSETSU("zassetsu"), SEKKU("sekku"), LUNAR("lunar"),
+    HOLIDAY("holiday"), MOON("moon"), ROKUYOU("rokuyou"), KINENBI("kinenbi"), REGIONAL("regional"),
 }
 
 /**

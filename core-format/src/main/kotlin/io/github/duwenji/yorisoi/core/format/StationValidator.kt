@@ -220,6 +220,17 @@ object StationValidator {
         val talkLevel = talk.string("level").let { parseEnum<TalkLevel>(it) ?: unknown("talk.level", it, restricts = true) ?: TalkLevel.QUIET }
         val guideLength = json.obj("guide").string("length").let { parseEnum<GuideLength>(it) ?: unknown("guide.length", it, restricts = true) ?: GuideLength.SHORT }
         val sound = mood.string("sound").let { parseEnum<SoundChoice>(it) ?: unknown("mood.sound", it, restricts = false) ?: SoundChoice.AUTO }
+        // calendar (REQ-KOYOMI F-21〜F-23): optional; a kind the app doesn't know only drops out, as an
+        // app that doesn't know it never tells it, so leaving it out loosens nothing (G-5).
+        val calendar = json.optNullable("calendar")?.let { it as? JSONObject ?: reject(RejectCode.BAD_MANIFEST, "calendar is not an object") }
+        fun calendarKinds(key: String): List<CalendarKind> {
+            val written = (calendar?.optList(key) ?: emptyList()).strings("calendar.$key", RejectCode.BAD_MANIFEST).distinctOrReject("calendar.$key")
+            if (written.size > 10) reject(RejectCode.BAD_VALUE, "calendar.$key has ${written.size} kinds (max 10)")
+            return written.mapNotNull { parseEnum<CalendarKind>(it) ?: unknown("calendar.$key", it, restricts = false) }
+        }
+        val calendarPrefer = calendarKinds("prefer")
+        val calendarSkip = calendarKinds("skip")
+        (calendarPrefer intersect calendarSkip.toSet()).firstOrNull()?.let { reject(RejectCode.BAD_VALUE, "calendar ${it.json} is both preferred and skipped") }
 
         return StationManifest(
             format = format,
@@ -232,12 +243,14 @@ object StationValidator {
             greeting = json.string("greeting").also { checkLength("greeting", it, 1, 60) },
             talkLevel = talkLevel,
             events = TalkEventKind.entries.filter { if (it.required || events.optNullable(it.json) != null) events.bool(it.json) else true }
-                .let { if (TalkEventKind.CHAT in it) it else it - TalkEventKind.SONG }.toSet(),
+                .let { if (TalkEventKind.CHAT in it) it else it - TalkEventKind.SONG - TalkEventKind.CALENDAR }.toSet(),
             prefer = prefer,
             skip = skip,
             guideLength = guideLength,
             moodTone = mood.bool("tone"),
             sound = sound,
+            calendarPrefer = calendarPrefer,
+            calendarSkip = calendarSkip,
             activities = activities,
             genres = genres,
             requires = requires,
