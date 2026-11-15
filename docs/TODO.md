@@ -21,6 +21,7 @@
 
 - [ ] 技術チュートリアルの追従
 - [ ] 本番の配信を作る時期を決める（API-SPOT-TILES 未決事項 No.2）
+- [ ] スポットの Wikidata の情報（[REQ-WIKIDATA](requirements/REQ-WIKIDATA.md)）: バッチ（X-1）、kit-geo（X-2）、両アプリ（X-3・X-4）、技術チュートリアル（X-5）、実機の確認（X-6）
 
 ## その場の素材（スタジオ・一言）
 
