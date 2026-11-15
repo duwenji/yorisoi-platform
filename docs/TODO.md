@@ -19,7 +19,6 @@
 
 [API-SPOT-TILES](contracts/API-SPOT-TILES.md)。配信は開発用（yorisoi-console の `YorisoiSpotTiles-dev`）で、両アプリのリリース版も開発用を使っています。
 
-- [ ] 実機での確認: 散歩・走行の記録で、スポットの `source` が `tiles`・`kept_tiles` になり、空白や待ちが減ったこと
 - [ ] 技術チュートリアルの追従
 - [ ] 本番の配信を作る時期を決める（API-SPOT-TILES 未決事項 No.2）
 
@@ -27,8 +26,6 @@
 
 [REQ-STUDIO](requirements/REQ-STUDIO.md)・[REQ-NOTES](requirements/REQ-NOTES.md)・[MATERIALS](overview/materials.md)・[API-LOCAL-MATERIALS](contracts/API-LOCAL-MATERIALS.md)。サーバーは開発用（yorisoi-console の `YorisoiLocalMaterials-dev`）だけです。アプリ側の部品は [kit-local-materials](../kit-local-materials/README.md)。
 
-- [ ] 両アプリの内部テストへの送信と、実機での確認（声で一言を置く、スタジオの音声の再生、走行中の読み上げ、チャンネルのきっかけと省略形）
-- [ ] 実際の M4A で、スタジオの確認（Transcribe・運営の AI）から配信・アプリでの再生までを通しで確かめる
 - [ ] 本番の配備（中継の本番の後）。Play のデータ セーフティとコンテンツのレーティングを、各アプリの `docs/operations/play-console.md` のとおりに入れ直す（REQ-STUDIO・REQ-NOTES N-3）
 - [ ] 技術チュートリアルの追従
 
@@ -49,7 +46,6 @@
 要件は [REQ-FREQUENT-WAYS](requirements/REQ-FREQUENT-WAYS.md)。両アプリに入っている。
 
 - [ ] CycleGuide のプロンプト・パック 0.1.2 の公開（`prompts-v0.1.2`。前に話した見どころの見本 `ride-guide-again` が増える）と、yorisoi-console の validator の追従（今は 0.1.0）
-- [ ] 実機での確認: 3 回通った道がよく通る道になる、Overpass が混んでいる日にも前方の見どころが空白にならない、前の日に話した見どころを別の話で話す
 - [ ] 散策の見つけ方の値（300 m）を散歩の記録で確かめる（U-1）
 
 ## 位置に紐づく秘密メッセージ
