@@ -104,6 +104,54 @@ class StationValidatorTest {
         assertEquals(RejectCode.BAD_MANIFEST, rejected(files(manifest { getJSONObject("talk").getJSONObject("events").put("chat", "no") })))
     }
 
+    private fun ok(files: StationFiles, strictness: Strictness = Strictness.REVIEW) =
+        (StationValidator.check(files, StationOrigin.BUILT_IN, strictness = strictness) as StationCheck.Ok).station.manifest
+
+    private fun calendar(prefer: List<String> = emptyList(), skip: List<String> = emptyList()) =
+        manifest { put("calendar", JSONObject(mapOf("prefer" to JSONArray(prefer), "skip" to JSONArray(skip)))) }
+
+    @Test
+    fun `the calendar event is on unless a channel turns it off, and off with chat (REQ-KOYOMI F-20)`() {
+        assertTrue(TalkEventKind.CALENDAR in ok(files()).events)
+        val off = manifest { getJSONObject("talk").getJSONObject("events").put("calendar", false) }
+        assertTrue(TalkEventKind.CALENDAR !in ok(files(off)).events)
+        val noChat = manifest { getJSONObject("talk").getJSONObject("events").put("chat", false).put("calendar", true) }
+        assertTrue(TalkEventKind.CALENDAR !in ok(files(noChat)).events)
+    }
+
+    @Test
+    fun `a channel without calendar reads as before (REQ-KOYOMI F-24)`() {
+        val m = ok(files())
+        assertEquals(emptyList<CalendarKind>(), m.calendarPrefer)
+        assertEquals(emptyList<CalendarKind>(), m.calendarSkip)
+    }
+
+    @Test
+    fun `calendar kinds to put first and to leave out (REQ-KOYOMI F-21, F-22)`() {
+        val m = ok(files(calendar(prefer = listOf("kou", "sekki"), skip = listOf("rokuyou", "kinenbi"))))
+        assertEquals(listOf(CalendarKind.KOU, CalendarKind.SEKKI), m.calendarPrefer)
+        assertEquals(listOf(CalendarKind.ROKUYOU, CalendarKind.KINENBI), m.calendarSkip)
+        // Either may be left out.
+        assertEquals(listOf(CalendarKind.ROKUYOU), ok(files(manifest { put("calendar", JSONObject(mapOf("skip" to JSONArray(listOf("rokuyou"))))) })).calendarSkip)
+    }
+
+    @Test
+    fun `a calendar kind both preferred and skipped, repeated, unknown or misshapen is turned away in review (REQ-KOYOMI F-23)`() {
+        assertEquals(RejectCode.BAD_VALUE, rejected(files(calendar(prefer = listOf("kou"), skip = listOf("kou")))))
+        assertEquals(RejectCode.BAD_VALUE, rejected(files(calendar(skip = listOf("rokuyou", "rokuyou")))))
+        assertEquals(RejectCode.BAD_VALUE, rejected(files(calendar(skip = listOf("horoscope")))))
+        assertEquals(RejectCode.BAD_VALUE, rejected(files(calendar(prefer = CalendarKind.entries.map { it.json } + "sekki"))))
+        assertEquals(RejectCode.BAD_MANIFEST, rejected(files(manifest { put("calendar", JSONObject(mapOf("skip" to "rokuyou"))) })))
+        assertEquals(RejectCode.BAD_MANIFEST, rejected(files(manifest { put("calendar", "rokuyou") })))
+    }
+
+    @Test
+    fun `an app ignores a calendar kind it doesn't know and still uses the channel (G-5)`() {
+        val m = ok(files(calendar(skip = listOf("rokuyou", "horoscope"))), Strictness.APP)
+        assertEquals(listOf(CalendarKind.ROKUYOU), m.calendarSkip)
+        assertEquals(emptyList<String>(), m.unknownRestrictions)
+    }
+
     @Test
     fun `the spot kinds of stations, bridges, slopes, libraries and theatres can be preferred`() {
         val station = (StationValidator.check(files(manifest {
