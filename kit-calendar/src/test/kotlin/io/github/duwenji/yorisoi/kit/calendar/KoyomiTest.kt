@@ -72,6 +72,16 @@ class KoyomiTest {
     }
 
     @Test
+    fun `a day of a year not worked out yet comes quickly (N-3)`() {
+        // 2031 is used by no other test, so its terms, pentads, new moons and tables are all cold here.
+        val started = System.nanoTime()
+        Koyomi().on(LocalDate.of(2031, 6, 1))
+        val ms = (System.nanoTime() - started) / 1_000_000
+        // On a desktop JVM; a phone is several times slower, and N-3 asks 50 ms of it.
+        assertTrue("$ms ms", ms < 40)
+    }
+
+    @Test
     fun `a day is worked out once (F-8)`() {
         assertSame(koyomi.on(LocalDate.of(2026, 11, 15)), koyomi.on(LocalDate.of(2026, 11, 15)))
     }

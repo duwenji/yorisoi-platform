@@ -2,6 +2,7 @@ package io.github.duwenji.yorisoi.kit.calendar
 
 import io.github.cosinekitty.astronomy.Time
 import io.github.cosinekitty.astronomy.nextMoonQuarter
+import io.github.cosinekitty.astronomy.searchMoonPhase
 import io.github.cosinekitty.astronomy.searchMoonQuarter
 import io.github.cosinekitty.astronomy.searchSunLongitude
 import java.time.Duration
@@ -47,6 +48,18 @@ internal object Astro {
             after = after.plus(Duration.ofDays(30))
         }
         error("The Sun doesn't reach $lon° in $year")
+    }
+
+    /** The new moons from [from] until [until]: a quarter of the work of [moonQuarters]. */
+    fun newMoons(from: Instant, until: Instant): List<Instant> {
+        val out = mutableListOf<Instant>()
+        var after = from
+        while (true) {
+            val at = instant(searchMoonPhase(0.0, time(after), 40.0) ?: error("No new moon within 40 days of $after"))
+            if (!at.isBefore(until)) return out
+            out += at
+            after = at.plus(Duration.ofDays(20))
+        }
     }
 
     /** The Moon's quarters (0 new, 1 first, 2 full, 3 last) from [from] until [until]. */

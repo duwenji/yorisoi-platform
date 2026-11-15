@@ -16,7 +16,6 @@ data class LunarDate(val month: Int, val day: Int, val leap: Boolean)
 object Lunisolar {
     private val CHUKI_MONTH = mapOf(330 to 1, 0 to 2, 30 to 3, 60 to 4, 90 to 5, 120 to 6, 150 to 7, 180 to 8, 210 to 9, 240 to 10, 270 to 11, 300 to 12)
     private val newMoons = ConcurrentHashMap<Int, List<LocalDate>>()
-    private val byLunar = ConcurrentHashMap<Int, Map<LunarDate, LocalDate>>()
 
     fun of(date: LocalDate): LunarDate {
         val starts = (date.year - 1..date.year + 1).flatMap(::newMoonsOf)
@@ -25,14 +24,24 @@ object Lunisolar {
         return LunarDate(month, ChronoUnit.DAYS.between(starts[k], date).toInt() + 1, leap)
     }
 
-    /** The day of [year] (Gregorian) that is the [day] of the [month] (not a leap one), or null. */
-    fun dateOf(year: Int, month: Int, day: Int): LocalDate? = byLunar.getOrPut(year) {
-        generateSequence(LocalDate.of(year, 1, 1)) { it.plusDays(1) }.takeWhile { it.year == year }
-            .associateBy(::of).filterKeys { !it.leap }
-    }[LunarDate(month, day, false)]
+    /**
+     * The first day of [year] (Gregorian) that is the [day] of the [month] (not a leap one), or null.
+     * Found from the months' first days, not day by day. A lunar date can fall twice in a Gregorian
+     * year (months 11 and 12); the earlier is given.
+     */
+    fun dateOf(year: Int, month: Int, day: Int): LocalDate? {
+        val starts = (year - 1..year + 1).flatMap(::newMoonsOf)
+        for (k in 1 until starts.size - 1) {
+            val (m, leap) = monthOf(starts, k)
+            if (leap || m != month) continue
+            val d = starts[k].plusDays(day - 1L)
+            if (d.year == year && d.isBefore(starts[k + 1])) return d
+        }
+        return null
+    }
 
     private fun newMoonsOf(year: Int): List<LocalDate> = newMoons.getOrPut(year) {
-        Astro.moonQuarters(Astro.startOf(year), Astro.startOf(year + 1)).filter { it.first == 0 }.map { Astro.dateOf(it.second) }
+        Astro.newMoons(Astro.startOf(year), Astro.startOf(year + 1)).map(Astro::dateOf)
     }
 
     private fun monthOf(starts: List<LocalDate>, k: Int): Pair<Int, Boolean> {
