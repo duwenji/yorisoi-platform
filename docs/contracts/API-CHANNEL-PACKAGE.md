@@ -263,7 +263,7 @@ ECOSYSTEM E-24 のとおり、実装するアプリを作ると決めた過ご�
 
 ### 暦の種類
 
-`calendar.prefer`・`calendar.skip` に書ける値（REQ-KOYOMI「暦の種類」）。値を足すのは `core-format` のマイナー版。
+`calendar.prefer`・`calendar.skip` に書ける値（REQ-KOYOMI「暦の種類」）。値を足すのは `core-format` のマイナー版。値を足すときは、新しい種類の事実だけにし、今ある種類の事実を新しい種類へ移さない（移すと、新しい種類を知らない古いアプリはその事実を今の種類として話し続け、`skip` が効かなくなる。移すときは `format` を上げる）。
 
 | 値 | 種類 |
 |---|---|
@@ -639,6 +639,7 @@ API-CHANNEL-LIST の `package_rejected` の詳細の理由。審査用の道具�
 - スロットを足すのは互換性のある変更（知らないアプリは `unexpected_file` で拒むので、同じく必要な版で案内する）
 - 素材の種類・見せ方・きっかけの種類は形式ですべて定める。アプリが対応していない種類を使うチャンネルは `unsupported_resource` で拒み、そのアプリの一覧には出ない（API-CHANNEL-LIST の必要な版で案内する）。管理システムは、使っている種類から必要な版を自動で決める
 - 見せ方の安全の決まり（F-8）を緩める変更は、互換性のある変更として扱わない。審査基準と本書の版を上げてから行う
+- 暦の雑談（`talk.events.calendar`。REQ-KOYOMI）は、`calendar.prefer`・`calendar.skip` を読める `core-format`（2.33.0 以降）のアプリだけが出す。それより前の `core-format` のアプリは暦の雑談を出さないので、`calendar` を書いたチャンネルをそのアプリの一覧に出しても制限は緩まず、必要な版（API-CHANNEL-LIST P-20）を上げなくてよい。チャンネル提供者には、暦の設定が効くアプリの版を案内する（REQ-KOYOMI F-24）
 - `source` だけの `present` は、素材集に対応していないアプリでは素材の参照がないとして拒まれる（`bad_cue`）。管理システムは、`collections`・`source` を使うチャンネルの必要な版を、素材集に対応したアプリの版にする
 
 ## 制約
