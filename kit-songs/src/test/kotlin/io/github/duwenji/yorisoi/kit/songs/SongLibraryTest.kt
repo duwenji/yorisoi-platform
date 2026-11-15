@@ -125,6 +125,22 @@ class SongLibraryTest {
     }
 
     @Test
+    fun `fetching ahead stops between songs when asked, as when a walk starts (AS-1)`() = runBlocking {
+        val lib = library()
+        lib.refresh()
+        requests.clear()
+        // A walk starts once the first sound is in.
+        assertEquals(1, lib.prefetch(stop = { requests.isNotEmpty() }))
+        assertEquals(1, requests.size)
+        // Asked to stop before the first: nothing is fetched.
+        requests.clear()
+        assertEquals(0, lib.prefetch(stop = { true }))
+        assertTrue(requests.isEmpty())
+        // Not stopped: the rest come in (autumn's other, winter's and all seasons').
+        assertEquals(3, lib.prefetch())
+    }
+
+    @Test
     fun `a song is picked from the kept ones of the season, fitting the time of day first, not played lately (AS-4)`() = runBlocking {
         val lib = library()
         lib.refresh()

@@ -17,7 +17,7 @@ val player = SongPlayer(context)
 
 // 散歩・走行をしていないときに（WorkManager など）
 songs.refresh()                 // 1 日 1 回だけ問い合わせる（ETag つき）
-if (unmetered) songs.prefetch() // 今の季節・次の季節・通年の音を取る（sha256 を確かめる。合わせて 10 MB まで）
+if (unmetered) songs.prefetch(stop = { walking }) // 今の季節・次の季節・通年の音を取る（sha256 を確かめる。合わせて 10 MB まで）。散歩・走行が始まったら、次の曲の前でやめる
 
 // 散歩・走行の始まり
 songs.startWalk()
@@ -34,7 +34,7 @@ if (file != null && player.mayPlay()) {
 player.stop()
 ```
 
-- `refresh`・`prefetch` は、呼ばれたときにだけ通信します。散歩・走行の最中には呼ばないでください（AS-1）
+- `refresh`・`prefetch` は、呼ばれたときにだけ通信します。散歩・走行の最中には呼ばないでください（AS-1）。`prefetch` の途中で散歩・走行が始まったときは、`stop` が真を返せば次の曲の前でやめます（取り終えた曲は残ります）
 - 送るのは URL と `User-Agent`・`If-None-Match` だけです。位置は送りません
 - `pick` は、端末に音がある曲だけから選びます。季節が合う曲（通年を含む）のうち、時間帯・天気が合うもの、今の季節だけのものを先にし、同じくらいなら無作為に選びます
 - `SongPlayer.mayPlay` は、ほかのアプリが音楽を流しているときと通話中は偽です（F-26）。流している間は音声フォーカスを取り（`GAIN_TRANSIENT_MAY_DUCK`）、ほかの音は小さくなります

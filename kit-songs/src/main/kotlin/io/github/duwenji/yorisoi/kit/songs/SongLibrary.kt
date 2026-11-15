@@ -77,14 +77,18 @@ class SongLibrary(
      * Fetches the sounds of this season, the next and all seasons that aren't kept yet (AS-2), keeping
      * only those whose hash matches, then trims to [MAX_TOTAL_BYTES] (AS-3). The app calls it on an
      * unmetered network only. Returns how many it fetched.
+     *
+     * [stop] is asked before each sound: true (a walk or ride has started, AS-1) ends the fetching
+     * there, keeping the sounds already in.
      */
-    suspend fun prefetch(): Int = lock.withLock {
+    suspend fun prefetch(stop: () -> Boolean = { false }): Int = lock.withLock {
         withContext(Dispatchers.IO) {
             val songs = catalog?.songs ?: return@withContext 0
             val season = SongSeason.now(now())
             val wanted = setOf(season, SongSeason.next(season), "all")
             var fetched = 0
             for (song in songs.filter { it.seasons.any(wanted::contains) && fileOf(it) == null }) {
+                if (stop()) break
                 if (fetch(song)) fetched++
             }
             trim(wanted)
