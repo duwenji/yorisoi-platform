@@ -10,6 +10,11 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        // Astronomy Engine is only on JitPack; nothing else is taken from there (REQ-KOYOMI D-1).
+        exclusiveContent {
+            forRepository { maven("https://jitpack.io") }
+            filter { includeGroup("io.github.cosinekitty") }
+        }
     }
 }
 rootProject.name = "yorisoi-platform"
@@ -27,3 +32,4 @@ include(":kit-companion")
 include(":kit-channel")
 include(":kit-local-materials")
 include(":kit-songs")
+include(":kit-calendar")
