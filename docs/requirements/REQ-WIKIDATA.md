@@ -7,7 +7,7 @@
 | ドキュメント種別 | 要件定義書 |
 | 対象システム/機能 | スポットに結び付いた Wikidata の項目の情報を、スポットのタイルに入れて、解説シートの表示・AI の手がかり・写真・名の知れたスポットの判定に使う。platform kit-geo・API-SPOT-TILES、yorisoi-console（スポットのタイルのバッチ）、yorisoi-sanpoguide、yorisoi-cycleguide |
 | 承認者 | 開発者（duwenji） |
-| ステータス | 草案 |
+| ステータス | 承認済（2026-11-15） |
 
 ## 目的・背景
 
