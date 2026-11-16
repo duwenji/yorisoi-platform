@@ -318,7 +318,7 @@ sequenceDiagram
 | `summary` | 文字列 | | 概要、なければ説明の先頭。120 字まで |
 | `conditions` | 文字列 | | 開催条件・開始日時特記事項（例: `雨天中止`）。80 字まで |
 | `url` | 文字列 | | 催しの頁（`http`・`https`） |
-| `source` | オブジェクト | ○ | `publisher`（自治体名）・`dataset`（データセットの頁の URL）・`license`（`CC-BY-4.0`・`CC-BY-2.1-JP`・`CC0-1.0`・`PDL-1.0`） |
+| `source` | オブジェクト | ○ | `publisher`（自治体名）・`dataset`（データセットの頁の URL）・`license`（`CC-BY-4.0`・`CC-BY-2.1-JP`・`CC-BY`（版の書かれていない CC BY）・`CC0-1.0`・`PDL-1.0`） |
 
 値がない項目は置かない（空の文字列を置かない）。催しは `startDate`・`name` の順に並べる。どの行を残し、位置をどう求めるかは REQ-LOCAL-EVENTS F-7〜F-16・F-20 に従う。
 
