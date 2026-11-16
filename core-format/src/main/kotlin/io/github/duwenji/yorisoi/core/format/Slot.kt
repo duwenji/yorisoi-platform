@@ -29,7 +29,7 @@ enum class Slot(val path: String, val maxChars: Int) {
             // A first visit is narrated by the guide prompt, whose slots cover it.
             TalkEventKind.SPOT -> null
             // These use the topics slot and the shared rules; no slot of their own (REQ-NEARBY-TALK F-30).
-            TalkEventKind.PREVIEW, TalkEventKind.CHAT, TalkEventKind.SONG, TalkEventKind.CALENDAR -> null
+            TalkEventKind.PREVIEW, TalkEventKind.CHAT, TalkEventKind.SONG, TalkEventKind.CALENDAR, TalkEventKind.LOCAL_EVENT -> null
         }
     }
 }

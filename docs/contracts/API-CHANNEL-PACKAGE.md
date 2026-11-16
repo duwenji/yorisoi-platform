@@ -149,7 +149,7 @@ resources/                   パッケージに入れる素材（任意）
 | `requires.features` | string[] | 任意 | これがないアプリでは成り立たない機能。[機能](#機能requiresfeatures)から 0〜20 個。書かない機能は、アプリが実装していなければ使われないだけ |
 | `greeting` | string | ○ | 散歩中にこのチャンネルへ切り替えたとき、そのまま読み上げる一言。1〜60 文字。AI は使わない |
 | `talk.level` | string | ○ | `quiet`（控えめ）/ `normal`（ふつう）/ `chatty`（おしゃべり）。アプリの `TalkLevel` と同じ 3 段階 |
-| `talk.events` | object | ○ | 次の出来事で話すか（真偽値）。必須の 6 つ: `spot`（初めてのスポットの解説）・`revisit`（再訪の一言）・`milestone`（距離・時間の区切り）・`rest`（休憩）・`start`（開始のあいさつ）・`finish`（終了の振り返り）。任意の 4 つ（書かなければ真）: `preview`（少し先の見どころの予告）・`chat`（話すことがないときの雑談）・`song`（雑談の話題の 1 つとしての季節の歌。`chat` が偽なら出さない）（REQ-NEARBY-TALK）・`calendar`（雑談の話題の 1 つとしての暦。`chat` が偽なら出さない）（REQ-KOYOMI）。天気の急変・日の入り・施設の案内は項目がなく、常に話す |
+| `talk.events` | object | ○ | 次の出来事で話すか（真偽値）。必須の 6 つ: `spot`（初めてのスポットの解説）・`revisit`（再訪の一言）・`milestone`（距離・時間の区切り）・`rest`（休憩）・`start`（開始のあいさつ）・`finish`（終了の振り返り）。任意の 5 つ（書かなければ真）: `preview`（少し先の見どころの予告）・`chat`（話すことがないときの雑談）・`song`（雑談の話題の 1 つとしての季節の歌。`chat` が偽なら出さない）（REQ-NEARBY-TALK）・`calendar`（雑談の話題の 1 つとしての暦。`chat` が偽なら出さない）（REQ-KOYOMI）・`localEvent`（近くで今日ある地域の催し。雑談の話題と予告に使い、`chat` が偽なら雑談で、`preview` が偽なら予告で話さない）（REQ-LOCAL-EVENTS）。天気の急変・日の入り・施設の案内は項目がなく、常に話す |
 | `spots.prefer` | string[] | ○（空でもよい） | 優先して話題にするスポットの種類（下表）。最大 8 個 |
 | `spots.skip` | string[] | ○（空でもよい） | 散策中に話題にしない種類。地図と一覧には出る。`prefer` と重ねない |
 | `calendar.prefer` | string[] | 任意 | 暦の雑談で先に話す暦の種類（[暦の種類](#暦の種類)）。0〜10 個（REQ-KOYOMI F-22） |
@@ -629,6 +629,7 @@ API-CHANNEL-LIST の `package_rejected` の詳細の理由。審査用の道具�
 | V-27 | アプリ: 知らない値をどう扱っても、天気の急変・日の入り・施設の案内と共通の指示はなくならない（V-08・V-09） |
 | V-28 | `calendar.prefer`・`calendar.skip` に同じ種類・知らない種類・11 個以上を書いたチャンネルを、審査で拒む（`bad_value`）。アプリは知らない種類だけを無視してチャンネルを使う |
 | V-29 | `talk.events.chat` が偽のチャンネルでは、`calendar` が真でも暦の雑談を出さない |
+| V-30 | `talk.events.localEvent` が偽のチャンネルでは、近くの催しを雑談でも予告でも話さない。`chat` が偽なら雑談で、`preview` が偽なら予告で話さない。`localEvent` を書かないチャンネルでは、両方で話す |
 
 ## 互換性方針・移行メモ
 
@@ -640,6 +641,7 @@ API-CHANNEL-LIST の `package_rejected` の詳細の理由。審査用の道具�
 - 素材の種類・見せ方・きっかけの種類は形式ですべて定める。アプリが対応していない種類を使うチャンネルは `unsupported_resource` で拒み、そのアプリの一覧には出ない（API-CHANNEL-LIST の必要な版で案内する）。管理システムは、使っている種類から必要な版を自動で決める
 - 見せ方の安全の決まり（F-8）を緩める変更は、互換性のある変更として扱わない。審査基準と本書の版を上げてから行う
 - 暦の雑談（`talk.events.calendar`。REQ-KOYOMI）は、`calendar.prefer`・`calendar.skip` を読める `core-format`（2.33.0 以降）のアプリだけが出す。それより前の `core-format` のアプリは暦の雑談を出さないので、`calendar` を書いたチャンネルをそのアプリの一覧に出しても制限は緩まず、必要な版（API-CHANNEL-LIST P-20）を上げなくてよい。チャンネル提供者には、暦の設定が効くアプリの版を案内する（REQ-KOYOMI F-24）
+- 近くの催し（`talk.events.localEvent`。REQ-LOCAL-EVENTS）は、`localEvent` を読める `core-format`（2.36.0 以降）のアプリだけが話す。それより前のアプリは催しを話さないので、`localEvent` を書いたチャンネルを古いアプリの一覧に出しても制限は緩まず、必要な版（API-CHANNEL-LIST P-20）を上げなくてよい
 - `source` だけの `present` は、素材集に対応していないアプリでは素材の参照がないとして拒まれる（`bad_cue`）。管理システムは、`collections`・`source` を使うチャンネルの必要な版を、素材集に対応したアプリの版にする
 
 ## 制約
