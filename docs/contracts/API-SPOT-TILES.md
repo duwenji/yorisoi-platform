@@ -115,7 +115,7 @@ flowchart LR
 | ST-7 | 送るもの | アプリが送るのは、URL（層とタイルの番号）・`If-None-Match`・アプリ名と版の `User-Agent` だけ。クエリ文字列・インストール ID・位置は送らない。配信はアクセスログを残さない |
 | ST-8 | ライセンス | 各タイルに `license`（`ODbL-1.0`）と `attribution`（`© OpenStreetMap contributors`）を入れる。基点に `LICENSE.txt`（ODbL 1.0 で配っていること、出典、もとのデータの取得元と日時）を置く。`events` の中身のライセンスは ST-12 |
 | ST-10 | Wikidata の値 | スポットに、結び付いた Wikidata の項目から決めた値を任意の項目 `wikidata` として入れる（[Wikidata の値](#wikidata-の値)）。OSM のタグ（`tags`）には混ぜない。バッチは週 1 回、版の番号が変わった項目だけを取り直す（REQ-WIKIDATA F-6〜F-8） |
-| ST-11 | 催しの層 | `events` には、そのタイルに位置がある地域の催しのうち、作った日から 14 日先までに開かれるものを入れる（[催しの層](#催しの層)）。催しのないタイルは置かず、前の週にあって今週なくなったタイルは消す（404） |
+| ST-11 | 催しの層 | `events` には、そのタイルに位置がある地域の催しのうち、作った日から 30 日先までに開かれるものを入れる（[催しの層](#催しの層)）。催しのないタイルは置かず、前の週にあって今週なくなったタイルは消す（404） |
 | ST-12 | 催しのライセンス | `events` のタイルも、データベースとしては ODbL 1.0 で配る（催しの位置に OSM のスポットの位置を使うことがあるため）。各催しの中身（名前・概要など）は、出どころの自治体のライセンス（CC BY 4.0・PDL1.0 など）のままとし、催しごとの `source` に自治体名・データセットの頁・ライセンスを入れる。`LICENSE.txt` に、使ったデータセットの一覧と、運営が選び、位置を求め、形を変えたことを書く（REQ-LOCAL-EVENTS F-19） |
 | ST-9 | 形式の置き場所 | タイルを読むのはアプリだけなので、読み込みは `kit-geo` に置き、core-format には置かない。機械可読な形は JSON Schema [`api/spot-tile.schema.json`](api/spot-tile.schema.json) とし、バッチは書き出したタイルをこれで確かめる |
 
@@ -298,7 +298,7 @@ sequenceDiagram
 | 項目 | 型 | 内容 |
 |---|---|---|
 | `eventsFrom` | 文字列 | 入れた催しの期間の初め。作った日（日本時間の `YYYY-MM-DD`） |
-| `eventsUntil` | 文字列 | 入れた催しの期間の終わり。`eventsFrom` の 14 日後 |
+| `eventsUntil` | 文字列 | 入れた催しの期間の終わり。`eventsFrom` の 30 日後 |
 | `events` | 配列 | 催し（下の表）。1 件以上 |
 
 `osmTimestamp` は、催しの位置をスポットと突き合わせたときの OSM データの時刻（同じバッチの `base` と同じ）。
@@ -335,7 +335,7 @@ sequenceDiagram
   "license": "ODbL-1.0",
   "attribution": "© OpenStreetMap contributors",
   "eventsFrom": "2026-11-18",
-  "eventsUntil": "2026-12-02",
+  "eventsUntil": "2026-12-18",
   "events": [
     {
       "id": "462144:h:3f9a0c21b7d4e815",
