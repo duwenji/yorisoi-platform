@@ -65,6 +65,13 @@ enum class TalkEventKind(override val json: String, val required: Boolean = true
 
     /** A word on the calendar (a solar term, a festival…), as one of the chat's topics; off with [CHAT] too (REQ-KOYOMI F-20). */
     CALENDAR("calendar", required = false),
+
+    /**
+     * A local event near by today (REQ-LOCAL-EVENTS F-25), told as a chat topic and in a preview.
+     * Unlike [SONG] and [CALENDAR] it stays on when [CHAT] is off, as the preview still uses it;
+     * the app asks for [CHAT] or [PREVIEW] as well.
+     */
+    LOCAL_EVENT("localEvent", required = false),
 }
 
 enum class GuideLength(override val json: String) : JsonValue { SHORT("short"), NORMAL("normal"), LONG("long") }

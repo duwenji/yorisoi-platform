@@ -111,6 +111,16 @@ class StationValidatorTest {
         manifest { put("calendar", JSONObject(mapOf("prefer" to JSONArray(prefer), "skip" to JSONArray(skip)))) }
 
     @Test
+    fun `the local event is on unless a channel turns it off, and stays on without chat for the preview (REQ-LOCAL-EVENTS F-25)`() {
+        assertTrue(TalkEventKind.LOCAL_EVENT in ok(files()).events)
+        val off = manifest { getJSONObject("talk").getJSONObject("events").put("localEvent", false) }
+        assertTrue(TalkEventKind.LOCAL_EVENT !in ok(files(off)).events)
+        val noChat = manifest { getJSONObject("talk").getJSONObject("events").put("chat", false) }
+        assertTrue(TalkEventKind.LOCAL_EVENT in ok(files(noChat)).events)
+        assertEquals(RejectCode.BAD_MANIFEST, rejected(files(manifest { getJSONObject("talk").getJSONObject("events").put("localEvent", "yes") })))
+    }
+
+    @Test
     fun `the calendar event is on unless a channel turns it off, and off with chat (REQ-KOYOMI F-20)`() {
         assertTrue(TalkEventKind.CALENDAR in ok(files()).events)
         val off = manifest { getJSONObject("talk").getJSONObject("events").put("calendar", false) }

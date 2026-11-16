@@ -10,7 +10,7 @@
 | 承認者 | 開発者 |
 | ステータス | 承認済 |
 
-本書は、運営が作るスポットのタイルの置き場所・形式・取り方を定めます。タイルを作るバッチと配信の AWS の構成は、yorisoi-console の文書で定めます。
+本書は、運営が作るスポットのタイルの置き場所・形式・取り方を定めます。タイルには、地域の催し（[REQ-LOCAL-EVENTS](../requirements/REQ-LOCAL-EVENTS.md)）の層も含みます。タイルを作るバッチと配信の AWS の構成は、yorisoi-console の文書で定めます。
 
 ## 目的・背景
 
@@ -20,12 +20,14 @@ API-SPOT-TILES で、アプリはスポット・施設・お店・信号を、�
 2. どの OSM の要素を、どの形で入れるか（今の `OverpassClient` と同じ答えになるように）
 3. 取り直し（ETag）と、取れないときのアプリの動き
 4. 互換性とライセンスの表示
+5. 地域の催しの層（`events`）の形と取り方
 
 ## スコープ・非スコープ
 
 スコープ:
 - タイルの URL・層・JSON の形・HTTP の応答
 - 抜き出しの条件と、位置・輪郭の作り方
+- 地域の催しの層の形と、アプリの取り方
 - アプリの取り方・残し方・予備の Overpass に戻る条件
 - 互換性の方針
 
@@ -33,6 +35,7 @@ API-SPOT-TILES で、アプリはスポット・施設・お店・信号を、�
 - バッチと配信の AWS の構成・配備・警報（yorisoi-console の文書）
 - スポットの種類の表示名や、話す判断での使い方（今と同じく `kit-geo`・`kit-companion` で決める）
 - スポットの写真（`SpotPhotos`）
+- 催しの探し方・選び方・位置の求め方の細かい決まり（REQ-LOCAL-EVENTS F-1〜F-16。本書は結果の形だけを定める）と、話す判断（REQ-LOCAL-EVENTS F-24〜F-31）
 
 ## 対応元ID（トレーサビリティ）
 
@@ -48,6 +51,7 @@ API-SPOT-TILES で、アプリはスポット・施設・お店・信号を、�
 | API-SPOT-TILES S-12 | 運営に届くのはタイルの番号だけ | ST-7 |
 | API-SPOT-TILES S-13 | ODbL 1.0 と出典 | ST-8 |
 | REQ-WIKIDATA F-1〜F-9 | スポットの Wikidata の項目の値 | ST-10・[Wikidata の値](#wikidata-の値) |
+| REQ-LOCAL-EVENTS D-4・D-5・D-13、F-17〜F-20・F-23 | 地域の催しの層 | ST-11・ST-12・[催しの層](#催しの層)・AP-9〜AP-12 |
 
 ## スポットのタイルの方針
 
@@ -103,14 +107,16 @@ flowchart LR
 | No. | 論点 | 決定 |
 |---|---|---|
 | ST-1 | 接続先 | 配信の基点の URL はアプリに組み込む。デバッグ版は開発用の配信を使う。リリース版は本番用の配信を使い、本番用ができるまでは開発用を使う。アプリ利用者には設定させない |
-| ST-2 | 層 | `base`（スポット・施設・信号）と `shops`（お店）。どちらも同じタイルの番号で置く |
-| ST-3 | 範囲 | Geofabrik の日本の抽出の範囲（`japan.poly`）に少しでもかかるタイルは、中身が空でもすべて置く。範囲にかからないタイルは置かない（404） |
-| ST-4 | 新しさ | 週に 1 回作り直す。作り直したタイルは、遅くとも 1 時間で配信に反映される |
+| ST-2 | 層 | `base`（スポット・施設・信号）・`shops`（お店）・`events`（地域の催し）。どれも同じタイルの番号で置く |
+| ST-3 | 範囲 | `base`・`shops` は、Geofabrik の日本の抽出の範囲（`japan.poly`）に少しでもかかるタイルを、中身が空でもすべて置く。範囲にかからないタイルは置かない（404）。`events` は、催しのあるタイルだけ置く（ST-11） |
+| ST-4 | 新しさ | 週に 1 回作り直す。3 つの層を同じバッチで作る（REQ-LOCAL-EVENTS D-13）。作り直したタイルは、遅くとも 1 時間で配信に反映される |
 | ST-5 | 取り直し | URL は版を含まない。中身（時刻を除く）が変わったタイルだけを置き直すので、それ以外のタイルの `ETag` は変わらない。アプリは残っているタイルの `ETag` を `If-None-Match` で送り、変わっていなければ 304 を受ける |
 | ST-6 | 圧縮 | タイルは gzip で置き、`Content-Encoding: gzip` で返す。アプリの HTTP クライアントが展開する |
 | ST-7 | 送るもの | アプリが送るのは、URL（層とタイルの番号）・`If-None-Match`・アプリ名と版の `User-Agent` だけ。クエリ文字列・インストール ID・位置は送らない。配信はアクセスログを残さない |
-| ST-8 | ライセンス | 各タイルに `license`（`ODbL-1.0`）と `attribution`（`© OpenStreetMap contributors`）を入れる。基点に `LICENSE.txt`（ODbL 1.0 で配っていること、出典、もとのデータの取得元と日時）を置く |
+| ST-8 | ライセンス | 各タイルに `license`（`ODbL-1.0`）と `attribution`（`© OpenStreetMap contributors`）を入れる。基点に `LICENSE.txt`（ODbL 1.0 で配っていること、出典、もとのデータの取得元と日時）を置く。`events` の中身のライセンスは ST-12 |
 | ST-10 | Wikidata の値 | スポットに、結び付いた Wikidata の項目から決めた値を任意の項目 `wikidata` として入れる（[Wikidata の値](#wikidata-の値)）。OSM のタグ（`tags`）には混ぜない。バッチは週 1 回、版の番号が変わった項目だけを取り直す（REQ-WIKIDATA F-6〜F-8） |
+| ST-11 | 催しの層 | `events` には、そのタイルに位置がある地域の催しのうち、作った日から 14 日先までに開かれるものを入れる（[催しの層](#催しの層)）。催しのないタイルは置かず、前の週にあって今週なくなったタイルは消す（404） |
+| ST-12 | 催しのライセンス | `events` のタイルも、データベースとしては ODbL 1.0 で配る（催しの位置に OSM のスポットの位置を使うことがあるため）。各催しの中身（名前・概要など）は、出どころの自治体のライセンス（CC BY 4.0・PDL1.0 など）のままとし、催しごとの `source` に自治体名・データセットの頁・ライセンスを入れる。`LICENSE.txt` に、使ったデータセットの一覧と、運営が選び、位置を求め、形を変えたことを書く（REQ-LOCAL-EVENTS F-19） |
 | ST-9 | 形式の置き場所 | タイルを読むのはアプリだけなので、読み込みは `kit-geo` に置き、core-format には置かない。機械可読な形は JSON Schema [`api/spot-tile.schema.json`](api/spot-tile.schema.json) とし、バッチは書き出したタイルをこれで確かめる |
 
 ```mermaid
@@ -143,6 +149,7 @@ sequenceDiagram
 |---|---|---|
 | GET | `{base}/v1/base/{geohash}.json` | 基本の層 |
 | GET | `{base}/v1/shops/{geohash}.json` | お店の層 |
+| GET | `{base}/v1/events/{geohash}.json` | 地域の催しの層 |
 | GET | `{base}/LICENSE.txt` | ライセンスと出典 |
 
 `{geohash}` は geohash の 5 桁（小文字、`0-9b-hjkmnp-z`）。
@@ -151,7 +158,7 @@ sequenceDiagram
 
 ### URL と層
 
-アプリは、チャンネルが店の種類を探すとき（`searchedKinds` が空でないとき）だけ `shops` を取る。`base` はいつも取る。
+アプリは、チャンネルが店の種類を探すとき（`searchedKinds` が空でないとき）だけ `shops` を取る。`events` は、近くの催しを話すとき（AP-9）だけ取る。`base` はいつも取る。
 
 ### HTTP の応答
 
@@ -159,7 +166,7 @@ sequenceDiagram
 |---|---|---|
 | 200 | タイル。`ETag`・`Content-Encoding: gzip`・`Content-Type: application/json` | 使い、`ETag` と取った時刻と一緒に残す |
 | 304 | `If-None-Match` のタイルから変わっていない | 残っているタイルを使い、取った時刻を新しくする |
-| 404 | 範囲外のタイル（ST-3） | 残っているそのタイルを消す。その検索は Overpass に問い合わせる |
+| 404 | `base`・`shops`: 範囲外のタイル（ST-3）。`events`: 催しのないタイル（ST-11） | 残っているそのタイルを消す。`base`・`shops` は、その検索を Overpass に問い合わせる。`events` は、そのタイルに催しがないものとする |
 | その他（5xx・通信の失敗・10 秒の時間切れ） | 取れない | 残っていれば古くても（90 日まで）使う。なければ Overpass に問い合わせる |
 
 配信は、範囲外のタイルに 404 を返す（403 を返さない）。
@@ -174,7 +181,7 @@ sequenceDiagram
 |---|---|---|
 | `format` | 文字列 | `yorisoi-spot-tile` |
 | `version` | 整数 | `1`。互換の変更（項目を足す）では上げない |
-| `layer` | 文字列 | `base` か `shops` |
+| `layer` | 文字列 | `base`・`shops`・`events` |
 | `tile` | 文字列 | geohash の 5 桁 |
 | `osmTimestamp` | 文字列 | タイルの中身を作った OSM データの時刻（ISO 8601、UTC）。中身が変わらない週は作り直さないので、中身が最後に変わった週のもの |
 | `generatedAt` | 文字列 | タイルを作った時刻（ISO 8601、UTC）。`osmTimestamp` と同じく、中身が最後に変わった週のもの |
@@ -214,6 +221,8 @@ sequenceDiagram
 | `lat`・`lon` | 数値 | 位置 |
 | `name` | 文字列 | `name:ja`、なければ `name`。どちらもなければ項目を置かない |
 | `publicTransport` | 真偽 | `SHELTER` で `shelter_type=public_transport` のとき `true`。それ以外は項目を置かない |
+
+`events` の層: [催しの層](#催しの層)
 
 例（`base`、一部）:
 
@@ -279,6 +288,68 @@ sequenceDiagram
   "heritage": ["史跡"],
   "jawiki": "鶴岡八幡宮",
   "image": "Tsurugaoka Hachimangu Kamakura.jpg"
+}
+```
+
+### 催しの層
+
+`events` の層の項目（共通の項目に加えて）:
+
+| 項目 | 型 | 内容 |
+|---|---|---|
+| `eventsFrom` | 文字列 | 入れた催しの期間の初め。作った日（日本時間の `YYYY-MM-DD`） |
+| `eventsUntil` | 文字列 | 入れた催しの期間の終わり。`eventsFrom` の 14 日後 |
+| `events` | 配列 | 催し（下の表）。1 件以上 |
+
+`osmTimestamp` は、催しの位置をスポットと突き合わせたときの OSM データの時刻（同じバッチの `base` と同じ）。
+
+催し:
+
+| 項目 | 型 | 必須 | 内容 |
+|---|---|---|---|
+| `id` | 文字列 | ○ | `{団体コード 6 桁}:{行の ID}`。行の ID がなければ `{団体コード}:h:{名前・開始日・位置から作った 16 桁の 16 進}`。週をまたいで同じ催しは同じ `id` |
+| `name` | 文字列 | ○ | イベント名 |
+| `startDate`・`endDate` | 文字列 | ○ | 日本時間の `YYYY-MM-DD`。1 日だけなら同じ値 |
+| `startTime`・`endTime` | 文字列 | | 日本時間の `HH:MM`。分からなければ置かない |
+| `venue` | 文字列 | ○ | 場所名称 |
+| `lat`・`lon` | 数値 | ○ | 位置。小数 5 桁。`precision` が `area` なら町字の代表点 |
+| `precision` | 文字列 | ○ | `point`（会場の地点）か `area`（町のあたり） |
+| `area` | 文字列 | | `precision` が `area` のとき必須。町字の名前（例: `垂水市本町`） |
+| `summary` | 文字列 | | 概要、なければ説明の先頭。120 字まで |
+| `conditions` | 文字列 | | 開催条件・開始日時特記事項（例: `雨天中止`）。80 字まで |
+| `url` | 文字列 | | 催しの頁（`http`・`https`） |
+| `source` | オブジェクト | ○ | `publisher`（自治体名）・`dataset`（データセットの頁の URL）・`license`（`CC-BY-4.0`・`CC-BY-2.1-JP`・`CC0-1.0`・`PDL-1.0`） |
+
+値がない項目は置かない（空の文字列を置かない）。催しは `startDate`・`name` の順に並べる。どの行を残し、位置をどう求めるかは REQ-LOCAL-EVENTS F-7〜F-16・F-20 に従う。
+
+例（`events`）:
+
+```json
+{
+  "format": "yorisoi-spot-tile",
+  "version": 1,
+  "layer": "events",
+  "tile": "wvsgq",
+  "osmTimestamp": "2026-11-17T20:21:03Z",
+  "generatedAt": "2026-11-18T03:40:12Z",
+  "license": "ODbL-1.0",
+  "attribution": "© OpenStreetMap contributors",
+  "eventsFrom": "2026-11-18",
+  "eventsUntil": "2026-12-02",
+  "events": [
+    {
+      "id": "462144:h:3f9a0c21b7d4e815",
+      "name": "たるみず千本イチョウ祭り",
+      "startDate": "2026-11-28",
+      "endDate": "2026-12-06",
+      "venue": "垂水千本イチョウ",
+      "lat": 31.52811,
+      "lon": 130.72042,
+      "precision": "point",
+      "url": "https://www.city.tarumizu.lg.jp/kanko/koi/miryoku/meisho/senbon.html",
+      "source": { "publisher": "鹿児島県垂水市", "dataset": "https://data.bodik.jp/dataset/7b0056f5-0a24-462d-a546-bc20f84ce459", "license": "CC-BY-4.0" }
+    }
+  ]
 }
 ```
 
@@ -353,6 +424,10 @@ sequenceDiagram
 | AP-6 | よく通る道の先読み（REQ-FREQUENT-WAYS F-6）は、道から 1,000m 以内にかかるタイルのうち、新しいものが残っていないタイルを取る。間を空けなくてよい |
 | AP-7 | 1 つでもタイルが使えないとき（AP-1 の円にかかるタイルのうち、取れず残ってもいないものがあるとき）は、その検索は今と同じく Overpass に問い合わせる |
 | AP-8 | 知らない項目・知らない `kind` は無視する。`format` が違う、`version` が 1 でない、JSON として読めないタイルは、取れなかったものとして扱う |
+| AP-9 | `events` は、チャンネルの `talk.events.localEvent` が真で、雑談（`chat`）か予告（`preview`）のどちらかが真のときだけ取る（REQ-LOCAL-EVENTS F-25）。取るタイルは AP-1 と同じ（1,000m の円にかかる 1〜4 枚） |
+| AP-10 | 残し方・取り直しは AP-4・AP-5 と同じ。ただし、今日が `eventsUntil` を過ぎたタイルは使わない |
+| AP-11 | `events` が取れず残ってもいないときは、近くの催しがないものとして続ける。Overpass には問い合わせない |
+| AP-12 | 近くの催しを選ぶときは、端末で今日の日付と時刻、距離（1,000m）で絞る（REQ-LOCAL-EVENTS F-24）。`source` の値は AI に渡し、記録に残す |
 
 ## エラー表
 
@@ -376,11 +451,15 @@ sequenceDiagram
 | CK-7 | バッチの書き出したタイルが `spot-tile.schema.json` に合う |
 | CK-8 | アプリの要求にクエリ文字列・インストール ID・位置が入らない |
 | CK-9 | `wikidata` が[Wikidata の値](#wikidata-の値)の確かめに通った項目のものだけで、空の値を持たない |
+| CK-10 | `events` のタイルが `spot-tile.schema.json` に合い、`eventsFrom` から `eventsUntil` までに開かれる催しだけを持ち、すべての催しに `source` がある |
+| CK-11 | 催しのなくなったタイルが消され（404）、アプリが残っていたそのタイルを消す |
+| CK-12 | `talk.events.localEvent` が偽のチャンネルでは `events` を取らない。`events` が取れなくても、`base` の検索は今と同じに動く |
 
 ## 互換性方針・移行メモ
 
 - パスは `/v1`、タイルの `version` は `1`。項目を足すこと、施設の `kind` を足すこと（`FacilityKind` に種類を足すとき）は互換の変更とし、アプリは知らないものを無視する
 - 抜き出しの条件を広げること（スポットやお店の種類を足す）、`wikidata` に項目を足すことは互換の変更とする。アプリは自分が知る条件で分け、合わない要素を使わない
+- `events` の層を足すこと、催しに項目を足すこと、`source.license` に値を足すことは互換の変更とする。古いアプリは `events` を取らない。アプリは知らない `license` の値の催しも使う（ライセンスは運営がバッチで確かめている）
 - 項目の削除・意味の変更・タイルの単位の変更は `/v2` で行い、`/v1` は古いアプリが残る間置き続ける（期間は運営が決める）
 - 移行: `kit-geo` がタイルを読めるようになるまでは、アプリは今のまま Overpass を使う。タイルを読めるアプリでも、タイルが取れなければ Overpass に戻るので、配信を作る前に出してよい
 
@@ -415,6 +494,7 @@ sequenceDiagram
 - [API-SPOT-TILES](API-SPOT-TILES.md)
 - [API-CHANNEL-PACKAGE](API-CHANNEL-PACKAGE.md)（店の種類）
 - [REQ-FREQUENT-WAYS](../requirements/REQ-FREQUENT-WAYS.md)（F-6）
+- [REQ-LOCAL-EVENTS](../requirements/REQ-LOCAL-EVENTS.md)（地域の催し）
 - [`api/spot-tile.schema.json`](api/spot-tile.schema.json)
 - [geohash](https://en.wikipedia.org/wiki/Geohash)
 - [OpenStreetMap の著作権とライセンス](https://www.openstreetmap.org/copyright)
