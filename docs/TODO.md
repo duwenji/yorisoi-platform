@@ -22,7 +22,7 @@
 - [ ] 技術チュートリアルの追従
 - [ ] 本番の配信を作る時期を決める（API-SPOT-TILES 未決事項 No.2）
 - [ ] スポットの Wikidata の情報（[REQ-WIKIDATA](requirements/REQ-WIKIDATA.md)）: バッチ（X-1）、kit-geo（X-2）、両アプリ（X-3・X-4）、技術チュートリアル（X-5）、実機の確認（X-6）
-- [ ] 地域の催し（[REQ-LOCAL-EVENTS](requirements/REQ-LOCAL-EVENTS.md)）: 契約（X-1）、バッチ（X-2）、部品（X-3）、両アプリ（X-4・X-5）、文書と実機（X-6）
+- [ ] 地域の催し（[REQ-LOCAL-EVENTS](requirements/REQ-LOCAL-EVENTS.md)）: 開発用への配備（X-2）、両アプリ（X-4・X-5）、文書と実機（X-6）。部品は kit-geo の `LocalEvents`
 
 ## その場の素材（スタジオ・一言）
 

@@ -211,6 +211,19 @@ class SpotRepository(
         return searches
     }
 
+    /**
+     * The local events from the operator's tiles around [at], by default the search centre of the
+     * last location (REQ-LOCAL-EVENTS F-23, API-SPOT-TILES AP-9〜AP-11): kept and asked about again
+     * as the spot tiles are, following [useCache] and [freshMs]. Empty without [tiles] or a
+     * location, and when the tiles can't be had. Call it only when the channel talks of local
+     * events (`talk.events.localEvent`, and chat or preview); pick from it with [LocalEvents.nearby].
+     */
+    suspend fun localEvents(at: LatLon? = null): List<LocalEvent> {
+        val tiles = tiles ?: return emptyList()
+        val center = at ?: _location.value?.let(searchCenter) ?: return emptyList()
+        return tiles.events(center.lat, center.lon, cache?.takeIf { useCache() }?.tiles, freshMs().coerceIn(0L, SpotCache.MAX_AGE_MS))
+    }
+
     /** Shows the nearest kept answer that still covers the point, if any. */
     private fun showFallback(cache: SpotCache, lat: Double, lon: Double, shops: Set<SpotKind>) {
         cache.find(lat, lon, shops, FALLBACK_DISTANCE_M, SpotCache.MAX_AGE_MS, signals, facilityKinds)?.let { show(it, SpotSource.FALLBACK) }

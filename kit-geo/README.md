@@ -132,6 +132,18 @@ val spots = SpotRepository(
 - 1 件は `NearbyHighlight`: スポット・距離（50m 単位。50m より近くても 50m）・方角（8 方位: 北・北東・…）・進む向きから見た側（`relativeDirection`: 前方・右手・左手・後ろ。`headingDeg` がなければ null）
 - 距離は、輪郭のあるスポットは輪郭まで、ないものは点まで
 
+## 近くの催し（`LocalEvents`）
+
+要件は [REQ-LOCAL-EVENTS](../docs/requirements/REQ-LOCAL-EVENTS.md) F-23〜F-27・F-30。運営のタイルの `events` の層（[API-SPOT-TILES](../docs/contracts/API-SPOT-TILES.md) の「催しの層」）から、自治体のオープンデータの催しを取り、話すものを選びます。
+
+- `SpotRepository.localEvents(at)`: `at`（省略すると最後の位置の検索の中心。CycleGuide なら前方の点）から 1,000m の円にかかるタイル（1〜4 枚）の催し（`LocalEvent`）。チャンネルが近くの催しを話すとき（`talk.events.localEvent` が真で、雑談か予告が真）だけ呼ぶ（AP-9）。`tiles` がなければ空
+- 取り方・残し方はほかの層と同じ（`freshMs`・`useCache`・ETag・90 日）。404 は「そのタイルに催しがない」で、範囲外ではない。端末には残さず、アプリが動いている間だけ覚えて、`freshMs` を過ぎたら問い合わせ直す
+- `eventsUntil` を過ぎたタイル（週のバッチが止まった）は使わない。1 時間に 1 回まで問い合わせ直す。取れなければ催しはないものとして続け、Overpass には問い合わせない（AP-11）
+- 読めない催し（必須の値がない、`area` なのに町字の名前がない、日付が読めない）は除く。タイルの形や `eventsUntil` が読めなければ、タイルごと取れなかったものとする
+- `LocalEvents.nearby(events, here, nowMs, headingDeg, exclude)`: 今日開かれている（日本の日付。終了時刻があればまだ終わっていない。終了時刻が開始時刻より前なら終了時刻はないものとする）1,000m 以内の催しを近い順に。`exclude` は今回の散歩・走行で話した催しの `id`
+- 1 件は `NearbyLocalEvent`: 催し・距離（50m 単位）・方角（8 方位）・進む向きから見た側（`relativeDirection`）。`precision` が `AREA` の催しは方角と側が null（AI は町の名前だけを言う）
+- `LocalEvents.ahead(events, here, headingDeg, nowMs, exclude)`: 予告用。前方（`relativeDirection` が前方）300m 以内の、`precision` が `POINT` の今日の催しのうち、いちばん近いもの
+
 ## よく通る道
 
 要件は [REQ-FREQUENT-WAYS](../docs/requirements/REQ-FREQUENT-WAYS.md)。散歩や走行で何度も通る道を見つけて残し、その道のスポットを前もって取っておきます。
