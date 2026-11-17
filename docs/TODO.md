@@ -62,6 +62,16 @@
 - 公開メッセージの不適切な投稿への対策（通報・削除）。一言の仕組み（通報・自動で隠す・締め出し・置けない区画）を使えるか、MATERIALS U-2 とあわせて決める
 - 私有地・危険な場所に置かせない配慮
 
+## 3 秒ごとの Tick
+
+判定を 3 秒ごとにし、オンエアが空いたらチャンネルの `tick` のきっかけ（`idle` を一本化）の素材、なければ雑談・季節の歌を出す（REQ-NEARBY-TALK D-19・D-20・F-14・F-35、REQ-KOYOMI F-42、API-CHANNEL-PACKAGE「語りの合間のきっかけ」）。両アプリ。
+
+- X-1: core-format の `tick`・`idle` の読み替え・`gapMin`・`tick` で使える素材の検査、kit-channel のきっかけの照合（platform）
+- X-2: validator とチャンネルの編集画面（yorisoi-console）
+- X-3: 3 秒の Tick、オンエア、空いたときの順番、雑談と歌の条件、記録（yorisoi-sanpoguide）
+- X-4: X-3 と同じ。信号の近く・速いときに黙る条件は残す（yorisoi-cycleguide）
+- X-5: 各アプリの設計・手引き、console の手順書、yorisoi-tutorial の追従
+
 ## 共通の検討事項
 
 - **収益化**: 広告、有料プラン、提携。既存の広告 SDK は、位置情報を外部に送らない方針（API-CHANNEL-PACKAGE F-10）と合わないので使わない方向。だれに何を提供し、だれが費用を持つかは[提供価値と事業の検討](overview/value-proposition.md)で検討中

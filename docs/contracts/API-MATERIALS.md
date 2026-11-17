@@ -168,11 +168,11 @@ interface Producer {
 | `builtin:commons-photo` | `SpotPhotos` | スポットの写真（`image`、幅 800px） | `spot` | `onDemand` / `subject` / false | なし |
 | `builtin:ambient` | `Soundscape`・`AmbientPlayer` | 合成の背景音（`audio`、ループ） | `none` | `local` / `none` / false | `sound`（`auto`・`rain`・`waves`・`wind`・`birds`・`insects`・`temple`） |
 | `builtin:mood-scene` | `MoodScene` | 雰囲気の絵（`image`、`content=render`） | `none` | `local` / `none` / false | なし |
-| `builtin:studio` | kit-local-materials の `StudioProducer` | スタジオ（`text`。音声があれば読み上げの後に続けて流す） | `event`（`idle`）・`spot`・`point` | `area` / `area` / false、`verbatim=true` | `categories`（[スタジオの分類](#スタジオの分類)を 1〜9 個。省略はすべて）、`prelude`（[前置き](#前置き)） |
-| `builtin:note` | kit-local-materials の `NoteProducer` | 一言（`text`） | `event`（`idle`）・`spot`・`point` | `area` / `area` / false、`verbatim=true` | `prelude`（[前置き](#前置き)） |
+| `builtin:studio` | kit-local-materials の `StudioProducer` | スタジオ（`text`。音声があれば読み上げの後に続けて流す） | `event`（`tick`）・`spot`・`point` | `area` / `area` / false、`verbatim=true` | `categories`（[スタジオの分類](#スタジオの分類)を 1〜9 個。省略はすべて）、`prelude`（[前置き](#前置き)） |
+| `builtin:note` | kit-local-materials の `NoteProducer` | 一言（`text`） | `event`（`tick`）・`spot`・`point` | `area` / `area` / false、`verbatim=true` | `prelude`（[前置き](#前置き)） |
 
 - 組み込みの素材提供者を足すのはアプリの更新だけ（MATERIALS D-6）。足したら本表に加え、本書の版を上げる
-- `builtin:studio`・`builtin:note` は、チャンネル提供者が 1 件ずつではなく条件で選ぶ素材（MATERIALS D-50）。`spot`・`point` のきっかけでは、その題材の区画にあるものから選び、AI の解説の後に出す。`idle` では、端末がいる区画とその周りから選ぶ。どれを選ぶか（近さ・期限・いいね）は REQ-STUDIO F-9・REQ-NOTES F-9 のとおり
+- `builtin:studio`・`builtin:note` は、チャンネル提供者が 1 件ずつではなく条件で選ぶ素材（MATERIALS D-50）。`spot`・`point` のきっかけでは、その題材の区画にあるものから選び、AI の解説の後に出す。`tick` では、端末がいる区画とその周りから選ぶ。どれを選ぶか（近さ・期限・いいね）は REQ-STUDIO F-9・REQ-NOTES F-9 のとおり
 - 出どころの紹介は、`builtin:studio` は「（素材提供者の名前）からのお知らせです。」、`builtin:note` は「（スポットの名前があれば「〇〇のそばで、」）この辺りを通った人の一言です。」
 - `builtin:studio` は、自分（チャンネル提供者と同じアカウント）が出したスタジオだけを選ぶ指示を受け付けない（チャンネル提供者がスタジオの出し先を握らないため）
 
@@ -254,8 +254,8 @@ interface Producer {
 | `present[].resource: "x"` | `source: ["self#x"]` |
 | `cues[].narration: "replace"` | AI の解説を出さない（きっかけの `source` だけを使う） |
 | `cues[].narration: "add"` | きっかけの `present` の前に `{ "as": "speak", "source": ["builtin:ai-guide", "builtin:fallback-text"] }` を足す |
-| スタジオ（`cues` に `builtin:studio` がなく、`shorthands` で止めていない） | `{ "trigger": { "type": "event", "event": "idle" }, "present": [ { "as": "speak", "source": ["builtin:studio"] } ] }` を足す（MATERIALS D-53） |
-| 一言（`cues` に `builtin:note` がなく、`shorthands` で止めていない） | `{ "trigger": { "type": "event", "event": "idle" }, "present": [ { "as": "speak", "source": ["builtin:note"] } ] }` を足す（MATERIALS D-54） |
+| スタジオ（`cues` に `builtin:studio` がなく、`shorthands` で止めていない） | `{ "trigger": { "type": "event", "event": "tick" }, "present": [ { "as": "speak", "source": ["builtin:studio"] } ] }` を足す（MATERIALS D-53） |
+| 一言（`cues` に `builtin:note` がなく、`shorthands` で止めていない） | `{ "trigger": { "type": "event", "event": "tick" }, "present": [ { "as": "speak", "source": ["builtin:note"] } ] }` を足す（MATERIALS D-54） |
 
 `cues` に `builtin:studio`・`builtin:note` を書いたチャンネルでは、その種類の省略形を足さず、書いたとおりに出す。`channel.json` の `shorthands` に `"builtin:studio": false` などと書くと、その種類の省略形を足さない（`cues` にも書かなければ、そのチャンネルでは出さない）。
 
@@ -439,7 +439,8 @@ resources/
 - `channel.json` は省略形のまま読めるので、`collections`・`source` を使わないチャンネルはそのまま動く
 - `collections`・`source` を使うチャンネルは、素材集に対応していないアプリで拒まれる（知らない項目は無視されるが、`source` だけの `present` は `resource` がないので形式の誤りになる）。API-CHANNEL-LIST の必要な版で案内する
 - 組み込みの素材提供者を足すのは互換性のある変更。知らない `builtin:` は `none` として扱い、次の候補に進む
-- `builtin:studio`・`builtin:note`・`idle` を知らないアプリは、そのきっかけ・候補を使わない。そのアプリでは、その種類の素材は今までの出し方（チャンネルにかかわらず語りの合間）のまま
+- `builtin:studio`・`builtin:note`・`tick` を知らないアプリは、そのきっかけ・候補を使わない。そのアプリでは、その種類の素材は今までの出し方（チャンネルにかかわらず語りの合間）のまま
+- `idle` は `tick` と同じ意味で読む。`tick` を知らず `idle` を知るアプリは、`idle` のきっかけを区画ごとの素材（`builtin:studio`・`builtin:note`）だけ、`repeat` なしで使う
 - 方針（P-1〜P-5）を緩める変更は、MATERIALS の見直しの条件にあたる
 - `grants.grounding` を知らないアプリは、素材集を根拠に使わない（省略と同じ扱いになる）
 - リストの `collections[]`・`producerChange` の形は API-CHANNEL-LIST で定める
