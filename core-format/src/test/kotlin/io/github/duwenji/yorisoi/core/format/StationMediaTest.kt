@@ -185,22 +185,24 @@ class StationMediaTest {
     }
 
     private fun idle() = JSONObject().put("type", "event").put("event", "idle")
+    private fun tick() = JSONObject().put("type", "event").put("event", "tick")
 
     @Test
-    fun `idle cues show only producers fetched by area, with their params`() {
+    fun `tick cues show producers fetched by area, with their params, and idle is read as tick`() {
         val studio = show("speak", "source", "builtin:studio")
             .put("params", JSONObject().put("categories", JSONArray(listOf("shrine-temple", "event"))).put("prelude", "by-the-way"))
         val media = (check(files(manifest { put("cues", JSONArray().put(cue("temple-news", idle(), studio))) }, withMedia = false)) as StationCheck.Ok).station.media
         val p = media.cues[0].present[0]
-        assertEquals(Trigger.Event(CueEvent.IDLE), media.cues[0].trigger)
+        assertEquals(Trigger.Event(CueEvent.TICK), media.cues[0].trigger)
+        assertTrue(media.cues[0].areaOnly)
         assertEquals(listOf(StudioCategory.SHRINE_TEMPLE, StudioCategory.EVENT), p.params.categories)
         assertEquals(Prelude.BY_THE_WAY, p.params.prelude)
         assertEquals(1, MediaStage.required(media))
 
         fun one(c: JSONObject) = files(manifest { put("cues", JSONArray().put(c)) }, withMedia = false)
-        // Idle has nothing to ask the AI or a collection about, and no repeat.
-        assertEquals(RejectCode.BAD_CUE, rejected(one(cue("x", idle(), show("speak", "source", "builtin:ai-guide")))))
+        // Producers fetched by area count by their own rule, so no repeat there.
         assertEquals(RejectCode.BAD_CUE, rejected(one(cue("x", idle(), show("speak", "source", "builtin:note")).put("repeat", "once"))))
+        assertEquals(RejectCode.BAD_CUE, rejected(one(cue("x", tick(), show("speak", "source", "builtin:note")).put("repeat", "once"))))
         // Only what a producer here declares, with a rule for its values.
         assertEquals(RejectCode.BAD_CUE, rejected(one(cue("x", idle(), show("speak", "source", "builtin:note").put("params", JSONObject().put("categories", JSONArray().put("food")))))))
         assertEquals(RejectCode.BAD_VALUE, rejected(one(cue("x", idle(), show("speak", "source", "builtin:studio").put("params", JSONObject().put("prelude", "hello"))))))
@@ -208,6 +210,22 @@ class StationMediaTest {
         assertEquals(RejectCode.BAD_CUE, rejected(one(cue("x", spot(), show("speak", "source", "builtin:ai-guide").put("params", JSONObject().put("persona", "x"))))))
         // A spot cue may show the studio around that spot too.
         assertTrue(check(one(cue("x", spot(), show("speak", "source", "builtin:studio")))) is StationCheck.Ok)
+    }
+
+    @Test
+    fun `tick cues show any material, with a repeat and a gap of their own`() {
+        fun one(c: JSONObject) = files(manifest { put("resources", JSONArray(listOf(intro(), photo()))); put("cues", JSONArray().put(c)) })
+        val media = (check(one(cue("x", tick(), show("speak", "resource", "intro"), show("card", "resource", "old-photo")).put("repeat", "oncePerDay").put("gapMin", 10))) as StationCheck.Ok).station.media
+        val cue = media.cues[0]
+        assertTrue(cue.isTick)
+        assertEquals(Repeat.ONCE_PER_DAY, cue.repeat)
+        assertEquals(10, cue.gapMin)
+        assertEquals(false, cue.areaOnly)
+        assertTrue(check(files(manifest { put("cues", JSONArray().put(cue("x", idle(), show("speak", "source", "builtin:ai-guide")))) }, withMedia = false)) is StationCheck.Ok)
+        // gapMin is a tick cue's, 1 to 60 minutes.
+        assertEquals(RejectCode.BAD_CUE, rejected(one(cue("x", spot(), show("speak", "resource", "intro")).put("gapMin", 10))))
+        assertEquals(RejectCode.BAD_CUE, rejected(one(cue("x", tick(), show("speak", "resource", "intro")).put("gapMin", 0))))
+        assertEquals(RejectCode.BAD_CUE, rejected(one(cue("x", tick(), show("speak", "resource", "intro")).put("gapMin", 61))))
     }
 
     @Test

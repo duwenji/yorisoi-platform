@@ -77,23 +77,31 @@ class CueFinder(private val memory: CueMemory, private val zone: () -> ZoneId = 
             fire(stationId, cue, Subject.Point(t.lat, t.lon, t.radiusM), shownThisWalk, now)
         }
 
-    /** Every cue on [event], in order; [subject] is the event's, for producers that make material from it. */
-    fun events(stationId: String, media: StationMedia, event: CueEvent, subject: Subject, shownThisWalk: Set<String>, now: Long): List<CueFire> =
+    /**
+     * Every cue on [event], in order; [subject] is the event's, for producers that make material from it.
+     * [sinceSpokeMs]: how long since the companion last spoke, for a tick cue's `gapMin`; null lets every cue through.
+     */
+    fun events(
+        stationId: String, media: StationMedia, event: CueEvent, subject: Subject, shownThisWalk: Set<String>, now: Long,
+        sinceSpokeMs: Long? = null,
+    ): List<CueFire> =
         media.cues.mapNotNull { cue ->
             if ((cue.trigger as? Trigger.Event)?.event != event) return@mapNotNull null
+            val gap = cue.gapMin?.let { it * 60_000L }
+            if (gap != null && sinceSpokeMs != null && sinceSpokeMs < gap) return@mapNotNull null
             fire(stationId, cue, subject, shownThisWalk, now)
         }
 
-    /** Counts [fire] as shown; an idle cue isn't counted (what it showed counts by its own kind's rule, API-MATERIALS P-8). */
+    /** Counts [fire] as shown; a tick cue of area producers isn't (what it showed counts by its own kind's rule, API-MATERIALS P-8). */
     fun record(fire: CueFire, shownThisWalk: MutableSet<String>, now: Long) {
-        if (fire.cue.isIdle) return
+        if (fire.cue.uncounted) return
         shownThisWalk += fire.key
         if (fire.cue.repeat != Repeat.ONCE_PER_WALK) memory.record(fire.key, now)
     }
 
     private fun fire(stationId: String, cue: Cue, subject: Subject, shownThisWalk: Set<String>, now: Long, perSubject: String? = null): CueFire? {
         val key = "$stationId#${cue.id}" + (perSubject?.let { "@$it" } ?: "")
-        val allowed = cue.isIdle || when (cue.repeat) {
+        val allowed = cue.uncounted || when (cue.repeat) {
             Repeat.ONCE_PER_WALK -> key !in shownThisWalk
             Repeat.ONCE_PER_DAY -> key !in shownThisWalk && memory.lastShown(key)?.let { day(it) == day(now) } != true
             Repeat.ONCE -> memory.lastShown(key) == null
@@ -103,7 +111,7 @@ class CueFinder(private val memory: CueMemory, private val zone: () -> ZoneId = 
 
     private fun day(at: Long) = Instant.ofEpochMilli(at).atZone(zone()).toLocalDate()
 
-    private val Cue.isIdle: Boolean get() = trigger == Trigger.Event(CueEvent.IDLE)
+    private val Cue.uncounted: Boolean get() = isTick && areaOnly
 }
 
 /** One presentation of a cue as it came out: how it's shown, and its material (a sheet may hold several). */

@@ -13,7 +13,7 @@ import io.github.duwenji.yorisoi.core.format.material.BuiltInProducers
 /**
  * The shorthand cues of built-in producers (API-MATERIALS「省略形の展開」, MATERIALS D-48): a channel
  * that neither names one of [BuiltInProducers.withShorthand] in its cues nor turns it off in
- * `shorthands` shows it between the companion's lines, as an `idle` cue at the end of its own.
+ * `shorthands` shows it between the companion's lines, as a `tick` cue at the end of its own.
  */
 object Shorthands {
     const val CUE_PREFIX = "shorthand-"
@@ -23,13 +23,13 @@ object Shorthands {
             .filterIsInstance<Reference.BuiltIn>().map { it.id }.toSet()
         val added = BuiltInProducers.withShorthand
             .filter { it.id !in named && it.id !in media.shorthandsOff }
-            .map { idle(it.id) }
+            .map { tick(it.id) }
         return if (added.isEmpty()) media else media.copy(cues = media.cues + added)
     }
 
-    private fun idle(producer: String) = Cue(
+    private fun tick(producer: String) = Cue(
         id = CUE_PREFIX + producer.removePrefix(BuiltInProducers.PREFIX),
-        trigger = Trigger.Event(CueEvent.IDLE),
+        trigger = Trigger.Event(CueEvent.TICK),
         narration = null,
         repeat = Repeat.ONCE_PER_WALK,
         present = listOf(Presentation(PresentAs.SPEAK, listOf(listOf(Reference.BuiltIn(producer))))),
