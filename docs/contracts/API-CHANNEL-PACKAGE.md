@@ -454,7 +454,7 @@ ECOSYSTEM E-24 のとおり、実装するアプリを作ると決めた過ご�
   { "id": "kotokuin", "trigger": { "type": "spot", "osm": "way/234567", "name": "高徳院" },
     "present": [ { "as": "speak", "source": ["kamakura", "builtin:ai-guide", "builtin:fallback-text"] },
                  { "as": "card", "source": ["kamakura#daibutsu-photo", "builtin:commons-photo"] } ] },
-  { "id": "temple-news", "trigger": { "type": "event", "event": "idle" },
+  { "id": "temple-news", "trigger": { "type": "event", "event": "tick" },
     "present": [ { "as": "speak", "source": ["builtin:studio"],
                    "params": { "categories": ["shrine-temple", "event"], "prelude": "by-the-way" } } ] }
 ]
@@ -465,7 +465,8 @@ ECOSYSTEM E-24 のとおり、実装するアプリを作ると決めた過ご�
 | `trigger.type` | `spot`（スポットに近づいた）/ `point`（地点の半径内に入った）/ `event`（出来事）。どれを使うかはチャンネルが決める（M-3） |
 | `spot` | `osm`（`node/…`・`way/…`・`relation/…`）。任意で `name` を付けると、ID が違っても同じ名前で 200m 以内なら同じスポットとみなす（再訪の判定と同じ規則）。近づいたかの判定は、アプリのスポット案内と同じ（60m、広さのあるスポットは境界から）。1.2 から、`osm` の代わりに `"any": true` と `categories`（[スポットの種類](#スポットの種類)を 1〜8 個）を書くと、その種類のどのスポットでも出す（題材を問わないきっかけ） |
 | `point` | `lat`・`lon`・`radiusM`（20〜300） |
-| `event` | `select`（このチャンネルを選んだ）/ `start`（散歩の開始）/ `finish`（散歩の終了）/ `idle`（語りの合間。アプリが話すことがないと決め、前の発言から間が空いたとき）。`start`・`finish` では、AI のあいさつ・振り返りの後に出す。`idle` で使えるのは `fetch=area` の素材提供者（`builtin:studio`・`builtin:note`）を指す `source` だけで、`repeat` は書けない（同じものを繰り返さない決まりと上限は種類ごとに API-MATERIALS P-8 と各要件で決まる） |
+| `event` | `select`（このチャンネルを選んだ）/ `start`（散歩の開始）/ `finish`（散歩の終了）/ `tick`（語りの合間。下の「語りの合間のきっかけ」）。`start`・`finish` では、AI のあいさつ・振り返りの後に出す。`idle` は `tick` と同じ意味の呼び名として読む |
+| `gapMin` | `tick` だけ（ほかのきっかけに書くと `bad_cue`）。任意で 1〜60（分）。前に話してから、この間とアプリの話の間隔の長いほうが過ぎるまで出さない |
 | `narration` | `spot` だけ。`replace`（AI の解説の代わりに出す。既定）/ `add`（AI の解説の後に出す） |
 | `repeat` | `oncePerWalk`（既定）/ `oncePerDay` / `once`（その端末で 1 度だけ） |
 | `present` | 見せ方と素材の組（1〜4 個）。上から順に出す。素材は `resource`（同梱の素材 1 つ）か `source`（素材提供者への参照の候補、下表）のどちらかで指す。`sheet` は `resources`（同梱）か `sources`（参照の候補の配列を並べる）で複数の素材を並べられる |
@@ -491,6 +492,18 @@ ECOSYSTEM E-24 のとおり、実装するアプリを作ると決めた過ご�
 - 題材を問わないきっかけ: 1 つのスポットに、特定のスポットのきっかけと題材を問わないきっかけの両方が当たるときは、特定のスポットのきっかけだけを出す。`repeat` はスポットごとに数える。`source` の候補がすべて出せないスポットでは、きっかけがなかったものとして通常のスポット案内に戻る
 - `talk.events.spot` が偽でも、`spot` のきっかけは出す（チャンネルが明示的に置いたものなので）。ただし、話しかけの頻度の「スポット案内の間隔」は守る
 - `spot`・`point` のきっかけは、同じ場所に立ち止まっている間（2 分以上）は新しく出さない（スポット案内と同じ）
+
+#### 語りの合間のきっかけ（tick）
+
+- アプリは散歩・走行中、3 秒ごとに話す判定をする（Tick）。`tick` のきっかけは、Tick のときに次がそろうと出す
+  - オンエアが空いている。オンエアは、読み上げ・季節の歌・素材の音声（`play`）のどれかが音を出している間。背景音（`ambient`）とカード・通知の表示は数えない
+  - ほかに話すこと（安全に関わる案内・あいさつ・スポット・地点・予告・休憩・区切り）がない
+  - 前に話してから、アプリの話の間隔（REQ-NEARBY-TALK D-7）と `gapMin` の長いほうが過ぎた
+  - CycleGuide では、信号の近く・速いとき（黙る条件）でない
+- 立ち止まっていても出す
+- `tick` のきっかけが複数あるときは、書いた順に見て、最初に出せたものを出す。どれも出せないときは、アプリが雑談・季節の歌を出す（REQ-NEARBY-TALK F-14）
+- どの素材も使える（同梱・素材集・基準・組み込み）。`repeat` を書ける（既定は `oncePerWalk`）
+- 区画ごとに運営から取る素材提供者（`fetch=area`。`builtin:studio`・`builtin:note`）を指す候補には `repeat` を使わない。同じものを繰り返さない決まりと上限は、種類ごとに API-MATERIALS P-8 と各要件のとおり
 
 ### 見せ方
 
@@ -522,6 +535,7 @@ ECOSYSTEM E-24 のとおり、実装するアプリを作ると決めた過ご�
 - 素材の出典とライセンスが正しいか。人の顔・個人の家が写っていないか
 - 書き起こし・代替テキストが中身と合っているか
 - 条件で選ぶ素材（`builtin:studio`・`builtin:note`・基準で選ぶ素材集）: どのきっかけで出すか、スタジオの分類、前置きが、チャンネルの雰囲気と散策者の安全に合っているか。どれが出るかは確かめない（MATERIALS D-50）
+- 語りの合間のきっかけ（`tick`）: 長い音声を並べて、付き添いの話や安全の案内が出にくくなっていないか。繰り返す素材（`repeat` が `oncePerWalk` でないもの）が、同じ散歩で何度も聞いてうるさくならないか（`gapMin` で間をあけているか）
 
 ## signature.json（第三者のみ）
 

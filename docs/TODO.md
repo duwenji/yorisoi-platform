@@ -64,10 +64,13 @@
 
 ## 3 秒ごとの Tick
 
-[ADR-TICK](decisions/ADR-TICK.md)（検討中）。判定を 3 秒ごとにし、オンエアが空いたらチャンネルの `tick` のきっかけ（`idle` を一本化）の素材、なければ雑談・季節の歌を出す。雑談と歌の「歩いている」の条件と、歌の 15 分を外す。両アプリ。
+判定を 3 秒ごとにし、オンエアが空いたらチャンネルの `tick` のきっかけ（`idle` を一本化）の素材、なければ雑談・季節の歌を出す（REQ-NEARBY-TALK D-19・D-20・F-14・F-35、REQ-KOYOMI F-42、API-CHANNEL-PACKAGE「語りの合間のきっかけ」）。両アプリ。
 
-- 承認する
-- X-1〜X-5（実装と文書の追従）
+- X-1: core-format の `tick`・`idle` の読み替え・`gapMin`・`tick` で使える素材の検査、kit-channel のきっかけの照合（platform）
+- X-2: validator とチャンネルの編集画面（yorisoi-console）
+- X-3: 3 秒の Tick、オンエア、空いたときの順番、雑談と歌の条件、記録（yorisoi-sanpoguide）
+- X-4: X-3 と同じ。信号の近く・速いときに黙る条件は残す（yorisoi-cycleguide）
+- X-5: 各アプリの設計・手引き、console の手順書、yorisoi-tutorial の追従
 
 ## 共通の検討事項
 
