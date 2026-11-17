@@ -260,22 +260,38 @@ class CuesTest {
     fun `a channel without material still shows the shorthand cues between the companion's lines`() {
         val standard = TestChannels.load().first { it.id == "standard" }
         assertNull(standard.materials)
-        val idle = standard.cueMedia.cues.filter { it.trigger == Trigger.Event(CueEvent.IDLE) }
-        assertEquals(listOf("shorthand-studio", "shorthand-note"), idle.map { it.id })
+        val tick = standard.cueMedia.cues.filter { it.trigger == Trigger.Event(CueEvent.TICK) }
+        assertEquals(listOf("shorthand-studio", "shorthand-note"), tick.map { it.id })
 
-        // Idle cues aren't counted by repeat: they fire every time there's room.
+        // Tick cues of area producers aren't counted by repeat: they fire every time there's room.
         val finder = CueFinder(Memory()) { tokyo }
         val shown = mutableSetOf<String>()
         repeat(3) {
-            val fires = finder.events(standard.id, standard.cueMedia, CueEvent.IDLE, Subject.None, shown, day1)
+            val fires = finder.events(standard.id, standard.cueMedia, CueEvent.TICK, Subject.None, shown, day1)
             assertEquals(2, fires.size)
             fires.forEach { finder.record(it, shown, day1) }
         }
-        val studioFire = finder.events(standard.id, standard.cueMedia, CueEvent.IDLE, Subject.None, shown, day1)[0]
+        val studioFire = finder.events(standard.id, standard.cueMedia, CueEvent.TICK, Subject.None, shown, day1)[0]
         val shownNow = runBlocking {
             CuePresenter(Producers(listOf(Asked())), stage = 1).present(studioFire, standard, MaterialContext(standard))
         }
         assertEquals("null", text(shownNow.single().items.single()))
+    }
+
+    @Test
+    fun `a tick cue of the channel's own material counts by repeat and waits its gap`() {
+        val station = station(JSONArray().put(
+            cue("chime", JSONObject().put("type", "event").put("event", "tick"), speak("builtin:ai-guide")).put("gapMin", 10),
+        ))
+        val finder = CueFinder(Memory()) { tokyo }
+        val shown = mutableSetOf<String>()
+        fun chime(sinceSpokeMs: Long?) = finder.events(station.id, station.cueMedia, CueEvent.TICK, Subject.None, shown, day1, sinceSpokeMs)
+            .filter { it.cue.id == "chime" }
+        assertEquals(0, chime(9 * 60_000L).size)
+        val fire = chime(10 * 60_000L).single()
+        finder.record(fire, shown, day1)
+        // Once a walk by default.
+        assertEquals(0, chime(60 * 60_000L).size)
     }
 
     @Test
@@ -285,7 +301,7 @@ class CuesTest {
             speak("builtin:studio").put("params", JSONObject().put("categories", JSONArray().put("shrine-temple")).put("prelude", "by-the-way")),
         )))
         assertEquals(listOf("temple-news", "shorthand-note"), station.cueMedia.cues.map { it.id })
-        val fire = CueFinder(Memory()) { tokyo }.events(station.id, station.cueMedia, CueEvent.IDLE, Subject.None, emptySet(), day1)[0]
+        val fire = CueFinder(Memory()) { tokyo }.events(station.id, station.cueMedia, CueEvent.TICK, Subject.None, emptySet(), day1)[0]
         val shown = runBlocking { CuePresenter(Producers(listOf(Asked())), stage = 1).present(fire, station, MaterialContext(station)) }
         assertEquals("ところで、[SHRINE_TEMPLE]", text(shown.single().items.single()))
 

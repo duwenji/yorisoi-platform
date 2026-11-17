@@ -34,8 +34,20 @@ sealed interface Trigger {
     data class Event(val event: CueEvent) : Trigger
 }
 
-/** [IDLE]: between the companion's lines, when the app has nothing to say (API-CHANNEL-PACKAGE; only for producers fetched by area). */
-enum class CueEvent(override val json: String) : JsonValue { SELECT("select"), START("start"), FINISH("finish"), IDLE("idle") }
+/**
+ * [TICK]: between the companion's lines, on the app's 3-second tick when nothing is on air and
+ * nothing else is to be said (API-CHANNEL-PACKAGE「語りの合間のきっかけ」). `idle` is read as [TICK].
+ */
+enum class CueEvent(override val json: String) : JsonValue {
+    SELECT("select"), START("start"), FINISH("finish"), TICK("tick");
+
+    companion object {
+        /** The other name a channel may write for [TICK]. */
+        const val IDLE = "idle"
+
+        fun parse(json: String): CueEvent? = if (json == IDLE) TICK else entries.firstOrNull { it.json == json }
+    }
+}
 
 /** Whether a spot cue stands in for the AI's narration or follows it (API-CHANNEL-PACKAGE F-12). */
 enum class NarrationMode(override val json: String) : JsonValue { REPLACE("replace"), ADD("add") }
@@ -90,10 +102,20 @@ data class Cue(
     val trigger: Trigger,
     /** Null when not written: a cue that asks the AI itself mustn't also say how it relates to the AI. */
     val narration: NarrationMode?,
-    /** Not written for [CueEvent.IDLE]: what isn't read out twice there follows each kind's own rule (API-MATERIALS P-8). */
+    /** Not written for a [CueEvent.TICK] cue of area producers only ([areaOnly]): what isn't read out twice follows each kind's own rule (API-MATERIALS P-8). */
     val repeat: Repeat,
     val present: List<Presentation>,
-)
+    /** [CueEvent.TICK] only: minutes since the companion last spoke, on top of the app's own gap (API-CHANNEL-PACKAGE `gapMin`). */
+    val gapMin: Int? = null,
+) {
+    val isTick: Boolean get() = trigger == Trigger.Event(CueEvent.TICK)
+
+    /** Whether every candidate is a producer fetched by area (`builtin:studio`, `builtin:note`): counted by its own kind's rule, not [repeat]. */
+    val areaOnly: Boolean
+        get() = present.flatMap { it.items.flatten() }.all { ref ->
+            (ref as? Reference.BuiltIn)?.let { BuiltInProducers.byId(it.id)?.fetch } == Fetch.AREA
+        }
+}
 
 /**
  * A channel's material: its own resources, the collections and selectors it uses, and its cues.
@@ -125,6 +147,7 @@ internal object CueReader {
     const val MAX_ANY_SPOT_CUES = 5
     const val MAX_COLLECTIONS = 5
     const val MAX_SELECTORS = 5
+    const val MAX_GAP_MIN = 60
 
     private val CUE_ID = Regex("[a-z0-9-]{1,40}")
     private val ALIAS = Regex("[a-z0-9-]{1,20}")
@@ -227,8 +250,10 @@ internal object CueReader {
         val trigger = readTrigger(id, c.obj("trigger", RejectCode.BAD_CUE))
         val narration = c.optString("narration", RejectCode.BAD_CUE)?.let { parseEnum<NarrationMode>(it) ?: reject(RejectCode.BAD_CUE, "$id: narration \"$it\"") }
         if (narration != null && trigger !is Trigger.Spot && trigger !is Trigger.AnySpot) reject(RejectCode.BAD_CUE, "$id: narration is for spot cues")
-        val idle = trigger == Trigger.Event(CueEvent.IDLE)
-        if (idle && c.has("repeat")) reject(RejectCode.BAD_CUE, "$id: an idle cue has no repeat")
+        val tick = trigger == Trigger.Event(CueEvent.TICK)
+        val gapMin = c.optInt("gapMin", RejectCode.BAD_CUE)
+        if (gapMin != null && !tick) reject(RejectCode.BAD_CUE, "$id: gapMin is for tick cues")
+        if (gapMin != null && gapMin !in 1..MAX_GAP_MIN) reject(RejectCode.BAD_CUE, "$id: gapMin $gapMin (1..$MAX_GAP_MIN)")
         val repeat = c.optString("repeat", RejectCode.BAD_CUE)?.let { parseEnum<Repeat>(it) ?: reject(RejectCode.BAD_CUE, "$id: repeat \"$it\"") }
             ?: Repeat.ONCE_PER_WALK
         val present = c.list("present", RejectCode.BAD_CUE).objects("$id present", RejectCode.BAD_CUE)
@@ -241,13 +266,12 @@ internal object CueReader {
             }
         }
         if (presentations.isEmpty()) unknownValue(RejectCode.BAD_CUE, "$id: no presentation this app knows")
-        // Idle has no place or spot to ask about: only producers that bring what's around the phone fit it.
-        if (idle) presentations.flatMap { it.items.flatten() }.firstOrNull { ref ->
-            (ref as? Reference.BuiltIn)?.let { BuiltInProducers.byId(it.id)?.fetch } != Fetch.AREA
-        }?.let { reject(RejectCode.BAD_CUE, "$id: an idle cue shows only producers fetched by area, not $it") }
         val asksAi = presentations.any { p -> p.items.flatten().contains(Reference.BuiltIn(BuiltInProducers.AI_GUIDE.id)) }
         if (asksAi && narration != null) reject(RejectCode.BAD_CUE, "$id: a cue that asks builtin:ai-guide can't also set narration")
-        return Cue(id, trigger, narration, repeat, presentations)
+        val cue = Cue(id, trigger, narration, repeat, presentations, gapMin)
+        // Producers fetched by area count what they read out by their own rule (API-MATERIALS P-8).
+        if (tick && cue.areaOnly && c.has("repeat")) reject(RejectCode.BAD_CUE, "$id: a tick cue of producers fetched by area has no repeat")
+        return cue
     }
 
     private fun readTrigger(id: String, t: JSONObject): Trigger = when (val type = t.string("type", RejectCode.BAD_CUE)) {
@@ -272,7 +296,7 @@ internal object CueReader {
             Trigger.Point(lat, lon, radius)
         }
         "event" -> t.string("event", RejectCode.BAD_CUE).let { e ->
-            Trigger.Event(parseEnum<CueEvent>(e) ?: unknownValue(RejectCode.BAD_CUE, "event \"$e\""))
+            Trigger.Event(CueEvent.parse(e) ?: unknownValue(RejectCode.BAD_CUE, "event \"$e\""))
         }
         else -> unknownValue(RejectCode.BAD_CUE, "$id: trigger type \"$type\"")
     }
