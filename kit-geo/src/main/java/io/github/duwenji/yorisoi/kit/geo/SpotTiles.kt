@@ -11,6 +11,9 @@ import org.json.JSONException
 import org.json.JSONObject
 import java.io.File
 import java.io.IOException
+import java.time.Instant
+import java.time.LocalDate
+import java.time.format.DateTimeParseException
 import java.util.concurrent.TimeUnit
 
 /**
@@ -101,6 +104,25 @@ class SpotTiles(
         return asked to false
     }
 
+    /**
+     * The local events of the tiles that a [OverpassClient.SPOT_RADIUS_M] circle around the point
+     * covers (API-SPOT-TILES AP-9, AP-10), kept and asked about again as the other layers are. A
+     * tile past its `eventsUntil` isn't used, and is asked about again; a tile that can't be had
+     * has no events (AP-11). Pick the ones to talk of with [LocalEvents.nearby].
+     */
+    internal suspend fun events(lat: Double, lon: Double, store: SpotTileStore?, freshMs: Long): List<LocalEvent> {
+        val today = Instant.ofEpochMilli(now()).atZone(LocalEvents.ZONE).toLocalDate()
+        return Geohash.covering(lat, lon, OverpassClient.SPOT_RADIUS_M.toDouble(), PRECISION).flatMap { hash ->
+            var got = tile(EVENTS, hash, store, freshMs, forceRefresh = false).tile
+            if (got != null && got.pastUntil(today) && now() - got.fetchedAt > PAST_UNTIL_RETRY_MS) {
+                got = tile(EVENTS, hash, store, freshMs, forceRefresh = true).tile
+            }
+            got?.takeUnless { it.pastUntil(today) }?.events.orEmpty()
+        }.distinctBy { it.id }
+    }
+
+    private fun Tile.pastUntil(today: LocalDate) = eventsUntil?.let { it < today } ?: false
+
     private fun layers(shops: Set<SpotKind>) = if (shops.isEmpty()) listOf(BASE) else listOf(BASE, SHOPS)
 
     /** A tile read, or null; [asked] when the server answered just now, [failed] when it couldn't be asked. */
@@ -133,7 +155,13 @@ class SpotTiles(
                 remember(tile)
                 Got(tile, asked = true)
             }
-            Answer.OutOfRange -> {
+            // A tile with no events (API-SPOT-TILES ST-11): asked about again as a kept one would be.
+            Answer.OutOfRange -> if (layer == EVENTS) {
+                store?.delete(layer, hash)
+                val none = Tile(layer, hash, null, now(), emptyList(), emptyList(), emptyList(), DoubleArray(0))
+                remember(none)
+                Got(none, asked = true)
+            } else {
                 synchronized(memory) {
                     memory.remove(key)
                     outOfRange += key
@@ -178,6 +206,9 @@ class SpotTiles(
         val shops: List<Poi>,
         val facilities: List<Facility>,
         val signals: DoubleArray,
+        val events: List<LocalEvent> = emptyList(),
+        /** The last day the events layer's events were chosen for; null for the other layers. */
+        val eventsUntil: LocalDate? = null,
     )
 
     /** The tile, or null when it isn't one this version reads (API-SPOT-TILES AP-8). */
@@ -186,23 +217,34 @@ class SpotTiles(
     } catch (e: JSONException) {
         Log.w(TAG, "Unreadable tile $layer/$hash: ${e.message}")
         null
+    } catch (e: DateTimeParseException) {
+        Log.w(TAG, "Unreadable tile $layer/$hash: ${e.message}")
+        null
     }
 
     internal companion object {
         private const val TAG = "SpotTiles"
         const val BASE = "base"
         const val SHOPS = "shops"
+        const val EVENTS = "events"
         const val PRECISION = 5
         private const val FORMAT = "yorisoi-spot-tile"
         private const val VERSION = 1
 
-        /** The four tiles of a search, of both layers. */
-        private const val MEMORY_TILES = 8
+        /** The four tiles of a search, of the three layers. */
+        private const val MEMORY_TILES = 12
+
+        /** A tile past its `eventsUntil` (the week's batch failed) is asked about again at most this often. */
+        private const val PAST_UNTIL_RETRY_MS = 60 * 60 * 1000L
 
         fun parse(json: String, layer: String, hash: String): Tile {
             val o = JSONObject(json)
             if (o.optString("format") != FORMAT || o.optInt("version") != VERSION || o.optString("layer") != layer || o.optString("tile") != hash) {
                 throw JSONException("not a $FORMAT v$VERSION $layer/$hash")
+            }
+            if (layer == EVENTS) {
+                val events = o.getJSONArray("events").objects().mapNotNull(LocalEvent::fromJson)
+                return Tile(layer, hash, null, 0L, emptyList(), emptyList(), emptyList(), DoubleArray(0), events, LocalDate.parse(o.getString("eventsUntil")))
             }
             val facilities = o.optJSONArray("facilities")?.objects().orEmpty().mapNotNull { f ->
                 // A kind this version doesn't know is left out.
