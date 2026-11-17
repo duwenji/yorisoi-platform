@@ -22,7 +22,7 @@
 - [ ] 技術チュートリアルの追従
 - [ ] 本番の配信を作る時期を決める（API-SPOT-TILES 未決事項 No.2）
 - [ ] スポットの Wikidata の情報（[REQ-WIKIDATA](requirements/REQ-WIKIDATA.md)）: バッチ（X-1）、kit-geo（X-2）、両アプリ（X-3・X-4）、技術チュートリアル（X-5）、実機の確認（X-6）
-- [ ] 地域の催し（[REQ-LOCAL-EVENTS](requirements/REQ-LOCAL-EVENTS.md)）: 開発用への配備（X-2）、両アプリ（X-4・X-5）、文書と実機（X-6）。部品は kit-geo の `LocalEvents`
+- [ ] 地域の催し（[REQ-LOCAL-EVENTS](requirements/REQ-LOCAL-EVENTS.md)）: 実機の確認（X-6 の AC-11。催しの入ったタイルは 2026-11-18 の定期の実行から）。バッチは開発用に配備済み、部品は kit-geo の `LocalEvents`、両アプリはプロンプト SanpoGuide 4.9.0・CycleGuide 0.7.0
 
 ## その場の素材（スタジオ・一言）
 
