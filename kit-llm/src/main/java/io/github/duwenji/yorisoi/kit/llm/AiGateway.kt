@@ -82,7 +82,7 @@ class AiGateway(
     }
 
     /**
-     * The AI's reply to [system] and [user], without stage directions.
+     * The AI's reply to [system] and [user], without stage directions and Markdown marks.
      *
      * @throws AiUnavailableException when no AI is set up or today's limit is reached (on the relay too)
      */
@@ -104,9 +104,9 @@ class AiGateway(
             if (e is RelayException && e.code == "daily_limit_reached") throw AiUnavailableException("The daily limit of AI calls is reached", e)
             throw e
         }
-        // Recorded as the AI wrote it, so stage directions it slipped in can still be counted.
+        // Recorded as the AI wrote it, so stage directions and marks it slipped in can still be counted.
         report(text, null)
-        return OutputCheck.withoutStageDirections(text)
+        return OutputCheck.spoken(text)
     }
 
     /** Counts a call on the user's own key against their limit; the relay counts the operator's AI. */
