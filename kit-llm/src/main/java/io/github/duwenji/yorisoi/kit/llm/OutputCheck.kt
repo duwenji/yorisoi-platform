@@ -3,8 +3,8 @@ package io.github.duwenji.yorisoi.kit.llm
 /**
  * Contact details the AI must not read out (AI-ROLES H-6 ③): a reply with a URL, an email
  * address or a phone number is not used, and a fixed line stands in. Stage directions the AI
- * sometimes writes for its own delivery, and Markdown marks such as 「**続き：**」, are taken out
- * before anything else, since they'd be read out.
+ * sometimes writes for its own delivery, Markdown marks such as 「**続き：**」, and notes on how it
+ * wrote the reply (「〜にひと言触れました」), are taken out before anything else, since they'd be read out.
  */
 object OutputCheck {
     private val URL = Regex("https?://|www\\.", RegexOption.IGNORE_CASE)
@@ -24,8 +24,20 @@ object OutputCheck {
     private val EMPHASIS = Regex("\\*+|_{2,}")
     private val HEADING = Regex("(?m)^[ \t　]*#{1,6}[ \t　]+")
 
-    /** [text] as it may be read out: without stage directions and Markdown marks. */
-    fun spoken(text: String): String = withoutStageDirections(withoutMarkdown(text))
+    /**
+     * Words a line of speech doesn't use but a note on the reply does: the prompt's own words for the
+     * reply and the user, and saying what was or wasn't mentioned. 「余談」 stays: 「余談ですが」 is speech.
+     */
+    private val META_NOTE = Regex("触れました|触れていません|言及し(?:ま|な|て)|本文|字数|文字数|プロンプト|指示(?:に従|どおり|通り|のとおり)|利用者|出力し")
+
+    /** [text] as it may be read out: without stage directions, Markdown marks and notes on the reply. */
+    fun spoken(text: String): String = withoutMetaNotes(withoutStageDirections(withoutMarkdown(text)))
+
+    /** [text] without the lines that are notes on the reply rather than speech; the rest as it was. */
+    fun withoutMetaNotes(text: String): String =
+        text.lines().filterNot { META_NOTE.containsMatchIn(it) }.joinToString("\n").replace(BLANK_LINES, "\n\n").trim()
+
+    private val BLANK_LINES = Regex("\n{3,}")
 
     /** [text] without the stage directions in it. */
     fun withoutStageDirections(text: String): String = STAGE_DIRECTION.replace(text, "").trim()

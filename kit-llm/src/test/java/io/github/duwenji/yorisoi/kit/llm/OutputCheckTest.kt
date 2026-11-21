@@ -64,4 +64,22 @@ class OutputCheckTest {
         val text = "石段は61段、#1 の札がある門です。snake_case も残ります。"
         assertEquals(text, OutputCheck.spoken(text))
     }
+
+    @Test
+    fun `notes on how the reply was written are taken out`() {
+        // A reply the operator's AI gave on 2026-11-21 ended with a note to itself.
+        val reply = "1897年に開業した駅です。\n\n" +
+            "そういえばさっきの亀有駅だけど、この辺りはお寺が多いんだよ。\n\n" +
+            "創建年が1897年というのを踏まえて、ひと言触れました。区役所等はとても範囲外なので言及しません。「さっきの」で始め、本文と別の余談（この地域の特徴）を短く。"
+        assertEquals(
+            "1897年に開業した駅です。\n\nそういえばさっきの亀有駅だけど、この辺りはお寺が多いんだよ。",
+            OutputCheck.spoken(reply),
+        )
+    }
+
+    @Test
+    fun `speech that says 余談 or 続き stays`() {
+        val text = "余談ですが、この橋は二代目です。\n続き：そういえばさっきの橋、夜も明るいんです。"
+        assertEquals(text, OutputCheck.spoken(text))
+    }
 }
