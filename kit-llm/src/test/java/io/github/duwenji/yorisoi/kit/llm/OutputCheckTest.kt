@@ -44,4 +44,24 @@ class OutputCheckTest {
         val aside = "浅草寺（せんそうじ）の本堂です。（本堂は戦後に再建されました）"
         assertEquals(aside, OutputCheck.withoutStageDirections(aside))
     }
+
+    @Test
+    fun `Markdown marks are taken out, so the marks after them are seen`() {
+        // A reply the operator's AI gave: 「**続き：**」 was read out with its marks.
+        assertEquals(
+            "のどかな景色です。\n\n続き：  \nそういえばこの「一之江」という地名は。\n\n続き：  \n車の流れを眺めていると落ち着きます。",
+            OutputCheck.spoken("のどかな景色です。\n\n**続き：**  \nそういえばこの「一之江」という地名は。\n\n**続き：**  \n車の流れを眺めていると落ち着きます。"),
+        )
+        assertEquals("1：秋の風ですね。\n2：鳥の声がします。", OutputCheck.spoken("**1：**秋の風ですね。\n**2：**鳥の声がします。"))
+        assertEquals("ここは大仏です。とても大きいですね。", OutputCheck.spoken("ここは*大仏*です。__とても__大きいですね。"))
+        assertEquals("鶴岡八幡宮\n源氏の守り神です。", OutputCheck.spoken("## 鶴岡八幡宮\n源氏の守り神です。"))
+        assertEquals("いい風ですね。", OutputCheck.spoken("（明るい声で）**いい風ですね。**"))
+        assertEquals("いい風ですね。", OutputCheck.spoken("**（明るい声で）**いい風ですね。"))
+    }
+
+    @Test
+    fun `ordinary narration is spoken as is`() {
+        val text = "石段は61段、#1 の札がある門です。snake_case も残ります。"
+        assertEquals(text, OutputCheck.spoken(text))
+    }
 }

@@ -3,7 +3,8 @@ package io.github.duwenji.yorisoi.kit.llm
 /**
  * Contact details the AI must not read out (AI-ROLES H-6 ③): a reply with a URL, an email
  * address or a phone number is not used, and a fixed line stands in. Stage directions the AI
- * sometimes writes for its own delivery are taken out before anything else, since they'd be read out.
+ * sometimes writes for its own delivery, and Markdown marks such as 「**続き：**」, are taken out
+ * before anything else, since they'd be read out.
  */
 object OutputCheck {
     private val URL = Regex("https?://|www\\.", RegexOption.IGNORE_CASE)
@@ -19,8 +20,18 @@ object OutputCheck {
         "(?:^|(?<=[。！？!?\n]))[ \t　]*[（(][^（）()\n]{0,40}(?:口調|声|トーン|調子|語り|話し|間を|笑|微笑|ささや|囁)[^（）()\n]{0,40}[）)][ \t　]*",
     )
 
+    /** Bold and italic marks (「**」「*」「__」) and headings at the start of a line. Single underscores stay. */
+    private val EMPHASIS = Regex("\\*+|_{2,}")
+    private val HEADING = Regex("(?m)^[ \t　]*#{1,6}[ \t　]+")
+
+    /** [text] as it may be read out: without stage directions and Markdown marks. */
+    fun spoken(text: String): String = withoutStageDirections(withoutMarkdown(text))
+
     /** [text] without the stage directions in it. */
     fun withoutStageDirections(text: String): String = STAGE_DIRECTION.replace(text, "").trim()
+
+    /** [text] without Markdown's bold, italic and heading marks. */
+    fun withoutMarkdown(text: String): String = HEADING.replace(EMPHASIS.replace(text, ""), "").trim()
 
     /** What in [text] makes it unusable, or null when it may be used. */
     fun violation(text: String): String? {
