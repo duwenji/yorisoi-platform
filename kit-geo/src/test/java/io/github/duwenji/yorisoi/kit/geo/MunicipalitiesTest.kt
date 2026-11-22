@@ -26,4 +26,13 @@ bad,line
     fun `no point within 5 km gives none`() {
         assertNull(points.at(36.3000, 135.9000))
     }
+
+    @Test
+    fun `the index gives the prefectures a point may be in`() {
+        val index = """{"version":1,"prefectures":{"17":[36.0,136.2,37.9,137.4],"18":[35.3,135.4,36.35,136.9]}}"""
+        assertEquals(listOf("18"), Municipalities.prefecturesAt(index, 35.9, 136.2))
+        assertEquals("near the border, both", listOf("17", "18"), Municipalities.prefecturesAt(index, 36.3, 136.3))
+        assertEquals(emptyList<String>(), Municipalities.prefecturesAt(index, 40.0, 140.0))
+        assertEquals(emptyList<String>(), Municipalities.prefecturesAt("not json", 36.0, 136.0))
+    }
 }
