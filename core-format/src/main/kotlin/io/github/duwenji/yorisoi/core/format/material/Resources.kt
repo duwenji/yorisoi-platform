@@ -3,7 +3,7 @@ package io.github.duwenji.yorisoi.core.format.material
 import io.github.duwenji.yorisoi.core.format.HEADING_PATTERN
 import io.github.duwenji.yorisoi.core.format.RejectCode
 import io.github.duwenji.yorisoi.core.format.StationFiles
-import io.github.duwenji.yorisoi.core.format.URL_PATTERN
+import io.github.duwenji.yorisoi.core.format.findUrl
 import io.github.duwenji.yorisoi.core.format.charCount
 import io.github.duwenji.yorisoi.core.format.checkLength
 import io.github.duwenji.yorisoi.core.format.decodeUtf8
@@ -242,7 +242,7 @@ object ResourceReader {
         val text = decodeUtf8(bytes, path, CODE)
         if (text.startsWith('﻿') || '\r' in text) reject(CODE, "$id: $path must be UTF-8 without BOM, with LF")
         if (HEADING_PATTERN.containsMatchIn(text) || MARKUP.containsMatchIn(text)) reject(CODE, "$id: $path has Markdown headings, links or images")
-        URL_PATTERN.find(text)?.let { reject(CODE, "$id: $path has a URL \"${it.value}\"") }
+        findUrl(text)?.let { reject(CODE, "$id: $path has a URL \"$it\"") }
         val trimmed = text.trim()
         if (trimmed.isEmpty()) reject(CODE, "$id: $path is empty")
         if (trimmed.charCount() > MAX_TEXT_CHARS) reject(CODE, "$id: $path has ${trimmed.charCount()} chars (max $MAX_TEXT_CHARS)")

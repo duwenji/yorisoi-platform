@@ -28,7 +28,8 @@ internal val ID_PATTERN = Regex("[a-z0-9-]{3,40}")
 internal val ACCOUNT_ID_PATTERN = Regex("sg1[a-z2-7]{32}")
 // The text checks every path shares live in core-text (ADR-AGENT A-52).
 internal val HEADING_PATTERN = WrittenText.HEADING
-internal val URL_PATTERN = WrittenText.URL
+/** The first URL in [text], full-width forms included (core-text WrittenText), or null. */
+internal fun findUrl(text: String): String? = WrittenText.findUrl(text)
 
 /** Strict UTF-8, or a rejection with [code]. */
 internal fun decodeUtf8(bytes: ByteArray, path: String, code: RejectCode): String = try {

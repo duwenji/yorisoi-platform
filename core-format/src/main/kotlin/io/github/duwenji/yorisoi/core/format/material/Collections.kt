@@ -11,7 +11,7 @@ import io.github.duwenji.yorisoi.core.format.RejectCode
 import io.github.duwenji.yorisoi.core.format.SignedKind
 import io.github.duwenji.yorisoi.core.format.StationFiles
 import io.github.duwenji.yorisoi.core.format.Strictness
-import io.github.duwenji.yorisoi.core.format.URL_PATTERN
+import io.github.duwenji.yorisoi.core.format.findUrl
 import io.github.duwenji.yorisoi.core.format.bool
 import io.github.duwenji.yorisoi.core.format.checkLength
 import io.github.duwenji.yorisoi.core.format.int
@@ -184,7 +184,7 @@ object CollectionValidator {
             resources.items.mapNotNull { r -> r.alt?.let { "${r.id} alt" to it } }
         for ((where, text) in texts) {
             if ("{{" in text) reject(RejectCode.FORBIDDEN_TEXT, "$where: \"{{\"")
-            URL_PATTERN.find(text)?.let { reject(RejectCode.FORBIDDEN_TEXT, "$where: URL \"${it.value}\"") }
+            findUrl(text)?.let { reject(RejectCode.FORBIDDEN_TEXT, "$where: URL \"$it\"") }
         }
     }
 }

@@ -36,6 +36,9 @@ class TextSafetyVectorsTest {
             if (c.has("written")) {
                 assertEquals("written: $text", c.opt("written").takeUnless { it == JSONObject.NULL }, writtenCode(text)); checked++
             }
+            if (c.has("instruction")) {
+                assertEquals("instruction: $text", c.getBoolean("instruction"), InstructionCheck.looksLikeInstruction(text)); checked++
+            }
             if (c.has("spoken")) {
                 assertEquals("spoken: $text", c.getString("spoken"), SpokenText.spoken(text)); checked++
             }
