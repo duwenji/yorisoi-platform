@@ -75,6 +75,7 @@ class StandardToolsTest {
     fun `the facts taken before the preparation follow the channel's policy`() {
         val koyomi = listOf(
             KoyomiFact("s", KoyomiKind.SEKKI, "小雪", "しょうせつ", today, Relation.Today, "雪が降り始めるころ"),
+            KoyomiFact("h", KoyomiKind.HOLIDAY, "勤労感謝の日", null, today, Relation.Today, "勤労をたつとび、生産を祝い、国民たがいに感謝しあう日として、国民の祝日に関する法律が定める祝日"),
             KoyomiFact("r", KoyomiKind.ROKUYOU, "仏滅", null, today, Relation.Today, "六曜"),
         )
         val obs = SeasonObsFile.parse("""{"season":"2027","attribution":"気象庁","observations":[{"kind":"first-snow","date":"2026-11-22","place":"福井地方気象台","prefecture":"18","fromNormal":-11,"fromLastYear":-11}]}""")
@@ -82,7 +83,8 @@ class StandardToolsTest {
         val text = tools(AgentPolicy(setOf("calendar", "season", "livelihood"), calendarSkip = setOf(KoyomiKind.ROKUYOU)), PrepInput(today, "18", koyomi = koyomi, seasonObs = obs)).prefetch(book)
         assertTrue(text.contains("R1 今日 11月22日は小雪"))
         assertFalse("rokuyou skipped", text.contains("仏滅"))
-        assertTrue(text.contains("福井地方気象台で 11月22日に初雪を観測"))
+        assertTrue("a long note is cut at a 「、」, not mid-word", text.contains("今日 11月22日は勤労感謝の日（勤労をたつとび、生産を祝い、国民たがいに感謝しあう日として）"))
+        assertTrue("an observation says how it stands to the day", text.contains("福井地方気象台で 今日 11月22日に初雪を観測"))
         assertFalse("no events scene", text.contains("## 催し"))
         assertEquals(setOf("calendar", "season_obs"), book.all.map { it.tool }.toSet())
 

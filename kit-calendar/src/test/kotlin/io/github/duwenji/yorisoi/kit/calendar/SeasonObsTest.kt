@@ -42,6 +42,9 @@ class SeasonObsTest {
         assertEquals("京都地方気象台で 11月18日にいちょうの黄葉日を観測、平年並み", obs[3].fact())
         assertEquals("11月20日に白山の初冠雪を確認", obs[4].fact())
         assertTrue(obs.all { it.fact().length <= 60 })
+        // With the day, how it stands to it: the speaker took yesterday's first snow for today's.
+        assertEquals("福井地方気象台で 昨日 11月22日に初雪を観測、平年より 11 日早い、昨年より 11 日早い", obs[0].fact(java.time.LocalDate.of(2026, 11, 23)))
+        assertEquals("京都地方気象台で 5日前の 11月18日にいちょうの黄葉日を観測、平年並み", obs[3].fact(java.time.LocalDate.of(2026, 11, 23)))
     }
 
     @Test
