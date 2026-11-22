@@ -32,13 +32,16 @@ class PreparerTest {
     }
     private val runner = ToolRunner { _, _, _ -> ToolOutcome("（なし）", emptyList()) }
 
+    // The store's clock on the test's day: a day's threads last until the day ends in Japan.
+    private fun store() = ThreadStore(tmp.newFolder(), now = { Instant.parse("2026-11-22T03:00:00Z") })
+
     private fun book() = ResultBook().apply { add("calendar", listOf("今日 11月22日は小雪")); add("season_obs", listOf("福井で初雪")) }
     private fun key(municipality: String = "182010") = PrepKey("standard", 3, municipality, today)
 
     @Test
     fun `a preparation keeps its threads, and the same day and place take them again`() = runBlocking {
         val records = ArrayList<PrepRecord>()
-        val p = Preparer(tools, { model }, ThreadStore(tmp.newFolder()), { 100 }, DayCount.inMemory { today }, onRecord = { records += it })
+        val p = Preparer(tools, { model }, store(), { 100 }, DayCount.inMemory { today }, onRecord = { records += it })
         val first = p.prepare(Trigger.STARTED, key(), system, "input", book(), setOf("calendar", "season"), runner) as PrepOutcome.Ready
         assertEquals(false, first.fromCache)
         assertEquals("福井で初雪", first.kept.threads.single().steps[1].results.single().text)
@@ -52,7 +55,7 @@ class PreparerTest {
     @Test
     fun `the walk's preparations, the day's share and a bad prompt stop it`() = runBlocking {
         val day = DayCount.inMemory { today }
-        val p = Preparer(tools, { model }, ThreadStore(tmp.newFolder()), { 10 }, day, PrepLimits(preparationsPerWalk = 4))
+        val p = Preparer(tools, { model }, store(), { 10 }, day, PrepLimits(preparationsPerWalk = 4))
         assertEquals(PrepOutcome.None(Skipped.BAD_PROMPT), p.prepare(Trigger.STARTED, key("a"), "no headings", "input", book(), setOf("calendar", "season"), runner))
         p.prepare(Trigger.STARTED, key("b"), system, "input", book(), setOf("calendar", "season"), runner)
         // 10 calls a day × 0.2 = 2: the first preparation used them both.
@@ -60,12 +63,12 @@ class PreparerTest {
         assertEquals(PrepOutcome.None(Skipped.DAY_LIMIT), p.prepare(Trigger.MUNICIPALITY_CHANGED, key("c"), system, "input", book(), setOf("calendar", "season"), runner))
         assertTrue("the hint maker is held to the same share", !p.takeHintCall())
 
-        val walk = Preparer(tools, { model }, ThreadStore(tmp.newFolder()), { 100 }, DayCount.inMemory { today }, PrepLimits(preparationsPerWalk = 1))
+        val walk = Preparer(tools, { model }, store(), { 100 }, DayCount.inMemory { today }, PrepLimits(preparationsPerWalk = 1))
         walk.prepare(Trigger.STARTED, key("d"), system, "input", book(), setOf("calendar", "season"), runner)
         assertEquals(PrepOutcome.None(Skipped.WALK_LIMIT), walk.prepare(Trigger.MUNICIPALITY_CHANGED, key("e"), system, "input", book(), setOf("calendar", "season"), runner))
         walk.startWalk()
         assertTrue(walk.prepare(Trigger.STARTED, key("e"), system, "input", book(), setOf("calendar", "season"), runner) is PrepOutcome.Ready)
-        assertEquals(PrepOutcome.None(Skipped.NO_AI), Preparer(tools, { null }, ThreadStore(tmp.newFolder()), { 100 }, DayCount.inMemory()).prepare(Trigger.STARTED, key(), system, "i", book(), setOf("calendar"), runner))
+        assertEquals(PrepOutcome.None(Skipped.NO_AI), Preparer(tools, { null }, store(), { 100 }, DayCount.inMemory()).prepare(Trigger.STARTED, key(), system, "i", book(), setOf("calendar"), runner))
     }
 
     @Test
