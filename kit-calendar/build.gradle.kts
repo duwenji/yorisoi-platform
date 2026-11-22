@@ -22,6 +22,9 @@ kotlin {
 
 dependencies {
     implementation(libs.astronomy)
+    // The season's observations file (docs/contracts/api/season-obs.schema.json). Android ships org.json.
+    compileOnly(libs.json)
+    testImplementation(libs.json)
     testImplementation(libs.junit)
     // Only to check the channel format spells the kinds the same way (REQ-KOYOMI F-21).
     testImplementation(project(":core-format"))
