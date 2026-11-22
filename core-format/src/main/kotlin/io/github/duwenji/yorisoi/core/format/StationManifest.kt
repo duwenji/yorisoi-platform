@@ -28,6 +28,8 @@ data class StationManifest(
     val genres: Set<Genre> = emptySet(),
     /** API-CHANNEL-PACKAGE: what an app must implement for this channel to make sense. */
     val requires: Set<Feature> = emptySet(),
+    /** platform ADR-AGENT A-6: whether the preparer is used, and within what; [ChannelAgent.OFF] when left out. */
+    val agent: ChannelAgent = ChannelAgent.OFF,
     /**
      * Values read with [Strictness.APP] that this core-format doesn't know, where they'd restrict
      * the channel (API-CHANNEL-PACKAGE「アプリでの知らない値」). An app doesn't use such a channel
