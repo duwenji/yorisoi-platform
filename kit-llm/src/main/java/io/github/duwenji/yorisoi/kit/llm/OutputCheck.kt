@@ -1,72 +1,27 @@
 package io.github.duwenji.yorisoi.kit.llm
 
+import io.github.duwenji.yorisoi.core.text.ContactCheck
+import io.github.duwenji.yorisoi.core.text.SpokenText
+
 /**
  * Contact details the AI must not read out (AI-ROLES H-6 ③): a reply with a URL, an email
- * address or a phone number is not used, and a fixed line stands in. Stage directions the AI
- * sometimes writes for its own delivery, Markdown marks such as 「**続き：**」, and notes on how it
- * wrote the reply (「〜にひと言触れました」), are taken out before anything else, since they'd be read out.
+ * address or a phone number is not used, and a fixed line stands in. Stage directions, Markdown marks
+ * and notes on how the reply was written are taken out before anything else, since they'd be read out.
+ * The checks themselves live in core-text, which every path shares (ADR-AGENT A-52).
  */
 object OutputCheck {
-    private val URL = Regex("https?://|www\\.", RegexOption.IGNORE_CASE)
-    private val EMAIL = Regex("[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)+")
-    // Japanese numbers start with 0: 03-1234-5678, 0120-123-456, 090 1234 5678, (0467)22-1234, 0312345678.
-    private val PHONE = Regex("(?<![0-9])[(]?0[0-9]{1,4}[)]?[-\\s]?[0-9]{1,4}[-\\s]?[0-9]{3,4}(?![0-9])")
-
-    /**
-     * A bracketed direction at the start of a sentence about how to say it, such as
-     * 「（しっとりと、落ち着いた口調で）」. Readings like 吽形（うんぎょう） follow a word, so they stay.
-     */
-    private val STAGE_DIRECTION = Regex(
-        "(?:^|(?<=[。！？!?\n]))[ \t　]*[（(][^（）()\n]{0,40}(?:口調|声|トーン|調子|語り|話し|間を|笑|微笑|ささや|囁)[^（）()\n]{0,40}[）)][ \t　]*",
-    )
-
-    /** Bold and italic marks (「**」「*」「__」) and headings at the start of a line. Single underscores stay. */
-    private val EMPHASIS = Regex("\\*+|_{2,}")
-    private val HEADING = Regex("(?m)^[ \t　]*#{1,6}[ \t　]+")
-
-    /**
-     * Words a line of speech doesn't use but a note on the reply does: the prompt's own words for the
-     * reply and the user, and saying what was or wasn't mentioned. 「余談」 stays: 「余談ですが」 is speech.
-     */
-    private val META_NOTE = Regex("触れました|触れていません|言及し(?:ま|な|て)|本文|字数|文字数|プロンプト|指示(?:に従|どおり|通り|のとおり)|利用者|出力し")
-
     /** [text] as it may be read out: without stage directions, Markdown marks and notes on the reply. */
-    fun spoken(text: String): String = withoutMetaNotes(withoutStageDirections(withoutMarkdown(text)))
+    fun spoken(text: String): String = SpokenText.spoken(text)
 
     /** [text] without the lines that are notes on the reply rather than speech; the rest as it was. */
-    fun withoutMetaNotes(text: String): String =
-        text.lines().filterNot { META_NOTE.containsMatchIn(it) }.joinToString("\n").replace(BLANK_LINES, "\n\n").trim()
-
-    private val BLANK_LINES = Regex("\n{3,}")
+    fun withoutMetaNotes(text: String): String = SpokenText.withoutMetaNotes(text)
 
     /** [text] without the stage directions in it. */
-    fun withoutStageDirections(text: String): String = STAGE_DIRECTION.replace(text, "").trim()
+    fun withoutStageDirections(text: String): String = SpokenText.withoutStageDirections(text)
 
     /** [text] without Markdown's bold, italic and heading marks. */
-    fun withoutMarkdown(text: String): String = HEADING.replace(EMPHASIS.replace(text, ""), "").trim()
+    fun withoutMarkdown(text: String): String = SpokenText.withoutMarkdown(text)
 
     /** What in [text] makes it unusable, or null when it may be used. */
-    fun violation(text: String): String? {
-        val plain = normalize(text)
-        return when {
-            URL.containsMatchIn(plain) -> "a URL"
-            EMAIL.containsMatchIn(plain) -> "an email address"
-            PHONE.containsMatchIn(plain) -> "a phone number"
-            else -> null
-        }
-    }
-
-    /** Full-width digits, letters and signs as their ASCII forms, and every dash as '-'. */
-    private fun normalize(text: String): String = buildString(text.length) {
-        for (c in text) {
-            append(
-                when (c) {
-                    in '！'..'～' -> c - 0xFEE0
-                    '‐', '‑', '‒', '–', '—', '―', 'ー', '−' -> '-'
-                    '　' -> ' '
-                    else -> c
-                },
-            )
-        }
-    }
+    fun violation(text: String): String? = ContactCheck.violation(text)
 }

@@ -21,6 +21,7 @@ kotlin {
 }
 
 dependencies {
+    implementation(project(":core-text"))
     // Android ships org.json; bundling the jar into the app would clash with it
     // (lint: DuplicatePlatformClasses). Other users add it themselves.
     compileOnly(libs.json)

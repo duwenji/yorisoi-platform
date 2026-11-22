@@ -1,5 +1,6 @@
 package io.github.duwenji.yorisoi.core.format
 
+import io.github.duwenji.yorisoi.core.text.WrittenText
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -25,8 +26,9 @@ internal fun reject(code: RejectCode, detail: String): Nothing = throw Reject(co
 
 internal val ID_PATTERN = Regex("[a-z0-9-]{3,40}")
 internal val ACCOUNT_ID_PATTERN = Regex("sg1[a-z2-7]{32}")
-internal val HEADING_PATTERN = Regex("(?m)^\\s*#")
-internal val URL_PATTERN = Regex("https?://|www\\.", RegexOption.IGNORE_CASE)
+// The text checks every path shares live in core-text (ADR-AGENT A-52).
+internal val HEADING_PATTERN = WrittenText.HEADING
+internal val URL_PATTERN = WrittenText.URL
 
 /** Strict UTF-8, or a rejection with [code]. */
 internal fun decodeUtf8(bytes: ByteArray, path: String, code: RejectCode): String = try {

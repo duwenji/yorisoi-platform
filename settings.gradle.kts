@@ -22,6 +22,7 @@ rootProject.name = "yorisoi-platform"
 // is its artifactId, so an app's composite build swaps the published versions for these sources
 //.
 include(":core-format")
+include(":core-text")
 include(":core-prompt")
 include(":kit-ui")
 include(":kit-voice")
