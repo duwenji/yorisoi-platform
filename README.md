@@ -10,6 +10,7 @@
 |---|---|---|
 | `core-format` | JVM | チャンネル・素材集の形式（API-CHANNEL-PACKAGE・API-MATERIALS）、その確認と署名、承認済みチャンネル・リスト（API-CHANNEL-LIST）、エコシステム共通の語彙。使う側で org.json が要る（Android には入っている） |
 | `core-text` | JVM | 文章の機械の確認（URL・メールアドレス・電話番号・見出し）と、読み上げる前に除く書き方（ト書き・Markdown・返事の書き方のメモ）。スロット・素材の確かめ（core-format）と AI の出力の確かめ（kit-llm）が同じものを使う |
+| `core-web` | JVM | 話の準備で読むウェブの決まり（ADR-AGENT）: 出どころの台帳と除外リストの読み取り、読んでよい URL（同じサイトの判定に Public Suffix List（MPL 2.0）を同梱）、`robots.txt`、ページの本文とリンク、RSS・Atom。通信と保存はしない。使う側で org.json が要る |
 | `core-prompt` | JVM | プロンプトのテンプレート（Mustache の一部） |
 | `kit-companion` | JVM | いま何を話すかの判定のエンジン（ルールの並びとゲート）、開発者モードの記録（`SessionRecorder`。使う側で org.json が要る） |
 | `kit-channel` | JVM | アプリの中のチャンネル（利用者の変更を重ねた設定値とスロット）、チャンネルの一覧と使っているチャンネル、組み込みのチャンネルの読み込み、第三者のチャンネルの素材。第三者のチャンネルの取り込み（`remote`: `ChannelSync`・`ThirdPartyChannels`）、前もって取る素材の計画と素材提供者（`material`: `MaterialPlan`・`SelectorPlan`・`Producer`・`Producers`・`CueFinder`・`CuePresenter`・`Grounding`・`ResourceProducer`・`SelectorProducer`。題材の `Subject`・素材の `Content`・アプリの文脈の `Situation` はアプリが足せる）、チャンネルの通報（`report`）。使う側で org.json が要る（`OkHttpProviderHttp`・`TinkEd25519` を使うなら OkHttp・Tink も） |

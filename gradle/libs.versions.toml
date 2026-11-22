@@ -18,6 +18,7 @@ tink = "1.23.0"
 json = "20240303"
 junit = "4.13.2"
 astronomy = "2.1.19"
+jsoup = "1.18.3"
 
 [libraries]
 compose-bom = { module = "androidx.compose:compose-bom", version.ref = "composeBom" }
@@ -47,6 +48,7 @@ tink-android = { module = "com.google.crypto.tink:tink-android", version.ref = "
 json = { module = "org.json:json", version.ref = "json" }
 junit = { module = "junit:junit", version.ref = "junit" }
 astronomy = { module = "io.github.cosinekitty:astronomy", version.ref = "astronomy" }
+jsoup = { module = "org.jsoup:jsoup", version.ref = "jsoup" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

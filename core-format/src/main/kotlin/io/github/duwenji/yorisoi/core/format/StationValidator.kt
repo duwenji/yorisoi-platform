@@ -264,7 +264,7 @@ object StationValidator {
             if (text.startsWith('﻿')) reject(RejectCode.FORBIDDEN_TEXT, "${slot.path}: byte order mark")
             if ('\r' in text) reject(RejectCode.FORBIDDEN_TEXT, "${slot.path}: CR line breaks")
             if ("{{" in text) reject(RejectCode.FORBIDDEN_TEXT, "${slot.path}: \"{{\"")
-            URL_PATTERN.find(text)?.let { reject(RejectCode.FORBIDDEN_TEXT, "${slot.path}: URL \"${it.value}\"") }
+            findUrl(text)?.let { reject(RejectCode.FORBIDDEN_TEXT, "${slot.path}: URL \"$it\"") }
             if (HEADING_PATTERN.containsMatchIn(text)) reject(RejectCode.FORBIDDEN_TEXT, "${slot.path}: heading")
             val trimmed = text.trim()
             if (trimmed.isEmpty()) reject(RejectCode.BAD_VALUE, "${slot.path} is empty")
