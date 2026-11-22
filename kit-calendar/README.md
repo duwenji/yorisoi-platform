@@ -21,7 +21,7 @@ val facts = koyomi.on(LocalDate.now(ZoneOffset.ofHours(9)))
 
 ## 依存
 
-天文の計算に Astronomy Engine（`io.github.cosinekitty:astronomy:2.1.19`、MIT ライセンス）を使います。Maven Central にないので、使う側の `settings.gradle.kts` にも、JitPack をこの group だけに絞って足してください。
+季節の観測のファイルを読むのに org.json を使います（Android には入っています。ほかで使うときは足してください）。天文の計算に Astronomy Engine（`io.github.cosinekitty:astronomy:2.1.19`、MIT ライセンス）を使います。Maven Central にないので、使う側の `settings.gradle.kts` にも、JitPack をこの group だけに絞って足してください。
 
 ```kotlin
 exclusiveContent {
