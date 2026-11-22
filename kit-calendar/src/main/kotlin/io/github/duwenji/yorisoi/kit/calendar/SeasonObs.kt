@@ -31,19 +31,28 @@ data class SeasonObservation(
 ) {
     /**
      * The observation as one fact for the preparer and the speaker (at most 60 characters), with the values as
-     * the 気象庁 gave them (ADR-AGENT A-28: they are not changed).
+     * the 気象庁 gave them (ADR-AGENT A-28: they are not changed). With [today] the date says how it stands to the
+     * day too (「昨日 11月22日」): the speaker otherwise took an observation of yesterday for today's.
      */
-    fun fact(): String {
+    fun fact(today: LocalDate? = null): String {
         val what = when (kind) {
             ObsKind.PHENOLOGY -> name ?: kind.label
             ObsKind.SNOW_CAP -> "${place}の初冠雪"
             else -> kind.label
         }
         val at = if (kind == ObsKind.SNOW_CAP) "" else "${place}で "
-        val head = "$at${date.monthValue}月${date.dayOfMonth}日に${what}を${if (kind == ObsKind.SNOW_CAP) "確認" else "観測"}"
+        val head = "$at${relative(today)}${date.monthValue}月${date.dayOfMonth}日に${what}を${if (kind == ObsKind.SNOW_CAP) "確認" else "観測"}"
         val tail = listOfNotNull(fromNormal?.let { "平年${diff(it)}" }, fromLastYear?.let { "昨年${diff(it)}" }).joinToString("、")
         val text = if (tail.isEmpty()) head else "$head、$tail"
         return if (text.length <= 60) text else head.take(60)
+    }
+
+    private fun relative(today: LocalDate?): String = when (today?.let { java.time.temporal.ChronoUnit.DAYS.between(date, it) }) {
+        null -> ""
+        0L -> "今日 "
+        1L -> "昨日 "
+        2L -> "一昨日 "
+        else -> "${java.time.temporal.ChronoUnit.DAYS.between(date, today)}日前の "
     }
 
     private fun diff(d: Int): String = when {

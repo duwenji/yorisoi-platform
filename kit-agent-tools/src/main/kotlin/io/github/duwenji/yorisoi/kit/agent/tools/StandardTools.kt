@@ -9,6 +9,7 @@ import io.github.duwenji.yorisoi.core.agent.ToolOutcome
 import io.github.duwenji.yorisoi.core.agent.ToolRunner
 import io.github.duwenji.yorisoi.core.web.ReadPolicy
 import io.github.duwenji.yorisoi.core.web.Source
+import io.github.duwenji.yorisoi.kit.calendar.KoyomiFact
 import io.github.duwenji.yorisoi.kit.web.Fetched
 import io.github.duwenji.yorisoi.kit.web.HintCache
 import io.github.duwenji.yorisoi.kit.web.PageFetcher
@@ -68,7 +69,7 @@ class StandardTools(
                 .filter { it.kind !in policy.calendarSkip }
                 .sortedBy { if (it.kind in policy.calendarPrefer) 0 else 1 }
                 .take(8)
-                .map { "${dayText(it.date)}${if (it.date == input.date) "は" else "、"}${it.name}（${it.note.take(24)}）" }
+                .map { koyomiText(it) }
             section("暦", book.add("calendar", facts, Origin("暦", "national")))
         }
         if ("season" in policy.scenes) {
@@ -77,7 +78,7 @@ class StandardTools(
                 section("天気", book.add("weather", listOf("今は${w.description}、気温 ${w.temperatureC.toInt()} 度$sunset"), Origin("天気予報", "national")))
             }
             val obs = input.seasonObs?.around(input.prefecture, input.date).orEmpty()
-            section("季節の観測", book.add("season_obs", obs.map { it.fact() }, Origin("気象庁", "national", url = obs.firstOrNull()?.source)))
+            section("季節の観測", book.add("season_obs", obs.map { it.fact(input.date) }, Origin("気象庁", "national", url = obs.firstOrNull()?.source)))
         }
         if ("events" in policy.scenes) {
             val ev = input.events.take(10).map { n ->
@@ -189,17 +190,36 @@ class StandardTools(
         return ToolOutcome(book.render(rs), rs)
     }
 
+    /**
+     * A calendar fact in one line of at most [FACT_MAX] characters: its note whole, or cut at a 「、」「。」 that leaves it
+     * whole up to there, or left out; never cut mid-word (the speaker read 「感謝しあ」 out as it was).
+     */
+    private fun koyomiText(f: KoyomiFact): String {
+        val head = "${dayText(f.date)}${if (f.date == input.date) "は" else "、"}${f.name}"
+        val room = FACT_MAX - head.length - 2
+        val note = f.note.trim().trimEnd('。')
+        val fit = when {
+            note.isEmpty() || room <= 0 -> null
+            note.length <= room -> note
+            else -> note.take(room).let { cut -> cut.lastIndexOfAny(charArrayOf('、', '。')).takeIf { it > 0 }?.let { cut.take(it) } }
+        }
+        return if (fit != null) "$head（$fit）" else head
+    }
+
     private fun dayText(d: LocalDate): String {
         val days = ChronoUnit.DAYS.between(input.date, d)
         val md = "${d.monthValue}月${d.dayOfMonth}日"
         return when (days) {
             0L -> "今日 $md"
             1L -> "明日 $md"
+            -1L -> "昨日 $md"
             else -> md
         }
     }
 
     companion object {
+        /** One result is one fact of at most this many characters (ADR-AGENT A-12). */
+        const val FACT_MAX = 60
         private val KIND_LABEL = mapOf(
             "national" to "国の機関", "prefecture" to "都道府県", "municipality" to "市区町村",
             "tourism" to "観光協会", "association" to "団体", "channel" to "チャンネル",
