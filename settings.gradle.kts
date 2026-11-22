@@ -24,6 +24,7 @@ rootProject.name = "yorisoi-platform"
 include(":core-format")
 include(":core-text")
 include(":core-web")
+include(":core-agent")
 include(":core-prompt")
 include(":kit-ui")
 include(":kit-voice")
