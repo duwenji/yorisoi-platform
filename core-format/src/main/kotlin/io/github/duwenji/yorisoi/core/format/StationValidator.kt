@@ -254,6 +254,7 @@ object StationValidator {
             activities = activities,
             genres = genres,
             requires = requires,
+            agent = ChannelAgent.read(json, lenient),
             unknownRestrictions = unknownRestrictions,
         )
     }
