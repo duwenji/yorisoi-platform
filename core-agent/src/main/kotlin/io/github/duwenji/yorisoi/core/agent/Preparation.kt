@@ -26,12 +26,12 @@ fun interface PreparerModel {
      * @param tools the tools offered on this turn
      * @param mustUse whether the AI must answer with a tool (the last turn, A-15)
      */
-    fun call(system: String, turns: List<Turn>, tools: List<ToolDef>, mustUse: Boolean): Reply
+    suspend fun call(system: String, turns: List<Turn>, tools: List<ToolDef>, mustUse: Boolean): Reply
 }
 
 /** The tools the app runs (kit-agent-tools). It adds its results to the book and answers in words for the AI. */
 fun interface ToolRunner {
-    fun run(name: String, input: JSONObject, book: ResultBook): ToolOutcome
+    suspend fun run(name: String, input: JSONObject, book: ResultBook): ToolOutcome
 }
 
 /** A tool's answer for the AI and the results it added. */
@@ -52,7 +52,7 @@ class Preparation(
     private val runner: ToolRunner,
     private val maxCalls: Int = 3,
 ) {
-    fun run(system: String, input: String, book: ResultBook, scenes: Set<String>): Prepared {
+    suspend fun run(system: String, input: String, book: ResultBook, scenes: Set<String>): Prepared {
         val turns = ArrayList<Turn>()
         turns += Turn.Input(input)
         val toolCalls = ArrayList<String>()

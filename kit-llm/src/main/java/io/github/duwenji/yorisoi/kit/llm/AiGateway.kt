@@ -1,5 +1,10 @@
 package io.github.duwenji.yorisoi.kit.llm
 
+import io.github.duwenji.yorisoi.core.agent.AgentTools
+import io.github.duwenji.yorisoi.core.agent.PreparerModel
+import io.github.duwenji.yorisoi.core.agent.Reply
+import io.github.duwenji.yorisoi.core.agent.ToolDef
+import io.github.duwenji.yorisoi.core.agent.Turn
 import kotlin.coroutines.cancellation.CancellationException
 
 /**
@@ -19,7 +24,12 @@ data class AiConnection(
     val model: String = provider.defaultModel,
     val baseUrl: String = provider.defaultBaseUrl,
     val dailyLimit: Int? = null,
+    /** The preparer's model on the user's own key; blank for the same as [model] (platform ADR-AGENT A-46). */
+    val agentModel: String = "",
 ) {
+    /** The model the preparer runs on with the user's own key. */
+    val preparerModel: String get() = agentModel.ifBlank { model }
+
     /** Whether a call can be made: the build has a relay, or the key, model and address are set. */
     fun isConfigured(operatorAvailable: Boolean): Boolean = when (route) {
         AiRoute.OPERATOR -> operatorAvailable
@@ -107,6 +117,42 @@ class AiGateway(
         // Recorded as the AI wrote it, so stage directions and marks it slipped in can still be counted.
         report(text, null)
         return OutputCheck.spoken(text)
+    }
+
+    /**
+     * The preparer (platform ADR-AGENT A-10・A-16・A-46) on today's route: the operator's relay (its model for the
+     * use `agent`), or the user's own key with [AiConnection.preparerModel]. Each call counts as one call of the
+     * day, like [generate]; the caller keeps the preparer within its share of them (A-33). Null when no AI is set up.
+     */
+    fun preparer(tools: AgentTools): PreparerModel? {
+        val c = connection()
+        if (!c.isConfigured(relay != null)) return null
+        val model: PreparerModel = when (c.route) {
+            AiRoute.OPERATOR -> relay?.let { r -> PreparerModel { s, turns, t, must -> r.agent(s, turns, t, must, tools.version) } } ?: return null
+            AiRoute.OWN_KEY -> when (c.provider) {
+                Provider.CLAUDE -> ClaudeToolModel(c.apiKey, c.preparerModel)
+                else -> OpenAiToolModel(c.baseUrl, c.apiKey, c.preparerModel)
+            }
+        }
+        return PreparerModel { system, turns, offered, mustUse -> counted(c, system, turns, offered) { model.call(system, turns, offered, mustUse) } }
+    }
+
+    private suspend fun counted(c: AiConnection, system: String, turns: List<Turn>, offered: List<ToolDef>, call: suspend () -> Reply): Reply {
+        if (limitReached() || !takeCall(c)) throw AiUnavailableException("The daily limit of AI calls is reached")
+        val startedAt = System.currentTimeMillis()
+        val asked = (turns.lastOrNull() as? Turn.Answers)?.answers?.joinToString("\n") { it.text } ?: (turns.lastOrNull() as? Turn.Input)?.text.orEmpty()
+        fun report(reply: String?, error: String?) = onCall(
+            AiCall("agent", if (c.route == AiRoute.OPERATOR) c.name else c.preparerModel, system, asked, reply, error, null, System.currentTimeMillis() - startedAt),
+        )
+        return try {
+            call().also { r -> report(r.uses.joinToString("\n") { "${it.name} ${it.input}" }.ifEmpty { "（道具なし: ${offered.joinToString { it.name }}）" }, null) }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            report(null, "${e.javaClass.simpleName}: ${e.message}")
+            if (e is RelayException && e.code == "daily_limit_reached") throw AiUnavailableException("The daily limit of AI calls is reached", e)
+            throw e
+        }
     }
 
     /** Counts a call on the user's own key against their limit; the relay counts the operator's AI. */

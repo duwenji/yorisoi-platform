@@ -27,6 +27,7 @@ dependencies {
     compileOnly(libs.json)
 
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.core)
     testImplementation(libs.json)
 }
 

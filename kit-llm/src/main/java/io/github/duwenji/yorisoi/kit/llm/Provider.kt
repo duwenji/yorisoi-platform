@@ -23,8 +23,12 @@ enum class Provider(
     }
 }
 
-/** What a call is for; the operator's relay counts them apart (API-AI-RELAY `kind`). */
-enum class Purpose { GUIDE, CHAT }
+/**
+ * What a call is for; the operator's relay counts them apart and picks the model by it (API-AI-RELAY `kind`;
+ * platform ADR-AGENT A-16): the speaker's narration and talk, and the hint maker's hints. The preparer's
+ * turns go by [AiGateway.preparer].
+ */
+enum class Purpose(val kind: String) { GUIDE("guide"), CHAT("chat"), HINTS("hints") }
 
 /** A text-generation backend. */
 interface LlmClient {

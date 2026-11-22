@@ -11,6 +11,11 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import io.github.duwenji.yorisoi.core.agent.Reply
+import io.github.duwenji.yorisoi.core.agent.ToolDef
+import io.github.duwenji.yorisoi.core.agent.ToolUse
+import io.github.duwenji.yorisoi.core.agent.Turn
+import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.IOException
@@ -76,12 +81,43 @@ class RelayClient(
 
     override suspend fun generate(system: String, user: String, purpose: Purpose): String = withContext(Dispatchers.IO) {
         val body = JSONObject()
-            .put("kind", if (purpose == Purpose.GUIDE) "guide" else "chat")
+            .put("kind", purpose.kind)
             .put("system", system)
             .put("user", user)
         val out = authorized { token -> call("POST", "/v1/generate", body, token) }
         out.optJSONObject("quota")?.let { _quota.value = parseQuota(it) }
         out.optString("text").trim()
+    }
+
+    /**
+     * One preparer's turn on the operator's AI (POST /v1/agent; platform ADR-AGENT A-45): the conversation, the
+     * version and the names of the tools offered. The relay builds the tools from its own definitions and
+     * answers with the tools the model asked for.
+     */
+    suspend fun agent(system: String, turns: List<Turn>, tools: List<ToolDef>, mustUse: Boolean, toolsVersion: Int): Reply = withContext(Dispatchers.IO) {
+        val body = JSONObject()
+            .put("toolsVersion", toolsVersion)
+            .put("tools", JSONArray(tools.map { it.name }))
+            .put("mustUse", mustUse)
+            .put("system", system)
+            .put("messages", JSONArray(turns.map { t ->
+                when (t) {
+                    is Turn.Input -> JSONObject().put("role", "user").put("text", t.text)
+                    is Turn.Asked -> JSONObject().put("role", "assistant").put("toolUses", JSONArray(t.uses.map {
+                        JSONObject().put("id", it.id).put("name", it.name).put("input", it.input)
+                    }))
+                    is Turn.Answers -> JSONObject().put("role", "tool").put("results", JSONArray(t.answers.map {
+                        JSONObject().put("id", it.useId).put("text", it.text)
+                    }))
+                }
+            }))
+        val out = authorized { token -> call("POST", "/v1/agent", body, token) }
+        out.optJSONObject("quota")?.let { _quota.value = parseQuota(it) }
+        val uses = out.optJSONArray("toolUses") ?: JSONArray()
+        Reply((0 until uses.length()).map { i ->
+            val u = uses.getJSONObject(i)
+            ToolUse(u.getString("id"), u.getString("name"), u.optJSONObject("input") ?: JSONObject())
+        }, "")
     }
 
     /** Asks for today's calls without using one; also serves as the connection test. */
