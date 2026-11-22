@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "web-sources.schema.json",
+  "title": "出どころの台帳（都道府県ごとの配信ファイル）",
+  "$comment": "ADR-AGENT A-21・A-22・A-26。タイルのバッチが作り、スポットのタイルと同じ配信で配る。全国の行は prefecture を 00 とした 1 つのファイル。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "generatedAt", "prefecture", "sources"],
+  "properties": {
+    "version": { "type": "integer", "minimum": 1 },
+    "generatedAt": { "type": "string", "format": "date-time" },
+    "prefecture": { "type": "string", "pattern": "^[0-4][0-9]$", "description": "都道府県の番号（01〜47）。全国は 00" },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "name", "kind", "scope", "reads", "scenes", "checkedAt"],
+        "properties": {
+          "id": { "type": "string", "pattern": "^[a-z0-9-]{3,60}$" },
+          "name": { "type": "string", "minLength": 1, "maxLength": 40 },
+          "kind": { "enum": ["national", "prefecture", "municipality", "tourism", "association"] },
+          "scope": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["level"],
+            "properties": {
+              "level": { "enum": ["national", "prefecture", "municipality"] },
+              "code": { "type": "string", "pattern": "^[0-9]{6}$", "description": "全国地方公共団体コード。municipality のとき" }
+            }
+          },
+          "reads": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 5,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["url", "form"],
+              "properties": {
+                "url": { "type": "string", "pattern": "^https?://" },
+                "form": { "enum": ["feed", "list"], "description": "feed は RSS・Atom、list は一覧のページ" },
+                "title": { "type": "string", "maxLength": 40 }
+              }
+            }
+          },
+          "scenes": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "enum": ["calendar", "season", "livelihood", "events", "spot"] }
+          },
+          "status": { "enum": ["ok", "unreadable"], "default": "ok", "description": "unreadable は機械の読み取りを拒む・接続できない（A-22）" },
+          "checkedAt": { "type": "string", "format": "date" }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "web-exclusion.schema.json",
+  "title": "除外リスト（1 つの配信ファイル）",
+  "$comment": "ADR-AGENT A-24〜A-26。yorisoi-console の運営の画面で公開するたびに版を上げて作る。最初の版は entries が空。",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "publishedAt", "entries"],
+  "properties": {
+    "version": { "type": "integer", "minimum": 1 },
+    "publishedAt": { "type": "string", "format": "date-time" },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["match", "kind", "addedAt"],
+        "properties": {
+          "match": {
+            "oneOf": [
+              { "type": "object", "additionalProperties": false, "required": ["domain"], "properties": { "domain": { "type": "string", "pattern": "^[a-z0-9.-]+\\.[a-z]{2,}$", "description": "このドメインと下位のドメイン" } } },
+              { "type": "object", "additionalProperties": false, "required": ["prefix"], "properties": { "prefix": { "type": "string", "pattern": "^https?://", "description": "URL の前方一致" } } }
+            ]
+          },
+          "kind": {
+            "enum": ["aggregator", "ugc", "misinformation", "adult-gambling-illegal", "incident-gossip", "ai-generated", "repeated-errors", "unsuitable-page", "opt-out"],
+            "description": "まとめ・アフィリエイト・量産記事 / 口コミ・Q&A・掲示板・SNS・個人のブログの集まり / 誤情報・詐欺 / 成人・賭け事・違法 / 事件・事故・ゴシップが中心 / AI で作った記事の量産 / 知らせで誤りが続いた / 話に向かないページ / 読み取りをやめてほしいという申し立て"
+          },
+          "addedAt": { "type": "string", "format": "date" }
+        }
+      }
+    }
+  }
+}

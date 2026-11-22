@@ -427,7 +427,7 @@ S-1 から始める。台帳は最初、開発者が歩く都道府県と全国�
 | No.  | 段階                                                                                                                                                                                                                                                                                                                                                | 場所                                     |
 | ---- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
 | X-0  | core-text を切り出す。今の振る舞いを `text-safety-vectors.json` で固めてから、`Checks.kt` と `OutputCheck` の中身を移す（振る舞いを変えない作り直し）                                                                                                                                                                                         | platform                                 |
-| X-1 | 改訂の案: 共有のデータの初めの版、web-exclusion の決まりの案、関連文書（core-format・API-CHANNEL-PACKAGE・AI-ROLES・API-AI-RELAY・REQ-SPOT-REFERENCES・REQ-KOYOMI・REQ-NEARBY-TALK・channel-review）の改訂案 | platform |
+| X-1 | 改訂の案: 共有のデータの初めの版、web-exclusion の決まりの案、関連文書（core-format・API-CHANNEL-PACKAGE・AI-ROLES・API-AI-RELAY・REQ-SPOT-REFERENCES・REQ-KOYOMI・REQ-NEARBY-TALK・channel-review）の改訂案。下書きは [ADR-AGENT/](ADR-AGENT/README.md) に置き、承認したら正本へ移す | platform |
 | X-2  | タイルのバッチ（台帳の候補・季節の観測）、運営の画面（台帳・除外リスト）、配信、中継の用途 `agent`・`hints` と用途ごとのモデル（Qwen3 235B A22B 2507・Kimi K2.5 を一覧と単価に足す）、道具の定義の写し                                                                                                                                                                                                | yorisoi-console                          |
 | X-3a | JVM の部品: core-web・core-agent・kit-calendar の `season_obs`                                                                                                                                                                                                                                                                                    | platform                                 |
 | X-3b | Android の部品: kit-web・kit-agent・kit-agent-tools・kit-llm・kit-geo                                                                                                                                                                                                                                                                               | platform                                 |
@@ -439,6 +439,8 @@ S-1 から始める。台帳は最初、開発者が歩く都道府県と全国�
 | X-9  | 実機での確認（AC-15）                                                                                                                                                                                                                                                                                                                               | 両アプリ                                 |
 
 ## 関連ドキュメント・参照リンク
+
+- [ADR-AGENT の下書き](ADR-AGENT/README.md)（共有のデータ・web-exclusion の決まり・関連文書の改訂案。承認したら正本へ移す）
 
 - [AI-ROLES](../overview/ai-roles.md)（H-1 役割、H-5 根拠の安全、H-6 実演の枠、H-7 責任の分担、H-9 上限、H-15 表示）
 - [API-AI-RELAY](../contracts/API-AI-RELAY.md)（R-2 上限、R-5 呼び先、R-9 汎用の AI として使わせない、R-12 中継を通るもの、R-13 中継が残すもの、R-14 上限の変え方）
