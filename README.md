@@ -24,6 +24,7 @@
 | [`kit-songs`](kit-songs/README.md) | Android | 運営が配る季節の歌。一覧と音を取って端末に残す（`SongLibrary`）、季節・時間帯・天気で選ぶ、流す・止める（`SongPlayer`）。API-SONGS |
 | [`kit-calendar`](kit-calendar/README.md) | JVM | その日の暦の事実（二十四節気・七十二候・雑節・五節句と年中行事・旧暦の行事・祝日・月の満ち欠け・六曜・記念日・地域ごとの行事）。REQ-KOYOMI。気象庁の季節の観測の読み取りと、近くの観測の選び方（準備役の道具 `season_obs`。ADR-AGENT）。使う側で JitPack（Astronomy Engine）と org.json が要る |
 | `kit-web` | Android | アプリの側のウェブ（ADR-AGENT）: 端末からページと RSS・Atom を読む（`robots.txt`、アプリの User-Agent、クッキーなし、同時に 2 つ・同じサイトは 1 つずつ、5 秒・1 MB まで、1 回だけやり直す）、ページと手がかりのキャッシュ（20 MB まで、古く使っていないものから消す）、運営の配信ファイル（台帳・除外リスト・季節の観測）の取得。何を読んでよいか・ページから何を取るかは core-web |
+| `kit-agent` | Android | 準備役をアプリで動かす（ADR-AGENT）: いつ準備するか（同じ日・市区町村・チャンネルの筋は作り直さない）、1 回の散歩・走行の上限（準備 4 回・AI 16 回・ページ 20 回）と 1 日の上限の 2 割、筋のキャッシュ（その日のうち・スポットは 7 日）、開発者の記録。準備の中身は core-agent、道具は kit-agent-tools |
 | `kit-agent-tools` | Android | 準備役の標準の道具（ADR-AGENT）: アプリが話のために持っている暦・天気・季節の観測・催しを番号つきの事実にして入力に入れ（先に取る道具）、`read_page`（kit-web で読み、手がかり作りの AI で手がかりにする。準備役にページの文は見せない）・`nearby_spots`・`materials` に答える。チャンネルの方針（外す暦・スポットの種類、参考の文章、`agent.web`）は道具の中でかける |
 
 コアは Android に依存しません。管理システムがアプリと同じコードで確かめるためです。
