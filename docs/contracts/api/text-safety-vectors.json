@@ -1,0 +1,31 @@
+{
+  "$comment": "core-text の機械の確認の見本（ADR-AGENT A-52）。contact は AI の出力の連絡先の確かめ（ContactCheck.violation。全角を半角にそろえてから見る）、written は提供者が書いた文の確かめ（WrittenText。スロット・素材・素材集。文字をそのまま見る）、spoken は読み上げる前の文（SpokenText.spoken）。書いていない項目は確かめない。Kotlin（core-text）と運営の画面の確認（TypeScript）は、どちらもこの見本を満たす。",
+  "version": 1,
+  "cases": [
+    { "text": "詳しくは https://example.com で", "contact": "url", "written": "url" },
+    { "text": "ｗｗｗ．example．com をご覧ください", "contact": "url", "written": null, "note": "全角の URL は、AI の出力では止まり、提供者が書いた文では止まらない（そろえるのは ADR-AGENT X-3a）" },
+    { "text": "詳しくは www.example.jp をご覧ください。", "contact": "url", "written": "url" },
+    { "text": "問い合わせは info@example.co.jp まで", "contact": "email", "written": null },
+    { "text": "電話は0467-22-0000です", "contact": "phone", "written": null },
+    { "text": "０１２０ー１２３ー４５６へ", "contact": "phone" },
+    { "text": "(0467)22-0000", "contact": "phone" },
+    { "text": "09012345678", "contact": "phone" },
+    { "text": "本宮は1180年に今の場所へ移されました。石段は61段あります。", "contact": null, "written": null },
+    { "text": "ここから約450m、徒歩で6分ほどです。コーヒーの香りがします。", "contact": null },
+    { "text": "10月16日、気温は18℃です。", "contact": null },
+    { "text": "令和8年12月18日から再開します。", "contact": null },
+    { "text": "# 見出し\n本文です。", "written": "heading" },
+    { "text": "石段は61段、#1 の札がある門です。", "written": null, "spoken": "石段は61段、#1 の札がある門です。" },
+    { "text": "（しっとりと、落ち着いた口調で）そろそろ雨にぬれた路地の先に、日輪寺が見えてくる頃ですね。", "spoken": "そろそろ雨にぬれた路地の先に、日輪寺が見えてくる頃ですね。" },
+    { "text": "門が見えてきました。(少し間を置いて) ここは江戸のころからの古いお寺です。", "spoken": "門が見えてきました。ここは江戸のころからの古いお寺です。" },
+    { "text": "すぐ近くにある「吽形（うんぎょう）」というアート作品ですね。", "spoken": "すぐ近くにある「吽形（うんぎょう）」というアート作品ですね。" },
+    { "text": "浅草寺（せんそうじ）の本堂です。（本堂は戦後に再建されました）", "spoken": "浅草寺（せんそうじ）の本堂です。（本堂は戦後に再建されました）" },
+    { "text": "**1：**秋の風ですね。\n**2：**鳥の声がします。", "spoken": "1：秋の風ですね。\n2：鳥の声がします。" },
+    { "text": "ここは*大仏*です。__とても__大きいですね。", "spoken": "ここは大仏です。とても大きいですね。" },
+    { "text": "## 鶴岡八幡宮\n源氏の守り神です。", "spoken": "鶴岡八幡宮\n源氏の守り神です。" },
+    { "text": "**（明るい声で）**いい風ですね。", "spoken": "いい風ですね。" },
+    { "text": "snake_case も残ります。", "spoken": "snake_case も残ります。" },
+    { "text": "1897年に開業した駅です。\n\n創建年が1897年というのを踏まえて、ひと言触れました。", "spoken": "1897年に開業した駅です。" },
+    { "text": "余談ですが、この橋は二代目です。\n続き：そういえばさっきの橋、夜も明るいんです。", "spoken": "余談ですが、この橋は二代目です。\n続き：そういえばさっきの橋、夜も明るいんです。" }
+  ]
+}

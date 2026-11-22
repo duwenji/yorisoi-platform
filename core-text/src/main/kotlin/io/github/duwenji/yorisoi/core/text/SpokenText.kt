@@ -1,0 +1,41 @@
+package io.github.duwenji.yorisoi.core.text
+
+/**
+ * Text as it may be read out. Stage directions the AI sometimes writes for its own delivery, Markdown marks
+ * such as 「**続き：**」, and notes on how it wrote the reply (「〜にひと言触れました」) are taken out, since
+ * they'd be read out.
+ */
+object SpokenText {
+    /**
+     * A bracketed direction at the start of a sentence about how to say it, such as
+     * 「（しっとりと、落ち着いた口調で）」. Readings like 吽形（うんぎょう） follow a word, so they stay.
+     */
+    private val STAGE_DIRECTION = Regex(
+        "(?:^|(?<=[。！？!?\n]))[ \t　]*[（(][^（）()\n]{0,40}(?:口調|声|トーン|調子|語り|話し|間を|笑|微笑|ささや|囁)[^（）()\n]{0,40}[）)][ \t　]*",
+    )
+
+    /** Bold and italic marks (「**」「*」「__」) and headings at the start of a line. Single underscores stay. */
+    private val EMPHASIS = Regex("\\*+|_{2,}")
+    private val HEADING = Regex("(?m)^[ \t　]*#{1,6}[ \t　]+")
+
+    /**
+     * Words a line of speech doesn't use but a note on the reply does: the prompt's own words for the
+     * reply and the user, and saying what was or wasn't mentioned. 「余談」 stays: 「余談ですが」 is speech.
+     */
+    private val META_NOTE = Regex("触れました|触れていません|言及し(?:ま|な|て)|本文|字数|文字数|プロンプト|指示(?:に従|どおり|通り|のとおり)|利用者|出力し")
+
+    private val BLANK_LINES = Regex("\n{3,}")
+
+    /** [text] as it may be read out: without stage directions, Markdown marks and notes on the reply. */
+    fun spoken(text: String): String = withoutMetaNotes(withoutStageDirections(withoutMarkdown(text)))
+
+    /** [text] without the lines that are notes on the reply rather than speech; the rest as it was. */
+    fun withoutMetaNotes(text: String): String =
+        text.lines().filterNot { META_NOTE.containsMatchIn(it) }.joinToString("\n").replace(BLANK_LINES, "\n\n").trim()
+
+    /** [text] without the stage directions in it. */
+    fun withoutStageDirections(text: String): String = STAGE_DIRECTION.replace(text, "").trim()
+
+    /** [text] without Markdown's bold, italic and heading marks. */
+    fun withoutMarkdown(text: String): String = HEADING.replace(EMPHASIS.replace(text, ""), "").trim()
+}
