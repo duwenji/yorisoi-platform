@@ -18,12 +18,13 @@
 | `kit-ui` | Android | どのアプリにも共通の見た目。よりそいの緑の配色（`YorisoiTheme`）、画面の上部のバー（`ScreenBar`）、ホーム画面のアイコンの緑の背景（`yorisoi_launcher_background`） |
 | `kit-voice` | Android | 読み上げ（オーディオフォーカス）と背景音の合成 |
 | `kit-llm` | Android | AI の接続（Claude・OpenAI 互換・運営の AI の中継。中継のセッションのトークンはほかの部品にも貸せる）と鍵の暗号化、自分のキーの 1 日の呼び出しの数、使わない返事（連絡先を含む）の判定 |
-| [`kit-geo`](kit-geo/README.md) | Android | スポット・ルート・写真・天気・地図。運営のスポットのタイル、スポット検索のキャッシュ、よく通る道 |
+| [`kit-geo`](kit-geo/README.md) | Android | スポット・ルート・写真・天気・地図。運営のスポットのタイル、スポット検索のキャッシュ、よく通る道、市区町村の代表点の表で今いる市区町村を決める（`Municipalities`。ADR-AGENT A-14） |
 | `kit-mood` | Android | 雰囲気（時間帯・季節・空模様・場所）と、配色・絵・背景音。雰囲気がないときの配色は `kit-ui` の緑 |
 | [`kit-local-materials`](kit-local-materials/README.md) | Android | 区画ごとに運営から取る素材（スタジオ、一言）のアプリ側。組み込みの素材提供者 `builtin:studio`・`builtin:note`。近くのスタジオと一言を取って種類ごとに選ぶ（`LocalFeed`、`StudioProducer`・`NoteProducer`）、API-LOCAL-MATERIALS（`LocalClient`、トークンは運営の AI の中継から）、スタジオの音声（`ClipCache`・`ClipPlayer`）、一言を声で置く（`NoteRecognizer`）、設定（`LocalSettingsStore`） |
 | [`kit-songs`](kit-songs/README.md) | Android | 運営が配る季節の歌。一覧と音を取って端末に残す（`SongLibrary`）、季節・時間帯・天気で選ぶ、流す・止める（`SongPlayer`）。API-SONGS |
 | [`kit-calendar`](kit-calendar/README.md) | JVM | その日の暦の事実（二十四節気・七十二候・雑節・五節句と年中行事・旧暦の行事・祝日・月の満ち欠け・六曜・記念日・地域ごとの行事）。REQ-KOYOMI。気象庁の季節の観測の読み取りと、近くの観測の選び方（準備役の道具 `season_obs`。ADR-AGENT）。使う側で JitPack（Astronomy Engine）と org.json が要る |
 | `kit-web` | Android | アプリの側のウェブ（ADR-AGENT）: 端末からページと RSS・Atom を読む（`robots.txt`、アプリの User-Agent、クッキーなし、同時に 2 つ・同じサイトは 1 つずつ、5 秒・1 MB まで、1 回だけやり直す）、ページと手がかりのキャッシュ（20 MB まで、古く使っていないものから消す）、運営の配信ファイル（台帳・除外リスト・季節の観測）の取得。何を読んでよいか・ページから何を取るかは core-web |
+| `kit-agent-tools` | Android | 準備役の標準の道具（ADR-AGENT）: アプリが話のために持っている暦・天気・季節の観測・催しを番号つきの事実にして入力に入れ（先に取る道具）、`read_page`（kit-web で読み、手がかり作りの AI で手がかりにする。準備役にページの文は見せない）・`nearby_spots`・`materials` に答える。チャンネルの方針（外す暦・スポットの種類、参考の文章、`agent.web`）は道具の中でかける |
 
 コアは Android に依存しません。管理システムがアプリと同じコードで確かめるためです。
 
