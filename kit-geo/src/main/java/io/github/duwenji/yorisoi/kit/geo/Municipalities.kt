@@ -49,6 +49,19 @@ class Municipalities private constructor(private val cells: Map<Long, List<Point
         }
 
         /**
+         * The prefectures whose points files a point may need, from the delivered index
+         * (`municipality-points/index.json`: each prefecture's south, west, north and east, already widened by 5 km).
+         * Near a border there are two or three; at sea, none. An index that doesn't read gives none.
+         */
+        fun prefecturesAt(index: String, lat: Double, lon: Double): List<String> = runCatching {
+            val prefs = org.json.JSONObject(index).getJSONObject("prefectures")
+            prefs.keys().asSequence().filter { pp ->
+                val r = prefs.getJSONArray(pp)
+                lat >= r.getDouble(0) && lon >= r.getDouble(1) && lat <= r.getDouble(2) && lon <= r.getDouble(3)
+            }.sorted().toList()
+        }.getOrDefault(emptyList())
+
+        /**
          * Reads the delivered points: one line `code,name,lat,lon` each, with a header line; lines that don't
          * read are left out. Several prefectures' files may be joined.
          */
