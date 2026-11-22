@@ -1,5 +1,6 @@
 package io.github.duwenji.yorisoi.core.agent
 
+import kotlinx.coroutines.runBlocking
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
@@ -93,7 +94,7 @@ class CoreAgentTest {
         var ran = 0
         val runner = ToolRunner { name, _, book -> ran++; ToolOutcome("（なし）", emptyList()) }
         val b = ResultBook().apply { add("calendar", listOf("小雪")); add("season_obs", listOf("初雪")) }
-        val p = Preparation(tools, model, runner).run("system", "input", b, setOf("calendar", "season"))
+        val p = runBlocking { Preparation(tools, model, runner).run("system", "input", b, setOf("calendar", "season")) }
         assertEquals(4, ran)
         assertEquals(listOf(false, false, true), mustUse)
         assertEquals(listOf(AgentTools.SUBMIT), offered[2])
