@@ -93,6 +93,28 @@ class StandardToolsTest {
     }
 
     @Test
+    fun `the weather, the events and the spots come as the tools' own facts, under the channel's spots`() = runBlocking {
+        val input = PrepInput(
+            today, "18",
+            weather = PrepWeather("くもり", 9.6, sunsetAt = Instant.parse("2026-11-22T07:40:00Z").toEpochMilli()),
+            events = listOf(PrepEvent("秋のライトアップ", "養浩館庭園", today, LocalDate.of(2026, 11, 29), "福井市")),
+            spots = listOf(
+                PrepSpot("w1", "フクイサウルス", "artwork", 120, "北西"),
+                PrepSpot("n1", "養浩館庭園", "garden", 640, "北", side = "ahead"),
+            ),
+        )
+        val t = tools(AgentPolicy(setOf("season", "events", "spot"), spotsSkip = setOf("artwork")), input)
+        val book = ResultBook()
+        val text = t.prefetch(book)
+        assertTrue(text.contains("今はくもり、気温 9 度、日の入り 16時40分"))
+        assertTrue(text.contains("〜11月29日 養浩館庭園で秋のライトアップ"))
+        assertEquals("福井市", book.all.single { it.tool == "local_events" }.origin?.name)
+        val spots = t.run("nearby_spots", JSONObject("""{"ahead":true}"""), book)
+        assertTrue(spots.text.contains("S1 養浩館庭園（garden）、北に約 600 m"))
+        assertFalse("a skipped category is left out", t.run("nearby_spots", JSONObject("{}"), book).text.contains("フクイサウルス"))
+    }
+
+    @Test
     fun `a source's list gives links, a link gives hints, and the preparer never sees the page`() = runBlocking {
         val t = tools(AgentPolicy(setOf("livelihood")), PrepInput(today, "18", sources = listOf(ledgerSource)))
         assertTrue(t.sourceList().startsWith("P1 福井市 お知らせ（市区町村）"))
