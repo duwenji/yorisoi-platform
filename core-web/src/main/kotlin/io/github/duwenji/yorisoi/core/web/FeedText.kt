@@ -14,7 +14,7 @@ import javax.xml.parsers.DocumentBuilderFactory
 data class FeedItem(val title: String, val url: String, val date: LocalDate?)
 
 /**
- * The items of an RSS 2.0, RSS 1.0 (RDF) or Atom feed (ADR-AGENT A-21): a source's 新着 list, with dates.
+ * The items of an RSS 2.0, RSS 1.0 (RDF) or Atom feed (AGENT A-21): a source's 新着 list, with dates.
  * The parser refuses DTDs and external entities, since the feed comes from a site nobody reviewed.
  */
 object FeedText {

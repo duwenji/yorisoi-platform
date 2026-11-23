@@ -4,7 +4,7 @@ import org.json.JSONObject
 import java.net.URI
 
 /**
- * The operator's exclusion list (ADR-AGENT A-24・A-26; docs/contracts/api/web-exclusion.schema.json): a
+ * The operator's exclusion list (AGENT A-24・A-26; docs/contracts/api/web-exclusion.schema.json): a
  * domain with the domains under it, or a URL prefix. A channel's `agent.skip` adds to it and never takes away.
  */
 class ExclusionList(val version: Int, private val domains: List<Pair<String, String>>, private val prefixes: List<Pair<String, String>>) {

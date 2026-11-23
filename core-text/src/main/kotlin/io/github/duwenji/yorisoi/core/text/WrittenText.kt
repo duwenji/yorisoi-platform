@@ -3,7 +3,7 @@ package io.github.duwenji.yorisoi.core.text
 /**
  * The checks on text a provider wrote into a package (slots, materials, collections; API-CHANNEL-PACKAGE
  * F-2): no URL and no Markdown heading. Like [ContactCheck], full-width forms are brought to ASCII width
- * first, so 「ｈｔｔｐｓ：／／」 is a URL here too (ADR-AGENT A-52).
+ * first, so 「ｈｔｔｐｓ：／／」 is a URL here too (AGENT A-52).
  */
 object WrittenText {
     /** A URL's start: 「http://」「https://」「www.」, in any case. Matched against [ContactCheck.normalize]d text. */

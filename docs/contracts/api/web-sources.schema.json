@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "web-sources.schema.json",
   "title": "出どころの台帳（都道府県ごとの配信ファイル）",
-  "$comment": "ADR-AGENT A-21・A-22・A-26。タイルのバッチが作り、スポットのタイルと同じ配信で配る。全国の行は prefecture を 00 とした 1 つのファイル。",
+  "$comment": "AGENT A-21・A-22・A-26。タイルのバッチが作り、スポットのタイルと同じ配信で配る。全国の行は prefecture を 00 とした 1 つのファイル。",
   "type": "object",
   "additionalProperties": false,
   "required": ["version", "generatedAt", "prefecture", "sources"],

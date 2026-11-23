@@ -11,7 +11,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.time.LocalDate
 
-/** What starts a preparation (platform ADR-AGENT A-32). */
+/** What starts a preparation (platform AGENT A-32). */
 enum class Trigger { SCREEN_OPENED, STARTED, MUNICIPALITY_CHANGED, SPOT_AHEAD, CHANNEL_CHANGED }
 
 /** The limits of A-33 (the daily share is of the day's AI calls: the user's limit, or the relay's). */
@@ -45,7 +45,7 @@ sealed interface PrepOutcome {
 }
 
 /**
- * Runs the preparer on the app's side (platform ADR-AGENT A-32・A-33・A-34・A-49). One at a time; a day's threads
+ * Runs the preparer on the app's side (platform AGENT A-32・A-33・A-34・A-49). One at a time; a day's threads
  * for the same channel, version and municipality are taken from [store] and not prepared again. Each walk or
  * ride counts its preparations, its AI calls (the preparer's and the hint maker's) and its page reads; the day
  * counts its AI calls against [dailyShare] of [dailyLimit]. Past a limit nothing is prepared and the talk goes

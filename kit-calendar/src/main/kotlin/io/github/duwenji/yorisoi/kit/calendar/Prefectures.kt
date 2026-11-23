@@ -1,7 +1,7 @@
 package io.github.duwenji.yorisoi.kit.calendar
 
 /**
- * The 47 prefectures by their numbers (01 北海道 … 47 沖縄) and which border which (ADR-AGENT A-12:
+ * The 47 prefectures by their numbers (01 北海道 … 47 沖縄) and which border which (AGENT A-12:
  * `season_obs` gives the prefecture one is in and the ones next to it). Next to means a land border, or a
  * crossing one may travel by road or rail: 青函トンネル, 東京湾アクアライン, 明石海峡・大鳴門橋, 瀬戸大橋,
  * しまなみ海道, 関門. 沖縄 has none.

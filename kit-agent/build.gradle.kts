@@ -1,6 +1,6 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
-// Running the preparer (platform ADR-AGENT A-32・A-33・A-34・A-49): when it runs, its limits per walk and per day,
+// Running the preparer (platform AGENT A-32・A-33・A-34・A-49): when it runs, its limits per walk and per day,
 // the threads it made kept, and the developer's record of each preparation. It leans on core-agent only: the model
 // comes in from kit-llm (the apps) or the validator, the tools from kit-agent-tools. Plain JVM (A-54).
 plugins {

@@ -1,5 +1,5 @@
 {
-  "$comment": "ADR-AGENT A-11・A-12・A-15・A-45。準備役が頼む道具の定義。中継はこの写しを持ち、アプリからは版と道具の名前だけを受ける。先に取る道具（calendar・weather・season_obs・local_events）は準備役に頼ませないので、ここには置かない。",
+  "$comment": "AGENT A-11・A-12・A-15・A-45。準備役が頼む道具の定義。中継はこの写しを持ち、アプリからは版と道具の名前だけを受ける。先に取る道具（calendar・weather・season_obs・local_events）は準備役に頼ませないので、ここには置かない。",
   "version": 1,
   "tools": [
     {

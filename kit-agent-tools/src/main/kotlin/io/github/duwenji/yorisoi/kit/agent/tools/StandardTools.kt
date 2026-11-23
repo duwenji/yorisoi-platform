@@ -21,7 +21,7 @@ import java.time.ZoneId
 import java.time.temporal.ChronoUnit
 
 /**
- * The preparer's standard tools (platform ADR-AGENT A-6・A-7・A-12・A-69), for one preparation.
+ * The preparer's standard tools (platform AGENT A-6・A-7・A-12・A-69), for one preparation.
  *
  * [prefetch] runs the tools taken before the preparation (calendar, weather, season_obs, local_events) for the
  * scenes the channel lets it use, and [sourceList] gives the sources it may read; both go in the input (A-4).
@@ -222,7 +222,7 @@ class StandardTools(
     }
 
     companion object {
-        /** One result is one fact of at most this many characters (ADR-AGENT A-12). */
+        /** One result is one fact of at most this many characters (AGENT A-12). */
         const val FACT_MAX = 60
         private val KIND_LABEL = mapOf(
             "national" to "国の機関", "prefecture" to "都道府県", "municipality" to "市区町村",

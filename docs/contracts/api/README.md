@@ -11,6 +11,13 @@
 |---|---|
 | `sanpo-messages.openapi.yaml` | API の定義（エンドポイント、リクエスト・レスポンスの形、エラー） |
 | `spot-tile.schema.json` | スポットのタイルの JSON Schema（[API-SPOT-TILES](../API-SPOT-TILES.md)）。タイルを作るバッチが書き出したものを確かめる |
+| `municipality-points.md` | 市区町村の代表点の表の形（[AGENT](../../overview/agent.md) A-14） |
+| `agent-tools.v1.json` | 準備役が頼む道具の定義（AGENT A-11・A-12・A-15・A-45）。中継が写しを持つ |
+| `web-sources.schema.json` | 出どころの台帳の配信ファイルの形（AGENT A-21・A-22・A-26） |
+| `web-exclusion.schema.json` | 除外リストの配信ファイルの形（AGENT A-24〜A-26） |
+| `season-obs.schema.json` | 季節の観測の配信ファイルの形（AGENT A-27・A-28） |
+| `text-safety-vectors.json` | 機械の確認（core-text）の見本。Kotlin と運営の画面（TypeScript）がどちらも満たす（AGENT A-52） |
+| `web-url-vectors.json` | 読んでよい URL・同じサイト・除外の照合の見本（AGENT A-17・A-24） |
 | `redocly.yaml` | 検証ツール（Redocly CLI）の設定。意図して外したルールと理由 |
 | `README.md` | このファイル |
 

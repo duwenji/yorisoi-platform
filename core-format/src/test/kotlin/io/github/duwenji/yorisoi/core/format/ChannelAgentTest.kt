@@ -5,7 +5,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** `agent` of `channel.json` (platform ADR-AGENT A-6・A-8・A-9). */
+/** `agent` of `channel.json` (platform AGENT A-6・A-8・A-9). */
 class ChannelAgentTest {
     private class MemoryFiles(val files: Map<String, ByteArray>) : StationFiles {
         override fun list() = files.keys.toList()

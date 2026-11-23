@@ -7,7 +7,7 @@ import io.github.duwenji.yorisoi.core.text.SpokenText
  * Contact details the AI must not read out (AI-ROLES H-6 ③): a reply with a URL, an email
  * address or a phone number is not used, and a fixed line stands in. Stage directions, Markdown marks
  * and notes on how the reply was written are taken out before anything else, since they'd be read out.
- * The checks themselves live in core-text, which every path shares (ADR-AGENT A-52).
+ * The checks themselves live in core-text, which every path shares (AGENT A-52).
  */
 object OutputCheck {
     /** [text] as it may be read out: without stage directions, Markdown marks and notes on the reply. */

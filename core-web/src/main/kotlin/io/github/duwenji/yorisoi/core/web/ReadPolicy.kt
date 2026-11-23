@@ -2,7 +2,7 @@ package io.github.duwenji.yorisoi.core.web
 
 import java.net.URI
 
-/** Why a URL may not be read (ADR-AGENT A-17・A-19・A-24・A-26). */
+/** Why a URL may not be read (AGENT A-17・A-19・A-24・A-26). */
 enum class Deny(val id: String) {
     NOT_WEB("not-web"),
     TOO_DEEP("too-deep"),
@@ -15,7 +15,7 @@ enum class Deny(val id: String) {
 }
 
 /**
- * Which URLs a preparation may read (ADR-AGENT A-17): a source's own URLs, and pages reached from them by
+ * Which URLs a preparation may read (AGENT A-17): a source's own URLs, and pages reached from them by
  * following links on the same site, at most [MAX_DEPTH] times. A source on a shared service (a blog or a
  * site builder) reaches only under its own host and path. Nothing excluded is read; until an exclusion list
  * has been fetched once, only the ledger's own URLs are read (A-26).
@@ -51,7 +51,7 @@ class ReadPolicy(private val exclusion: ExclusionList?) {
     }
 
     companion object {
-        /** How many links a path may follow from a source's own URL (ADR-AGENT A-17). */
+        /** How many links a path may follow from a source's own URL (AGENT A-17). */
         const val MAX_DEPTH = 2
     }
 }

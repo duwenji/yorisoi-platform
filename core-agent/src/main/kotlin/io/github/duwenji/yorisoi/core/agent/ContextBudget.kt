@@ -1,7 +1,7 @@
 package io.github.duwenji.yorisoi.core.agent
 
 /**
- * The preparer's context budget (ADR-AGENT A-36・A-37): the fixed instructions up to [SYSTEM] characters, the
+ * The preparer's context budget (AGENT A-36・A-37): the fixed instructions up to [SYSTEM] characters, the
  * preparation's input (without the results taken before it) up to [INPUT], and the tools' results (with those)
  * up to [RESULTS]; together within the relay's [TOTAL]. When the results grow past theirs, they are cut by
  * rule, never summarised by an AI: first the link lists already followed, then the pages with no hint, then the

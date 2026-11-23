@@ -6,7 +6,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.File
 
-/** Every sample in docs/contracts/api/web-url-vectors.json (ADR-AGENT A-17・A-24・A-26) holds. */
+/** Every sample in docs/contracts/api/web-url-vectors.json (AGENT A-17・A-24・A-26) holds. */
 class WebUrlVectorsTest {
     private val doc = JSONObject(File(System.getProperty("webUrlVectors")).readText(Charsets.UTF_8))
     private val exclusion = ExclusionList.parse(doc.getJSONObject("exclusion").toString())

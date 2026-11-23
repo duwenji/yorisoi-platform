@@ -4,7 +4,7 @@ import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
 /**
- * Whether a page's text is about now (ADR-AGENT A-18): it names a period that includes [today]
+ * Whether a page's text is about now (AGENT A-18): it names a period that includes [today]
  * (「10月10日（土）～11月23日（月・祝）」) or a day from today up to [SOON_DAYS] days ahead. An event's page is often written
  * before it opens and never updated, so its own date says little; such a page serves the day's threads although
  * it is older than 30 days. Dates without a year take the year that puts them nearest [today]; the second date of a

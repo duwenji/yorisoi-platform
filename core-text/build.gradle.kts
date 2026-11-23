@@ -1,6 +1,6 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
-// The machine checks on text that every path shares (ADR-AGENT A-52): slots and materials in review
+// The machine checks on text that every path shares (AGENT A-52): slots and materials in review
 // (core-format), the AI's replies before they are read out (kit-llm), and, next, pages and link titles.
 // Plain JVM with no dependencies, so the apps and the review tools run the same checks.
 plugins {

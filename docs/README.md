@@ -10,12 +10,13 @@
 | 関係者の呼び方、役割、共通用語を確認する | [関係者と共通用語](overview/roles-and-vocabulary.md) |
 | 関係者の課題と未承認の対応案を確認する | [関係者の課題と対応案](overview/stakeholder-needs.md) |
 | だれに何を提供し、費用をだれが持つかの検討を読む | [提供価値と事業の検討](overview/value-proposition.md) |
-| エコシステム・チャンネル・素材・生成 AI の決まりを読む | [エコシステム](overview/yorisoi-ecosystem.md#決まり)、[チャンネル](overview/channels.md)、[素材](overview/materials.md)、[生成 AI の役割](overview/ai-roles.md) |
+| エコシステム・チャンネル・素材・生成 AI の決まりを読む | [エコシステム](overview/yorisoi-ecosystem.md#決まり)、[チャンネル](overview/channels.md)、[素材](overview/materials.md)、[生成 AI の役割](overview/ai-roles.md)、[準備役](overview/agent.md) |
 | 複数のアプリにまたがる機能の要件を読む | [よく通る道](requirements/REQ-FREQUENT-WAYS.md)、[スタジオ](requirements/REQ-STUDIO.md)、[一言](requirements/REQ-NOTES.md)、[周りの見どころと雑談](requirements/REQ-NEARBY-TALK.md)、[スポットの Wikidata の情報](requirements/REQ-WIKIDATA.md)、[暦の雑談](requirements/REQ-KOYOMI.md)、[地域の催し](requirements/REQ-LOCAL-EVENTS.md)、[語り手の型](requirements/REQ-NARRATOR-STYLE.md)、[スポットの参考の文章](requirements/REQ-SPOT-REFERENCES.md) |
 | システム境界の形式・動作を確認する | [API 契約一覧](contracts/README.md) |
 | チャンネル審査の基準を確認する | [審査ポリシー](policies/channel-review.md) |
 | スタジオの決まりを確認する | [スタジオの決まりと素材提供者の承認の基準](policies/studio-rules.md) |
 | 一言の決まりを確認する | [一言の利用規約](policies/notes-terms.md) |
+| ウェブの除外リストの決まりを確認する | [ウェブの除外リストの決まり](policies/web-exclusion.md) |
 | SanpoGuide の操作・試用・運用手順を読む | [SanpoGuide 手引き](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/manual/README.md) |
 | エコシステムの未完了作業を確認する | [エコシステム TODO](TODO.md) |
 | 秘密メッセージ OpenAPI を検証する | [OpenAPI 手順](contracts/api/README.md) |

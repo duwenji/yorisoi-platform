@@ -19,7 +19,7 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** The channel's `agent` narrowed the same way in both apps and the validator (platform ADR-AGENT A-6・A-7・A-8・A-51). */
+/** The channel's `agent` narrowed the same way in both apps and the validator (platform AGENT A-6・A-7・A-8・A-51). */
 class ResearchPolicyTest {
     private class MemoryFiles(val files: Map<String, ByteArray>) : StationFiles {
         override fun list() = files.keys.toList()

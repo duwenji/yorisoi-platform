@@ -4,7 +4,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 /**
- * The part of JSON Schema the tools' definitions use (ADR-AGENT A-13・A-15): `type` (object, array,
+ * The part of JSON Schema the tools' definitions use (AGENT A-13・A-15): `type` (object, array,
  * string, integer, boolean), `properties`, `required`, `additionalProperties: false`, `items`,
  * `minItems`・`maxItems`, `maxLength`, `pattern`, `enum` and `oneOf`. An AI's arguments are checked against it
  * before a tool runs or a submission is taken; nothing outside this subset is relied on.

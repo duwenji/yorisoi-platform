@@ -15,7 +15,7 @@ import java.time.LocalDate
 import java.time.ZoneId
 
 /**
- * Where a preparation's threads are kept (platform ADR-AGENT A-34 ③): by the channel and its version and the
+ * Where a preparation's threads are kept (platform AGENT A-34 ③): by the channel and its version and the
  * municipality and the day, or for a spot's preparation by the channel and its version and the spot.
  */
 data class PrepKey(val channel: String, val channelVersion: Int, val municipality: String?, val date: LocalDate, val spot: String? = null) {

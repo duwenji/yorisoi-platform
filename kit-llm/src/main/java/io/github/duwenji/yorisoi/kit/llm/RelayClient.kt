@@ -90,7 +90,7 @@ class RelayClient(
     }
 
     /**
-     * One preparer's turn on the operator's AI (POST /v1/agent; platform ADR-AGENT A-45): the conversation, the
+     * One preparer's turn on the operator's AI (POST /v1/agent; platform AGENT A-45): the conversation, the
      * version and the names of the tools offered. The relay builds the tools from its own definitions and
      * answers with the tools the model asked for.
      */

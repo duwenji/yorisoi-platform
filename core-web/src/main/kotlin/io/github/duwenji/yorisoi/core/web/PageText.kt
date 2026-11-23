@@ -10,11 +10,11 @@ import java.time.LocalDate
 /** A link on a page: its title (cut and checked; empty when it failed the check) and its absolute URL. */
 data class PageLink(val title: String, val url: String)
 
-/** What a page gives the hint maker (ADR-AGENT A-18): its title, its date when it states one, its text, and its links. */
+/** What a page gives the hint maker (AGENT A-18): its title, its date when it states one, its text, and its links. */
 data class Page(val title: String, val published: LocalDate?, val text: String, val links: List<PageLink>)
 
 /**
- * The text and links of an HTML page (ADR-AGENT A-18). The page's own text is taken from its main part
+ * The text and links of an HTML page (AGENT A-18). The page's own text is taken from its main part
  * (without scripts, menus, headers and footers), split into sentences, and every sentence that fails the
  * machine check (contact details, instruction-like sentences; core-text) is dropped. At most [MAX_TEXT]
  * characters are kept. Link titles are cut to [MAX_TITLE] characters and emptied when they fail the check.

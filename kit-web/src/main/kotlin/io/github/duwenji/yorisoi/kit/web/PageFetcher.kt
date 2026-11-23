@@ -31,7 +31,7 @@ sealed interface Fetched {
 }
 
 /**
- * Reads pages and feeds from the device (ADR-AGENT A-19・A-20・A-34). Two at a time, one per site; a page at most
+ * Reads pages and feeds from the device (AGENT A-19・A-20・A-34). Two at a time, one per site; a page at most
  * [MAX_BYTES], HTML, text or a feed only; a failure is tried once more after a pause. robots.txt is read for
  * the app's product token and kept a day. A read is kept in [cache]: a source's own list page or feed for
  * [LIST_AGE], a page followed from it for [PAGE_AGE]; past that it is asked again with `If-None-Match` /

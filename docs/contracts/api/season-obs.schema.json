@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "season-obs.schema.json",
   "title": "季節の観測（寒候年ごとの配信ファイル）",
-  "$comment": "ADR-AGENT A-27・A-28。タイルのバッチが気象庁防災情報 XML（VGSK50・VGSK55）と「初冠雪の記録等」から作る。観測の値は変えない。",
+  "$comment": "AGENT A-27・A-28。タイルのバッチが気象庁防災情報 XML（VGSK50・VGSK55）と「初冠雪の記録等」から作る。観測の値は変えない。",
   "type": "object",
   "additionalProperties": false,
   "required": ["season", "generatedAt", "attribution", "observations"],

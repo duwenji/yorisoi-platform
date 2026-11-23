@@ -7,7 +7,7 @@ import io.github.duwenji.yorisoi.kit.calendar.SeasonObsFile
 import java.time.LocalDate
 
 /**
- * What the channel lets the preparer use (platform ADR-AGENT A-6・A-7), already read from `channel.json`:
+ * What the channel lets the preparer use (platform AGENT A-6・A-7), already read from `channel.json`:
  * the scenes that pass the channel's own items, and the items the tools apply.
  */
 data class AgentPolicy(
@@ -35,7 +35,7 @@ data class MaterialText(
 )
 
 /**
- * One preparation's facts, as the app has them for the talk (platform ADR-AGENT A-4・A-12): nothing here is a
+ * One preparation's facts, as the app has them for the talk (platform AGENT A-4・A-12): nothing here is a
  * coordinate (A-14). [sources] are the ledger's rows and the channel's own for this place and these scenes.
  */
 data class PrepInput(

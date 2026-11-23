@@ -15,7 +15,7 @@ import org.junit.Before
 import org.junit.Test
 import java.time.Instant
 
-/** The preparer's turns in each route's form of function calling (platform ADR-AGENT A-10・A-45). */
+/** The preparer's turns in each route's form of function calling (platform AGENT A-10・A-45). */
 class ToolModelsTest {
     private lateinit var server: MockWebServer
     private val tools = AgentTools.load()

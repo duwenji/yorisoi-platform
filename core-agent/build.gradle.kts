@@ -1,6 +1,6 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
-// The preparer's rules (ADR-AGENT): the tools' definitions and the check of their arguments, the numbered
+// The preparer's rules (AGENT): the tools' definitions and the check of their arguments, the numbered
 // results, the turns and their limits, the context's budget and how it is cut, the check of the submitted
 // threads, and the hint maker's prompt and the reading of its answer. No network: the AI and the tools
 // come in through interfaces, so the apps and the review tools run the same preparation.
@@ -31,7 +31,7 @@ dependencies {
     testImplementation(libs.json)
 }
 
-// The tools' definitions are shared with the relay (docs/contracts/api, ADR-AGENT A-45): one file, packed as is.
+// The tools' definitions are shared with the relay (docs/contracts/api, AGENT A-45): one file, packed as is.
 tasks.named<ProcessResources>("processResources") {
     from(rootProject.file("docs/contracts/api")) {
         include("agent-tools.v*.json")

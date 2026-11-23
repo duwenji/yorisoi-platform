@@ -6,7 +6,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.File
 
-/** Every sample in docs/contracts/api/text-safety-vectors.json (ADR-AGENT A-52) holds. */
+/** Every sample in docs/contracts/api/text-safety-vectors.json (AGENT A-52) holds. */
 class TextSafetyVectorsTest {
     private val cases = JSONObject(File(System.getProperty("textSafetyVectors")).readText(Charsets.UTF_8)).getJSONArray("cases")
 

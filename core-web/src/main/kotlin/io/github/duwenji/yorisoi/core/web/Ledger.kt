@@ -2,7 +2,7 @@ package io.github.duwenji.yorisoi.core.web
 
 import org.json.JSONObject
 
-/** The kinds of a source (ADR-AGENT A-21・A-23). The first five are the ledger's; [CHANNEL] is a channel's own. */
+/** The kinds of a source (AGENT A-21・A-23). The first five are the ledger's; [CHANNEL] is a channel's own. */
 enum class SourceKind(val id: String, val official: Boolean) {
     NATIONAL("national", true),
     PREFECTURE("prefecture", true),
@@ -17,10 +17,10 @@ enum class SourceKind(val id: String, val official: Boolean) {
     }
 }
 
-/** What a source offers to read: a feed (RSS・Atom) or a list page (ADR-AGENT A-21). */
+/** What a source offers to read: a feed (RSS・Atom) or a list page (AGENT A-21). */
 data class SourceRead(val url: String, val feed: Boolean, val title: String? = null)
 
-/** One source a preparation may read (ADR-AGENT A-21〜A-23). */
+/** One source a preparation may read (AGENT A-21〜A-23). */
 data class Source(
     val id: String,
     val name: String,

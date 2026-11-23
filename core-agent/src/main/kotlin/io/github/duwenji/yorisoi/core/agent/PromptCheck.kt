@@ -1,7 +1,7 @@
 package io.github.duwenji.yorisoi.core.agent
 
 /**
- * The check of the preparer's fixed instructions (ADR-AGENT A-42): both apps write their own (`agent/system`)
+ * The check of the preparer's fixed instructions (AGENT A-42): both apps write their own (`agent/system`)
  * for walking or cycling, with the same headings, and the shared guard (`shared/guard`, under 「# 守ること」)
  * last. Without them the preparer isn't used.
  */

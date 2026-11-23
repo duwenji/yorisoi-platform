@@ -1,6 +1,6 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
-// The preparer's standard tools (platform ADR-AGENT A-6・A-7・A-12・A-69): the facts the app or the validator already
+// The preparer's standard tools (platform AGENT A-6・A-7・A-12・A-69): the facts the app or the validator already
 // has (the calendar, the weather, the season's observations, the local events, the spots around, the materials) as
 // numbered facts, and the pages of the sources read with kit-web and turned into hints. The channel's policy is
 // applied inside the tools, so both apps and the validator keep it the same way. Plain JVM (A-54).

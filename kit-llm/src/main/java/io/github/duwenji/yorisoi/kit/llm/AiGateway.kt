@@ -24,7 +24,7 @@ data class AiConnection(
     val model: String = provider.defaultModel,
     val baseUrl: String = provider.defaultBaseUrl,
     val dailyLimit: Int? = null,
-    /** The preparer's model on the user's own key; blank for the same as [model] (platform ADR-AGENT A-46). */
+    /** The preparer's model on the user's own key; blank for the same as [model] (platform AGENT A-46). */
     val agentModel: String = "",
 ) {
     /** The model the preparer runs on with the user's own key. */
@@ -120,7 +120,7 @@ class AiGateway(
     }
 
     /**
-     * The preparer (platform ADR-AGENT A-10・A-16・A-46) on today's route: the operator's relay (its model for the
+     * The preparer (platform AGENT A-10・A-16・A-46) on today's route: the operator's relay (its model for the
      * use `agent`), or the user's own key with [AiConnection.preparerModel]. Each call counts as one call of the
      * day, like [generate]; the caller keeps the preparer within its share of them (A-33). Null when no AI is set up.
      */

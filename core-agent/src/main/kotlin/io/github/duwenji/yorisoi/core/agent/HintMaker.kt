@@ -7,7 +7,7 @@ import io.github.duwenji.yorisoi.core.text.InstructionCheck
 data class HintPage(val title: String, val text: String)
 
 /**
- * The hint maker (ADR-AGENT A-18・A-42): an AI with no tools reads up to [MAX_PAGES] pages at once and writes
+ * The hint maker (AGENT A-18・A-42): an AI with no tools reads up to [MAX_PAGES] pages at once and writes
  * short hints; nothing of the pages reaches the preparer but those hints. Its instructions are packed with
  * this module, so both apps and the review tools make the same hints. The answer is read by rule: a hint is a
  * line 「- [n] …」 for page n (「- [n] なし」 is nothing), cut to [ResultBook.MAX_FACT] characters, at most [PER_PAGE] per page; a hint with
