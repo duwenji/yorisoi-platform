@@ -1,0 +1,7 @@
+# GitHub Pages (.github/workflows/pages.yml) publishes this folder: the apps' pages and privacy policies.
+title: yorisoi
+lang: ja
+theme: jekyll-theme-primer
+defaults:
+  - scope: { path: "" }
+    values: { layout: default }
