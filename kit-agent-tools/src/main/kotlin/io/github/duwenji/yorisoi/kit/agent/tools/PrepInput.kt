@@ -4,9 +4,6 @@ import io.github.duwenji.yorisoi.core.web.Source
 import io.github.duwenji.yorisoi.kit.calendar.KoyomiFact
 import io.github.duwenji.yorisoi.kit.calendar.KoyomiKind
 import io.github.duwenji.yorisoi.kit.calendar.SeasonObsFile
-import io.github.duwenji.yorisoi.kit.geo.NearbyHighlight
-import io.github.duwenji.yorisoi.kit.geo.NearbyLocalEvent
-import io.github.duwenji.yorisoi.kit.geo.weather.Weather
 import java.time.LocalDate
 
 /**
@@ -46,12 +43,24 @@ data class PrepInput(
     /** The prefecture's number (「18」), for the season's observations. */
     val prefecture: String,
     val koyomi: List<KoyomiFact> = emptyList(),
-    val weather: Weather? = null,
+    val weather: PrepWeather? = null,
     val seasonObs: SeasonObsFile? = null,
-    val events: List<NearbyLocalEvent> = emptyList(),
-    val spots: List<NearbyHighlight> = emptyList(),
+    val events: List<PrepEvent> = emptyList(),
+    val spots: List<PrepSpot> = emptyList(),
     val materials: List<MaterialText> = emptyList(),
     val sources: List<Source> = emptyList(),
     /** A spot's preparation (A-3): pages without a date, or older than 30 days, may serve it (A-18). */
     val forSpot: Boolean = false,
 )
+
+/** The weather now, as the talk has it (kit-geo `Weather` in the apps). */
+data class PrepWeather(val description: String, val temperatureC: Double, val sunsetAt: Long? = null)
+
+/** A local event near (kit-geo `NearbyLocalEvent` in the apps), with whoever published it. */
+data class PrepEvent(val name: String, val venue: String, val startDate: LocalDate, val endDate: LocalDate, val publisher: String)
+
+/**
+ * A spot around (kit-geo `NearbyHighlight` in the apps): its distance and compass point from here, never a
+ * coordinate (A-14). [side] is "ahead" for one ahead on the way.
+ */
+data class PrepSpot(val id: String, val name: String, val category: String, val distanceM: Int, val compass: String, val side: String? = null)

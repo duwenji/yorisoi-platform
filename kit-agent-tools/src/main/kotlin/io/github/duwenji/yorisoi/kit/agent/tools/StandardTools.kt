@@ -82,11 +82,10 @@ class StandardTools(
             section("季節の観測", book.add("season_obs", obs.map { it.fact(input.date) }, Origin("気象庁", "national", url = obs.firstOrNull()?.source)))
         }
         if ("events" in policy.scenes) {
-            val ev = input.events.take(10).map { n ->
-                val e = n.event
+            val ev = input.events.take(10).map { e ->
                 "${dayText(e.startDate)}${if (e.endDate != e.startDate) "〜${e.endDate.monthValue}月${e.endDate.dayOfMonth}日" else ""} ${e.venue}で${e.name}"
             }
-            section("催し", book.add("local_events", ev, Origin(input.events.firstOrNull()?.event?.source?.publisher ?: "自治体", "municipality")))
+            section("催し", book.add("local_events", ev, Origin(input.events.firstOrNull()?.publisher ?: "自治体", "municipality")))
         }
     }
 
@@ -173,13 +172,13 @@ class StandardTools(
 
     private fun nearby(ahead: Boolean, book: ResultBook): ToolOutcome {
         val spots = input.spots
-            .filter { it.poi.category !in policy.spotsSkip }
+            .filter { it.category !in policy.spotsSkip }
             .filter { !ahead || it.side == "ahead" }
-            .sortedBy { if (it.poi.category in policy.spotsPrefer) 0 else 1 }
+            .sortedBy { if (it.category in policy.spotsPrefer) 0 else 1 }
             .take(20)
         val lines = spots.map { s ->
-            val sid = spotNumbers.getOrPut(s.poi.id) { "S${spotNumbers.size + 1}" }
-            "$sid ${s.poi.name}（${s.poi.category}）、${s.compass}に約 ${(s.distanceM + 50) / 100 * 100} m"
+            val sid = spotNumbers.getOrPut(s.id) { "S${spotNumbers.size + 1}" }
+            "$sid ${s.name}（${s.category}）、${s.compass}に約 ${(s.distanceM + 50) / 100 * 100} m"
         }
         val rs = book.add("nearby_spots", lines, Origin("地図データ", "national"))
         return ToolOutcome(book.render(rs), rs)

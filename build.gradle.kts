@@ -8,7 +8,7 @@ plugins {
 }
 
 // Every module is published to GitHub Packages under one version: the core
-// libraries as JARs, the kits as AARs (kit-companion is plain JVM). The group and the module
+// libraries as JARs, the kits as AARs (those that don't need Android, such as kit-agent, are plain JVM). The group and the module
 // names match the coordinates, so an app's composite build can stand in for them.
 subprojects {
     group = "io.github.duwenji.yorisoi"

@@ -28,7 +28,7 @@
 | No. | 論点 | 決定 |
 |---|---|---|
 | E-1 | 目的 | 付き添いアプリを、要望に応じて作れるプラットフォームにする。SanpoGuide はその最初のアプリ。チャンネル提供者・素材提供者・運営はアプリをまたいで共通 |
-| E-2 | 層 | 3 層に分ける。**コア**（JVM、Android に依存しない。アプリと管理システムが同じコードを使う）、**キット**（Android の AAR。Android に依存しない `kit-companion`・`kit-channel` は JVM）、**アプリ**。下の層は上の層を知らない |
+| E-2 | 層 | 3 層に分ける。**コア**（JVM、Android に依存しない。アプリと管理システムが同じコードを使う）、**キット**（Android の AAR。Android に依存しない `kit-companion`・`kit-channel`・`kit-calendar`・`kit-web`・`kit-agent`・`kit-agent-tools` は JVM）、**アプリ**。下の層は上の層を知らない |
 | E-3 | コア | `core-format`（チャンネルの形式の骨格・スロット・署名・ZIP の確認・きっかけ・エコシステム共通の語彙。素材提供者の記述と方針・素材集・地域・タグの一覧と、リストの検証もパッケージとして含む）、`core-prompt`（`PromptTemplates`） |
 | E-4 | キット | `kit-llm`（`LlmClient`・Claude／OpenAI 互換・`KeyCipher`・運営の AI の中継の `RelayClient`・`OperatorAi`・自分のキーの 1 日の呼び出しの数 `AiUsage`・使わない返事の判定 `OutputCheck`）、`kit-voice`（`Speaker`・オーディオフォーカス・`AmbientPlayer`・`Voices`）、`kit-geo`（運営のスポットのタイル `SpotTiles`・Overpass・`Poi`・`Shape`・`SpotFacts`・よく通る道 `FrequentWay`・ルート・`SpotPhotos`・地図・天気・日の入り）、`kit-mood`（`Mood`・`MoodSource`・`MoodTheme`・`MoodScene`）、`kit-ui`（どのアプリにも共通の見た目: よりそいの緑の配色 `YorisoiTheme`・画面の上部のバー `ScreenBar`・ホーム画面のアイコンの緑の背景。アプリどうしは同じ緑にし、見分けはアイコンの絵に任せる）、`kit-companion`（話す判断のエンジンと、開発者モードの記録 `SessionRecorder`。JVM）、`kit-channel`（チャンネルの扱い: `Station`・スロットからのプロンプトの組み立て・組み込みのチャンネルの読み込み・第三者のチャンネルの取り込み・前もって取る素材の計画・素材提供者・通報）、`kit-local-materials`（区画ごとに運営から取る素材のアプリ側: 組み込みの素材提供者 `builtin:studio`・`builtin:note`・`LocalFeed`・API-LOCAL-MATERIALS の `LocalClient`・スタジオの音声・一言を声で置く）。アプリにあったコードは、2 本目のアプリ（CycleGuide）が使う段階の前に、使うものから移す。移すときに散歩だけの前提（間隔の値・散歩の記録・散歩の状態）を外し、値はアプリが持つ。画面はアプリに置く（共通の見た目の部品は `kit-ui`） |
 | E-5 | アプリが持つもの | プロファイル（E-6）、判定のルール（散歩なら施設の案内・スポットの選び方）、プロンプトの固定部分の中身と定型文、組み込みのチャンネル、画面と常駐サービスのつなぎ込み |
