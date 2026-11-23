@@ -31,7 +31,7 @@ data class SeasonObservation(
 ) {
     /**
      * The observation as one fact for the preparer and the speaker (at most 60 characters), with the values as
-     * the 気象庁 gave them (ADR-AGENT A-28: they are not changed). With [today] the date says how it stands to the
+     * the 気象庁 gave them (AGENT A-28: they are not changed). With [today] the date says how it stands to the
      * day too (「昨日 11月22日」): the speaker otherwise took an observation of yesterday for today's.
      */
     fun fact(today: LocalDate? = null): String {
@@ -65,7 +65,7 @@ data class SeasonObservation(
 /** One cold season's observations file (寒候年: August to July), as the operator's batch hands it out. */
 data class SeasonObsFile(val season: String, val attribution: String, val observations: List<SeasonObservation>) {
     /**
-     * What `season_obs` gives (ADR-AGENT A-12・A-28): the observations of the last [days] days up to [today] in
+     * What `season_obs` gives (AGENT A-12・A-28): the observations of the last [days] days up to [today] in
      * [prefecture] and the prefectures next to it, the one's own first, newest first, at most [limit].
      */
     fun around(prefecture: String, today: LocalDate, days: Long = 14, limit: Int = 20): List<SeasonObservation> {

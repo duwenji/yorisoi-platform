@@ -6,7 +6,7 @@ import org.json.JSONObject
 /** One step of a thread: its topic, the results it points at, and the words that lead into it. */
 data class Step(val scene: String, val topic: String, val results: List<Result>, val bridge: String)
 
-/** A thread of talk (ADR-AGENT A-3): two to four steps along a path of scenes. */
+/** A thread of talk (AGENT A-3): two to four steps along a path of scenes. */
 data class TalkThread(val path: List<String>, val steps: List<Step>)
 
 /** A spot's preparation: one bundle of results (A-3). */
@@ -16,7 +16,7 @@ data class SpotBundle(val spot: String, val results: List<Result>)
 data class Checked(val threads: List<TalkThread>, val spot: SpotBundle?, val dropped: List<String>)
 
 /**
- * The check of a submission (ADR-AGENT A-29). The preparer writes no fact: a step points at results by number,
+ * The check of a submission (AGENT A-29). The preparer writes no fact: a step points at results by number,
  * and the speaker is given the results' own text. This takes out a number not in this preparation, a result
  * whose tool doesn't serve the step's scene, and a number a thread already used; empties a bridge longer than
  * [MAX_BRIDGE] characters or with a digit; cuts a topic to [MAX_TOPIC] characters. A step left with no result

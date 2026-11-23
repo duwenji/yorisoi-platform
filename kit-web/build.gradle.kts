@@ -1,6 +1,6 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
-// The web as the preparer reads it (platform ADR-AGENT A-19・A-20・A-26・A-34): reading pages and feeds with the
+// The web as the preparer reads it (platform AGENT A-19・A-20・A-26・A-34): reading pages and feeds with the
 // apps' manners (robots.txt, its own User-Agent, no cookies, two at a time and one per site), the page and hint
 // caches, and the operator's delivered files (the sources' ledger, the exclusion list, the season's observations)
 // with their versions. What may be read and what is taken from a page is core-web's. Plain JVM, so the apps and the

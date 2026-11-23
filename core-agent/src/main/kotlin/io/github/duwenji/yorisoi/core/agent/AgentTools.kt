@@ -6,7 +6,7 @@ import org.json.JSONObject
 data class ToolDef(val name: String, val description: String, val inputSchema: JSONObject)
 
 /**
- * The tools' definitions, read from the shared file packed with this module (ADR-AGENT A-11・A-45). The relay
+ * The tools' definitions, read from the shared file packed with this module (AGENT A-11・A-45). The relay
  * keeps a copy of the same file; the app sends it only the version and the names.
  */
 class AgentTools private constructor(val version: Int, private val byName: Map<String, ToolDef>) {

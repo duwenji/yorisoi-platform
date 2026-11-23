@@ -1,7 +1,7 @@
 package io.github.duwenji.yorisoi.core.text
 
 /**
- * Sentences that read as instructions to an AI rather than as information (ADR-AGENT A-18): text taken
+ * Sentences that read as instructions to an AI rather than as information (AGENT A-18): text taken
  * from a page or a link title that tries to steer the AI that reads it. They are dropped before any AI
  * sees them. The match is kept narrow so ordinary notices (「申し込みは窓口へ」) pass.
  */

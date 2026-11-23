@@ -1,6 +1,6 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
-// What may be read from the web for the talk, and what is taken from it (ADR-AGENT 4・5): the sources'
+// What may be read from the web for the talk, and what is taken from it (AGENT 4・5): the sources'
 // ledger and the exclusion list, which URLs are in reach, robots.txt, and the text and links of a page or
 // a feed. Plain JVM with no network or storage, so the apps and the review tools decide the same way.
 plugins {

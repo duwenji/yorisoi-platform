@@ -11,7 +11,7 @@ import io.github.duwenji.yorisoi.kit.calendar.KoyomiKind
 import io.github.duwenji.yorisoi.kit.channel.Station
 
 /**
- * What the preparer may do on a channel (platform ADR-AGENT A-6・A-7・A-46): the channel's `agent` narrowed by its
+ * What the preparer may do on a channel (platform AGENT A-6・A-7・A-46): the channel's `agent` narrowed by its
  * other items and the user's settings. Both apps and the console's validator narrow it here, the same way (A-51・A-54). Null when nothing is prepared: the channel's `mode` is off, it talks
  * quietly, it doesn't chat (S-1 prepares the chat's threads only), or the user turned research off.
  */

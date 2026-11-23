@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "web-exclusion.schema.json",
   "title": "除外リスト（1 つの配信ファイル）",
-  "$comment": "ADR-AGENT A-24〜A-26。yorisoi-console の運営の画面で公開するたびに版を上げて作る。最初の版は entries が空。",
+  "$comment": "AGENT A-24〜A-26。yorisoi-console の運営の画面で公開するたびに版を上げて作る。最初の版は entries が空。",
   "type": "object",
   "additionalProperties": false,
   "required": ["version", "publishedAt", "entries"],

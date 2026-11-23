@@ -10,22 +10,22 @@
 |---|---|---|
 | `core-format` | JVM | チャンネル・素材集の形式（API-CHANNEL-PACKAGE・API-MATERIALS）、その確認と署名、承認済みチャンネル・リスト（API-CHANNEL-LIST）、エコシステム共通の語彙。使う側で org.json が要る（Android には入っている） |
 | `core-text` | JVM | 文章の機械の確認（URL・メールアドレス・電話番号・見出し）と、読み上げる前に除く書き方（ト書き・Markdown・返事の書き方のメモ）。スロット・素材の確かめ（core-format）と AI の出力の確かめ（kit-llm）が同じものを使う |
-| `core-web` | JVM | 話の準備で読むウェブの決まり（ADR-AGENT）: 出どころの台帳と除外リストの読み取り、読んでよい URL（同じサイトの判定に Public Suffix List（MPL 2.0）を同梱）、`robots.txt`、ページの本文とリンク、RSS・Atom。通信と保存はしない。使う側で org.json が要る |
-| `core-agent` | JVM | 準備役の決まり（ADR-AGENT）: 道具の定義（`docs/contracts/api/agent-tools.v1.json` を同梱）と引数の確かめ、結果の番号、往復と回数、コンテキストの上限と縮め方、提出された筋の確かめ、手がかり作りの指示と答えの読み取り。AI と道具は口（interface）で受け、通信はしない。使う側で org.json が要る |
+| `core-web` | JVM | 話の準備で読むウェブの決まり（AGENT）: 出どころの台帳と除外リストの読み取り、読んでよい URL（同じサイトの判定に Public Suffix List（MPL 2.0）を同梱）、`robots.txt`、ページの本文とリンク、RSS・Atom。通信と保存はしない。使う側で org.json が要る |
+| `core-agent` | JVM | 準備役の決まり（AGENT）: 道具の定義（`docs/contracts/api/agent-tools.v1.json` を同梱）と引数の確かめ、結果の番号、往復と回数、コンテキストの上限と縮め方、提出された筋の確かめ、手がかり作りの指示と答えの読み取り。AI と道具は口（interface）で受け、通信はしない。使う側で org.json が要る |
 | `core-prompt` | JVM | プロンプトのテンプレート（Mustache の一部） |
 | `kit-companion` | JVM | いま何を話すかの判定のエンジン（ルールの並びとゲート）、開発者モードの記録（`SessionRecorder`。使う側で org.json が要る） |
 | `kit-channel` | JVM | アプリの中のチャンネル（利用者の変更を重ねた設定値とスロット）、チャンネルの一覧と使っているチャンネル、組み込みのチャンネルの読み込み、第三者のチャンネルの素材。第三者のチャンネルの取り込み（`remote`: `ChannelSync`・`ThirdPartyChannels`）、前もって取る素材の計画と素材提供者（`material`: `MaterialPlan`・`SelectorPlan`・`Producer`・`Producers`・`CueFinder`・`CuePresenter`・`Grounding`・`ResourceProducer`・`SelectorProducer`。題材の `Subject`・素材の `Content`・アプリの文脈の `Situation` はアプリが足せる）、チャンネルの通報（`report`）。使う側で org.json が要る（`OkHttpProviderHttp`・`TinkEd25519` を使うなら OkHttp・Tink も） |
 | `kit-ui` | Android | どのアプリにも共通の見た目。よりそいの緑の配色（`YorisoiTheme`）、画面の上部のバー（`ScreenBar`）、ホーム画面のアイコンの緑の背景（`yorisoi_launcher_background`） |
 | `kit-voice` | Android | 読み上げ（オーディオフォーカス）と背景音の合成 |
 | `kit-llm` | Android | AI の接続（Claude・OpenAI 互換・運営の AI の中継。中継のセッションのトークンはほかの部品にも貸せる）と鍵の暗号化、自分のキーの 1 日の呼び出しの数、使わない返事（連絡先を含む）の判定 |
-| [`kit-geo`](kit-geo/README.md) | Android | スポット・ルート・写真・天気・地図。運営のスポットのタイル、スポット検索のキャッシュ、よく通る道、市区町村の代表点の表で今いる市区町村を決める（`Municipalities`。ADR-AGENT A-14） |
+| [`kit-geo`](kit-geo/README.md) | Android | スポット・ルート・写真・天気・地図。運営のスポットのタイル、スポット検索のキャッシュ、よく通る道、市区町村の代表点の表で今いる市区町村を決める（`Municipalities`。AGENT A-14） |
 | `kit-mood` | Android | 雰囲気（時間帯・季節・空模様・場所）と、配色・絵・背景音。雰囲気がないときの配色は `kit-ui` の緑 |
 | [`kit-local-materials`](kit-local-materials/README.md) | Android | 区画ごとに運営から取る素材（スタジオ、一言）のアプリ側。組み込みの素材提供者 `builtin:studio`・`builtin:note`。近くのスタジオと一言を取って種類ごとに選ぶ（`LocalFeed`、`StudioProducer`・`NoteProducer`）、API-LOCAL-MATERIALS（`LocalClient`、トークンは運営の AI の中継から）、スタジオの音声（`ClipCache`・`ClipPlayer`）、一言を声で置く（`NoteRecognizer`）、設定（`LocalSettingsStore`） |
 | [`kit-songs`](kit-songs/README.md) | Android | 運営が配る季節の歌。一覧と音を取って端末に残す（`SongLibrary`）、季節・時間帯・天気で選ぶ、流す・止める（`SongPlayer`）。API-SONGS |
-| [`kit-calendar`](kit-calendar/README.md) | JVM | その日の暦の事実（二十四節気・七十二候・雑節・五節句と年中行事・旧暦の行事・祝日・月の満ち欠け・六曜・記念日・地域ごとの行事）。REQ-KOYOMI。気象庁の季節の観測の読み取りと、近くの観測の選び方（準備役の道具 `season_obs`。ADR-AGENT）。使う側で JitPack（Astronomy Engine）と org.json が要る |
-| `kit-web` | Android | アプリの側のウェブ（ADR-AGENT）: 端末からページと RSS・Atom を読む（`robots.txt`、アプリの User-Agent、クッキーなし、同時に 2 つ・同じサイトは 1 つずつ、5 秒・1 MB まで、1 回だけやり直す）、ページと手がかりのキャッシュ（20 MB まで、古く使っていないものから消す）、運営の配信ファイル（台帳・除外リスト・季節の観測）の取得。何を読んでよいか・ページから何を取るかは core-web |
-| `kit-agent` | Android | 準備役をアプリで動かす（ADR-AGENT）: いつ準備するか（同じ日・市区町村・チャンネルの筋は作り直さない）、1 回の散歩・走行の上限（準備 4 回・AI 16 回・ページ 20 回）と 1 日の上限の 2 割、筋のキャッシュ（その日のうち・スポットは 7 日）、開発者の記録。準備の中身は core-agent、道具は kit-agent-tools |
-| `kit-agent-tools` | Android | 準備役の標準の道具（ADR-AGENT）: アプリが話のために持っている暦・天気・季節の観測・催しを番号つきの事実にして入力に入れ（先に取る道具）、`read_page`（kit-web で読み、手がかり作りの AI で手がかりにする。準備役にページの文は見せない）・`nearby_spots`・`materials` に答える。チャンネルの方針（外す暦・スポットの種類、参考の文章、`agent.web`）は道具の中でかける |
+| [`kit-calendar`](kit-calendar/README.md) | JVM | その日の暦の事実（二十四節気・七十二候・雑節・五節句と年中行事・旧暦の行事・祝日・月の満ち欠け・六曜・記念日・地域ごとの行事）。REQ-KOYOMI。気象庁の季節の観測の読み取りと、近くの観測の選び方（準備役の道具 `season_obs`。AGENT）。使う側で JitPack（Astronomy Engine）と org.json が要る |
+| `kit-web` | Android | アプリの側のウェブ（AGENT）: 端末からページと RSS・Atom を読む（`robots.txt`、アプリの User-Agent、クッキーなし、同時に 2 つ・同じサイトは 1 つずつ、5 秒・1 MB まで、1 回だけやり直す）、ページと手がかりのキャッシュ（20 MB まで、古く使っていないものから消す）、運営の配信ファイル（台帳・除外リスト・季節の観測）の取得。何を読んでよいか・ページから何を取るかは core-web |
+| `kit-agent` | Android | 準備役をアプリで動かす（AGENT）: いつ準備するか（同じ日・市区町村・チャンネルの筋は作り直さない）、1 回の散歩・走行の上限（準備 4 回・AI 16 回・ページ 20 回）と 1 日の上限の 2 割、筋のキャッシュ（その日のうち・スポットは 7 日）、開発者の記録。準備の中身は core-agent、道具は kit-agent-tools |
+| `kit-agent-tools` | Android | 準備役の標準の道具（AGENT）: アプリが話のために持っている暦・天気・季節の観測・催しを番号つきの事実にして入力に入れ（先に取る道具）、`read_page`（kit-web で読み、手がかり作りの AI で手がかりにする。準備役にページの文は見せない）・`nearby_spots`・`materials` に答える。チャンネルの方針（外す暦・スポットの種類、参考の文章、`agent.web`）は道具の中でかける |
 
 コアは Android に依存しません。管理システムがアプリと同じコードで確かめるためです。
 

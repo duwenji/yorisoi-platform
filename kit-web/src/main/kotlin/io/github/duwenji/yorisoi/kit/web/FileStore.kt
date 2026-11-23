@@ -6,7 +6,7 @@ import java.security.MessageDigest
 
 /**
  * A small store on the device: a value (bytes) and its facts (JSON) by key, in [dir]. It keeps itself under
- * [maxBytes] by deleting what was used longest ago (ADR-AGENT A-34: the caches together up to 20 MB). Clearing
+ * [maxBytes] by deleting what was used longest ago (AGENT A-34: the caches together up to 20 MB). Clearing
  * it is the settings'「キャッシュを消す」.
  */
 class FileStore(private val dir: File, private val maxBytes: Long) {

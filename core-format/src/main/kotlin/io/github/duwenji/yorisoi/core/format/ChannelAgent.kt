@@ -2,21 +2,21 @@ package io.github.duwenji.yorisoi.core.format
 
 import org.json.JSONObject
 
-/** The scenes the preparer may look into (platform ADR-AGENT A-6; API-CHANNEL-PACKAGE「場面」). */
+/** The scenes the preparer may look into (platform AGENT A-6; API-CHANNEL-PACKAGE「場面」). */
 enum class AgentScene(override val json: String) : JsonValue {
     CALENDAR("calendar"), SEASON("season"), LIVELIHOOD("livelihood"), EVENTS("events"), SPOT("spot"),
 }
 
-/** The kinds of the ledger's sources (ADR-AGENT A-21), which `agent.skip` may name. */
+/** The kinds of the ledger's sources (AGENT A-21), which `agent.skip` may name. */
 enum class SourceKindName(override val json: String) : JsonValue {
     NATIONAL("national"), PREFECTURE("prefecture"), MUNICIPALITY("municipality"), TOURISM("tourism"), ASSOCIATION("association"),
 }
 
-/** A page of the channel's own the preparer may read (`agent.sources`, ADR-AGENT A-23). */
+/** A page of the channel's own the preparer may read (`agent.sources`, AGENT A-23). */
 data class AgentSource(val name: String, val urls: List<String>, val scenes: Set<AgentScene>)
 
 /**
- * `agent` of `channel.json` (platform ADR-AGENT A-6・A-8): whether the preparer is used, and within what. Left out,
+ * `agent` of `channel.json` (platform AGENT A-6・A-8): whether the preparer is used, and within what. Left out,
  * the preparer isn't used ([OFF]). This is what the channel wrote; the app narrows it with the channel's other
  * values (`talk.events`, `talk.level`, A-7) when it prepares.
  *

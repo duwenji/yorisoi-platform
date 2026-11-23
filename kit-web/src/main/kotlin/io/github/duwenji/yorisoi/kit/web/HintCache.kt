@@ -7,7 +7,7 @@ import java.time.Duration
 import java.time.Instant
 
 /**
- * The hints made from a page (ADR-AGENT A-34 ②), by the page's URL and a hash of the text they were made from,
+ * The hints made from a page (AGENT A-34 ②), by the page's URL and a hash of the text they were made from,
  * so a page that changed gets new hints. Kept as long as the page itself ([PageFetcher.LIST_AGE] for a source's
  * own list page, [PageFetcher.PAGE_AGE] for a page followed from it).
  */

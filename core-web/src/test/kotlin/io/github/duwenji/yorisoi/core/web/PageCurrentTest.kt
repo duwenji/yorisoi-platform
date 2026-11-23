@@ -5,7 +5,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.time.LocalDate
 
-/** ADR-AGENT A-18: a page older than 30 days still serves when its text is about now. */
+/** AGENT A-18: a page older than 30 days still serves when its text is about now. */
 class PageCurrentTest {
     private val today = LocalDate.of(2026, 11, 23)
 

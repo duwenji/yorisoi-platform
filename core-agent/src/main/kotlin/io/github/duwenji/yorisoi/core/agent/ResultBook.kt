@@ -1,6 +1,6 @@
 package io.github.duwenji.yorisoi.core.agent
 
-/** Where a fact came from, shown with it when it is spoken (ADR-AGENT A-30・A-31). */
+/** Where a fact came from, shown with it when it is spoken (AGENT A-30・A-31). */
 data class Origin(
     val name: String,
     /** `national`・`prefecture`・`municipality` may be stated as fact; the others are said as 「〜と紹介されていました」. */
@@ -10,14 +10,14 @@ data class Origin(
     val date: String? = null,
 )
 
-/** What a result is, for cutting the context (ADR-AGENT A-37): the facts stay longest. */
+/** What a result is, for cutting the context (AGENT A-37): the facts stay longest. */
 enum class ResultRole { FACT, LINKS, EMPTY_PAGE }
 
 /** One numbered result of a tool: one fact (1 sentence, at most [ResultBook.MAX_FACT] characters) and where it came from. */
 data class Result(val id: String, val tool: String, val text: String, val origin: Origin?, val role: ResultRole = ResultRole.FACT)
 
 /**
- * The numbered results of one preparation (ADR-AGENT A-12): every tool's results, the ones taken before the
+ * The numbered results of one preparation (AGENT A-12): every tool's results, the ones taken before the
  * preparation included, in one sequence R1, R2, …. Threads point at them by number (A-29), and the speaker is
  * given the result's own text, never the preparer's wording.
  */

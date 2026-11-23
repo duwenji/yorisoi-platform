@@ -9,12 +9,12 @@ import java.time.Instant
 
 /** A delivered file as the app holds it: its bytes and when they were fetched; [bytes] null when never fetched. */
 data class Delivered(val bytes: ByteArray?, val fetchedAt: Instant?) {
-    /** Whether a version was ever fetched (ADR-AGENT A-26: some reads wait for the first one). */
+    /** Whether a version was ever fetched (AGENT A-26: some reads wait for the first one). */
     val everFetched: Boolean get() = bytes != null
 }
 
 /**
- * The operator's delivered files (ADR-AGENT A-26・A-28): the sources' ledger, the exclusion list and the season's
+ * The operator's delivered files (AGENT A-26・A-28): the sources' ledger, the exclusion list and the season's
  * observations, from the same delivery as the spot tiles. A file is asked again once it is older than the
  * caller's age, with `If-None-Match`; when that fails the one held is used; a file never fetched comes back
  * with no bytes, so the caller can read in the narrower way the ADR sets for it.

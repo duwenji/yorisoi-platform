@@ -2,7 +2,7 @@ package io.github.duwenji.yorisoi.core.agent
 
 import org.json.JSONObject
 
-/** A turn of the conversation the app keeps and sends whole each time (ADR-AGENT A-11). */
+/** A turn of the conversation the app keeps and sends whole each time (AGENT A-11). */
 sealed interface Turn {
     /** The preparation's input (A-4), with the results taken before it. */
     data class Input(val text: String) : Turn
@@ -41,7 +41,7 @@ data class ToolOutcome(val text: String, val results: List<Result>)
 data class Prepared(val checked: Checked?, val calls: Int, val toolCalls: List<String>, val refused: List<String>, val budgetCuts: Int)
 
 /**
- * One preparation (ADR-AGENT A-11〜A-15・A-33・A-36〜A-38): at most [maxCalls] calls; the last offers only the
+ * One preparation (AGENT A-11〜A-15・A-33・A-36〜A-38): at most [maxCalls] calls; the last offers only the
  * submission and must use it. Each reply's tools run at most [MAX_TOOLS_PER_REPLY] at a time; a tool with wrong
  * arguments or an unknown name doesn't run and the reason goes back. The AI's words are dropped. The
  * conversation is kept to the budget (A-36) by [ContextBudget]. Every preparation starts afresh (A-38).

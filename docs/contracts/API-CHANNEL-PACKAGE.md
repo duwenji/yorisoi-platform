@@ -154,6 +154,13 @@ resources/                   パッケージに入れる素材（任意）
 | `spots.skip` | string[] | ○（空でもよい） | 散策中に話題にしない種類。地図と一覧には出る。`prefer` と重ねない |
 | `calendar.prefer` | string[] | 任意 | 暦の雑談で先に話す暦の種類（[暦の種類](#暦の種類)）。0〜10 個（REQ-KOYOMI F-22） |
 | `calendar.skip` | string[] | 任意 | 暦の雑談で話さない暦の種類。0〜10 個。`prefer` と重ねない（REQ-KOYOMI F-21・F-23） |
+| `agent.mode` | string | 任意 | `off`（準備役を使わない）/ `plan`（使う）。書かなければ `off`（[AGENT](../overview/agent.md) A-6） |
+| `agent.web` | string | 任意 | `off`（ページを読まない）/ `on`（台帳とチャンネルの出どころを読む）。書かなければ `on` |
+| `agent.scenes` | string[] | 任意 | 調べてよい場面（[場面](#場面)）。重ねない。書かなければ全部 |
+| `agent.paths` | string[] | 任意 | 目指す筋の型。`scenes` にある `spot` 以外の場面を `>` でつないだ 2〜4 個（例: `"calendar>livelihood>events"`）。0〜5 個 |
+| `agent.sources` | object[] | 任意 | チャンネルの出どころ。0〜10 個。1 つは `name`（1〜20 字）・`urls`（`https://` で始まる 1〜3 個、500 字まで）・`scenes`（1 つ以上）。書けるのはチャンネル提供者自身のサイトか公の出どころのページだけ（審査で確かめる。AGENT A-23） |
+| `agent.skip` | string[] | 任意 | 使わない台帳の出どころの種類（[出どころの種類](#出どころの種類)）、読まないドメイン（下位のドメインも含む）、URL の前方一致。0〜20 個。運営の除外リストに足すだけで、減らせない |
+| `agent.topics` | string[] | 任意 | 調べ物に足す言葉。0〜10 個、1 つ 1〜20 字。URL と `{{` を含めない |
 | `guide.length` | string | ○ | スポット解説の長さ。`short`（100〜150 字）/ `normal`（200〜300 字）/ `long`（300〜450 字） |
 | `mood.tone` | bool | ○ | スポット解説と話しかけの話し方のトーンを雰囲気に合わせるか |
 | `resources` | object[] | 任意 | 素材（[素材](#素材resources)） |
@@ -210,6 +217,10 @@ ECOSYSTEM E-24 のとおり、実装するアプリを作ると決めた過ご�
 | `spots.skip` | **チャンネルを使わない**（制限のため） |
 | `spots.prefer` | その値を無視する |
 | `calendar.prefer`・`calendar.skip` | その値を無視する（知らない種類の暦は、そのアプリはもともと話さないので、制限は緩まない） |
+| `agent.mode`・`agent.web` | `off` として扱う（AGENT A-8） |
+| `agent.scenes` | その値を使わない |
+| `agent.paths` | 知らない場面か `scenes` にない場面を含む型を使わない |
+| `agent.skip` の出どころの種類 | 台帳の出どころを使わない（チャンネルの出どころだけを読む） |
 | `talk.events` の知らない出来事 | その出来事を無視する（6 つの出来事は必須） |
 | `mood.sound` | `auto` として扱う |
 | `cues[].trigger` の知らない種類・出来事 | そのきっかけを使わない |
@@ -278,6 +289,22 @@ ECOSYSTEM E-24 のとおり、実装するアプリを作ると決めた過ご�
 | `kinenbi` | 記念日（国・自治体・団体が定めたもの） |
 | `regional` | 地域ごとの行事（お盆の時期・地蔵盆など） |
 
+### 場面
+
+`agent.scenes`・`agent.paths`・`agent.sources[].scenes` に書ける値（AGENT A-6）。値を足すのは `core-format` のマイナー版。
+
+| 値 | 場面 | 使えるとき（AGENT A-7） |
+|---|---|---|
+| `calendar` | 暦 | `talk.events.calendar` が真 |
+| `season` | 季節の様子 | いつでも |
+| `livelihood` | 暮らし・なりわい | いつでも |
+| `events` | 地域の催し | `talk.events.localEvent` が真 |
+| `spot` | スポット | `talk.events.spot` が真。筋の型（`paths`）には入れない |
+
+### 出どころの種類
+
+`agent.skip` に書ける台帳の出どころの種類（AGENT A-21）。`national`（国の機関）・`prefecture`（都道府県）・`municipality`（市区町村）・`tourism`（観光協会）・`association`（農協・漁協などの団体）。チャンネルの出どころ（`agent.sources`）の種類は `channel`。
+
 ## プロンプトのスロット
 
 ### 組み立て方
@@ -301,6 +328,8 @@ ECOSYSTEM E-24 のとおり、実装するアプリを作ると決めた過ご�
 5. `# 守ること` → 固定: 共通の指示
 
 **出来事（ユーザープロンプト）**: `companion/situation` ＋ 出来事のファイル（固定）＋ **`companion/events/{出来事}`**（`# このチャンネルでの追加の指示` の見出しの下に入れる）
+
+準備役の指示（`agent/system`・`agent/user`）にはチャンネルのスロットを差し込まない。`companion/topics` だけを、データの区切りで囲んで準備の入力に渡す（AGENT A-4・A-42）。
 
 ### 共通の指示（アプリの固定部分）
 
@@ -599,7 +628,7 @@ API-CHANNEL-LIST の `package_rejected` の詳細の理由。審査用の道具�
 | `publisher_mismatch` | 公開鍵から計算したアカウントIDが `channel.json`・リストと違う |
 | `unsupported_format` | `format` を知らない |
 | `bad_manifest` | `channel.json` が読めない。必須項目がない。型が違う。`id`・`version` がリストと違う |
-| `bad_value` | 列挙の外の値、文字数の上限超え、`prefer` と `skip` の重なり |
+| `bad_value` | 列挙の外の値、文字数の上限超え、`prefer` と `skip` の重なり。`agent` の `scenes` にない場面か `spot` を含む `paths`、形の誤った `sources`・`skip`、除外リストに当たる `sources`（審査用の道具が除外リストを渡したとき） |
 | `slot_too_long` | スロットの文字数・合計の上限超え |
 | `forbidden_text` | スロットに `{{`・URL・見出しがある |
 | `render_failed` | 組み立てたプロンプトにエラーがある |
@@ -644,6 +673,7 @@ API-CHANNEL-LIST の `package_rejected` の詳細の理由。審査用の道具�
 | V-28 | `calendar.prefer`・`calendar.skip` に同じ種類・知らない種類・11 個以上を書いたチャンネルを、審査で拒む（`bad_value`）。アプリは知らない種類だけを無視してチャンネルを使う |
 | V-29 | `talk.events.chat` が偽のチャンネルでは、`calendar` が真でも暦の雑談を出さない |
 | V-30 | `talk.events.localEvent` が偽のチャンネルでは、近くの催しを雑談でも予告でも話さない。`chat` が偽なら雑談で、`preview` が偽なら予告で話さない。`localEvent` を書かないチャンネルでは、両方で話す |
+| V-31 | `agent` の知らない値・`scenes` にない場面か `spot` を含む `paths`・形の誤った `sources` と `skip`・数と長さを超える値を、審査で拒む（`bad_value`）。アプリは知らない `mode`・`web` を `off` とし、知らない場面とそれを含む `paths` を使わない。今の項目（`talk.events`・`talk.level`）で使えない場面を書いたもの、準備しないチャンネル（`talk.level` が `quiet`、または `chat` と `spot` がどちらも偽）の `plan` は、審査で警告にする（AGENT A-9） |
 
 ## 互換性方針・移行メモ
 
@@ -656,6 +686,7 @@ API-CHANNEL-LIST の `package_rejected` の詳細の理由。審査用の道具�
 - 見せ方の安全の決まり（F-8）を緩める変更は、互換性のある変更として扱わない。審査基準と本書の版を上げてから行う
 - 暦の雑談（`talk.events.calendar`。REQ-KOYOMI）は、`calendar.prefer`・`calendar.skip` を読める `core-format`（2.33.0 以降）のアプリだけが出す。それより前の `core-format` のアプリは暦の雑談を出さないので、`calendar` を書いたチャンネルをそのアプリの一覧に出しても制限は緩まず、必要な版（API-CHANNEL-LIST P-20）を上げなくてよい。チャンネル提供者には、暦の設定が効くアプリの版を案内する（REQ-KOYOMI F-24）
 - 近くの催し（`talk.events.localEvent`。REQ-LOCAL-EVENTS）は、`localEvent` を読める `core-format`（2.36.0 以降）のアプリだけが話す。それより前のアプリは催しを話さないので、`localEvent` を書いたチャンネルを古いアプリの一覧に出しても制限は緩まず、必要な版（API-CHANNEL-LIST P-20）を上げなくてよい
+- 準備役（`agent`。AGENT）は、`agent` を読める `core-format`（2.50.0 以降）のアプリだけが使う。それより前のアプリは `agent` を無視して準備役を使わないので、`agent` を書いたチャンネルを古いアプリの一覧に出しても制限は緩まず、必要な版（API-CHANNEL-LIST P-20）を上げなくてよい（AGENT A-8）
 - `source` だけの `present` は、素材集に対応していないアプリでは素材の参照がないとして拒まれる（`bad_cue`）。管理システムは、`collections`・`source` を使うチャンネルの必要な版を、素材集に対応したアプリの版にする
 
 ## 制約

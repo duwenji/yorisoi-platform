@@ -26,7 +26,7 @@ internal fun reject(code: RejectCode, detail: String): Nothing = throw Reject(co
 
 internal val ID_PATTERN = Regex("[a-z0-9-]{3,40}")
 internal val ACCOUNT_ID_PATTERN = Regex("sg1[a-z2-7]{32}")
-// The text checks every path shares live in core-text (ADR-AGENT A-52).
+// The text checks every path shares live in core-text (AGENT A-52).
 internal val HEADING_PATTERN = WrittenText.HEADING
 /** The first URL in [text], full-width forms included (core-text WrittenText), or null. */
 internal fun findUrl(text: String): String? = WrittenText.findUrl(text)

@@ -2,7 +2,7 @@ package io.github.duwenji.yorisoi.core.web
 
 /**
  * The registrable domain of a host, from the Public Suffix List (bundled; MPL 2.0), so a link stays on
- * the site it came from (ADR-AGENT A-17). Two rules are added for Japan's local governments: every
+ * the site it came from (AGENT A-17). Two rules are added for Japan's local governments: every
  * `<prefecture>.lg.jp` is a suffix, so 福井県 (pref.fukui.lg.jp) and 福井市 (city.fukui.lg.jp) are
  * different sites; the list itself only has `lg.jp`.
  */

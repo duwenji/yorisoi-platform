@@ -1,5 +1,5 @@
 {
-  "$comment": "core-text の機械の確認の見本（ADR-AGENT A-52）。contact は AI の出力の連絡先の確かめ（ContactCheck.violation。全角を半角にそろえてから見る）、written は提供者が書いた文の確かめ（WrittenText。スロット・素材・素材集。全角を半角にそろえてから見る）、spoken は読み上げる前の文（SpokenText.spoken）、instruction は指示のような文の確かめ（InstructionCheck。ページの文とリンクの題名）。書いていない項目は確かめない。Kotlin（core-text）と運営の画面の確認（TypeScript）は、どちらもこの見本を満たす。",
+  "$comment": "core-text の機械の確認の見本（AGENT A-52）。contact は AI の出力の連絡先の確かめ（ContactCheck.violation。全角を半角にそろえてから見る）、written は提供者が書いた文の確かめ（WrittenText。スロット・素材・素材集。全角を半角にそろえてから見る）、spoken は読み上げる前の文（SpokenText.spoken）、instruction は指示のような文の確かめ（InstructionCheck。ページの文とリンクの題名）。書いていない項目は確かめない。Kotlin（core-text）と運営の画面の確認（TypeScript）は、どちらもこの見本を満たす。",
   "version": 1,
   "cases": [
     {

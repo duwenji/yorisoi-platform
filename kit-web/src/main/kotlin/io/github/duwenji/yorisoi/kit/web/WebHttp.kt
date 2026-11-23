@@ -5,7 +5,7 @@ import okhttp3.OkHttpClient
 import java.util.concurrent.TimeUnit
 
 /**
- * How the app reaches the web (ADR-AGENT A-19・A-20): its own User-Agent (the app's name and version and the
+ * How the app reaches the web (AGENT A-19・A-20): its own User-Agent (the app's name and version and the
  * operator's contact page), no cookies and no install id, and short waits so a slow site doesn't hold the
  * preparation up.
  *

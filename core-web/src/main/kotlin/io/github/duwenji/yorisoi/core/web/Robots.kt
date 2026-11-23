@@ -3,7 +3,7 @@ package io.github.duwenji.yorisoi.core.web
 import java.net.URI
 
 /**
- * A site's robots.txt (ADR-AGENT A-19): the group for the app's product token, or else for `*`, and its
+ * A site's robots.txt (AGENT A-19): the group for the app's product token, or else for `*`, and its
  * Allow and Disallow rules. The longest matching rule wins; Allow wins a tie. `*` and a closing `$` work
  * as in RFC 9309. A missing or unreadable robots.txt allows everything.
  */

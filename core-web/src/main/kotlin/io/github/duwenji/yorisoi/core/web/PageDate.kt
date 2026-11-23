@@ -4,7 +4,7 @@ import org.jsoup.nodes.Document
 import java.time.LocalDate
 
 /**
- * The date a page states for itself (ADR-AGENT A-18: pages without one serve only the `spot` scene):
+ * The date a page states for itself (AGENT A-18: pages without one serve only the `spot` scene):
  * its metadata (`article:published_time`, `article:modified_time`, `dc.date`, `date`, `<time datetime>`),
  * or else a 「更新日」「掲載日」「公開日」「作成日」 in its text, in the Western or the 令和 calendar.
  * The latest of them is taken.

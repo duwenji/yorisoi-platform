@@ -11,7 +11,7 @@ data class Municipality(val code: String, val name: String) {
 }
 
 /**
- * Which municipality a point is in, on the device (platform ADR-AGENT A-14): the nearest of the representative
+ * Which municipality a point is in, on the device (platform AGENT A-14): the nearest of the representative
  * points of the 大字・町丁目 (位置参照情報) the operator delivers per prefecture
  * (docs/contracts/api/municipality-points.md). No outside geocoding service is asked, and the point never
  * leaves the device; only the municipality's name goes into the preparer's input. A point with no

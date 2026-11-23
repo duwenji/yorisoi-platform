@@ -18,7 +18,7 @@ import java.io.IOException
 import java.util.concurrent.TimeUnit
 
 /**
- * The preparer on the user's own key (platform ADR-AGENT A-10・A-46): the same turns in each service's
+ * The preparer on the user's own key (platform AGENT A-10・A-46): the same turns in each service's
  * form of function calling. The model's words are dropped; only the tools it asked for come back (A-15).
  */
 internal object ToolForms {
