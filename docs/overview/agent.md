@@ -109,17 +109,17 @@ flowchart LR
         D2["web-sources / web-exclusion /<br/>season-obs の schema"]
         D3["text-safety / web-url の見本"]
     end
-    subgraph JVM["JVM の部品（判断だけ）"]
+    subgraph JVM["JVM の部品（core-* は判断だけ）"]
         CT["core-text"]
         CF["core-format"]
         CW["core-web"]
         CA["core-agent"]
         KC["kit-calendar"]
-    end
-    subgraph AND["Android の部品"]
         KW["kit-web"]
         KA["kit-agent"]
         KT["kit-agent-tools"]
+    end
+    subgraph AND["Android の部品"]
         KL["kit-llm"]
         KG["kit-geo"]
     end
