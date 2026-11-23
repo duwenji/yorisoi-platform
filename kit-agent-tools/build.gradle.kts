@@ -25,6 +25,8 @@ dependencies {
     api(project(":core-agent"))
     api(project(":kit-web"))
     api(project(":kit-calendar"))
+    // The channel as the apps read it, for the policy's narrowing (ResearchPolicy).
+    api(project(":kit-channel"))
     implementation(libs.kotlinx.coroutines.core)
     // Android ships org.json.
     compileOnly(libs.json)
