@@ -18,6 +18,7 @@
 | 一言の決まりを確認する | [一言の利用規約](policies/notes-terms.md) |
 | ウェブの除外リストの決まりを確認する | [ウェブの除外リストの決まり](policies/web-exclusion.md) |
 | SanpoGuide の操作・試用・運用手順を読む | [SanpoGuide 手引き](https://github.com/duwenji/yorisoi-sanpoguide/blob/main/docs/manual/README.md) |
+| アプリの紹介のページとプライバシーポリシーを直す | [`site/`](../site/)（GitHub Pages で https://duwenji.github.io/yorisoi-platform/ に出る。アプリのリポジトリは非公開なので、ストアに出す公開のページはここに置く） |
 | エコシステムの未完了作業を確認する | [エコシステム TODO](TODO.md) |
 | 秘密メッセージ OpenAPI を検証する | [OpenAPI 手順](contracts/api/README.md) |
 
@@ -32,7 +33,7 @@
 | リポジトリ | 正本とする情報 |
 |---|---|
 | **yorisoi-platform**（このリポジトリ） | 複数リポジトリが従う方針、契約、共通語彙、審査基準 |
-| 各アプリ（[yorisoi-sanpoguide](https://github.com/duwenji/yorisoi-sanpoguide) など） | アプリ固有の設計、画面、プロンプト、公開・プライバシー手続き |
+| 各アプリ（[yorisoi-sanpoguide](https://github.com/duwenji/yorisoi-sanpoguide) など） | アプリ固有の設計、画面、プロンプト、公開の手続き。ストアに出す公開のページ（紹介・プライバシーポリシー・申告の動画）だけは、このリポジトリの `site/` に置く |
 | [yorisoi-console](https://github.com/duwenji/yorisoi-console) | 管理システムの実装・運用、管理 API、データモデル、配備 |
 | [yorisoi-tutorial](https://github.com/duwenji/yorisoi-tutorial) | 学習用の説明。決まりは定めず、正本へ案内する |
 
