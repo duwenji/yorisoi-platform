@@ -43,6 +43,15 @@ class PageAndFeedTest {
     }
 
     @Test
+    fun `a link whose text every card shares takes its card's title`() {
+        val card = { t: String, u: String -> "<li><div class=\"event_card\"><p class=\"title\">$t</p><p>開催日時 / 令和8年</p><a href=\"$u\" class=\"link_btn\">詳細を見る</a></div></li>" }
+        val html = "<main><ul>" + card("特別展は11月23日まで開催中", "/m/1.html") + card("秋の朝市", "/m/2.html") + card("落語会", "/m/3.html") +
+            "</ul><a href=\"/about.html\">市の紹介</a></main>"
+        val links = PageText.read(html, "https://www.city.fukui.lg.jp/eventlist/index.html").links
+        assertEquals(listOf("特別展は11月23日まで開催中", "秋の朝市", "落語会", "市の紹介"), links.map { it.title })
+    }
+
+    @Test
     fun `dates in metadata, western and missing`() {
         assertEquals(LocalDate.of(2026, 11, 18), PageText.read("<meta property=\"article:published_time\" content=\"2026-11-18T09:00:00+09:00\"><p>x</p>", "https://a.example/").published)
         assertEquals(LocalDate.of(2026, 10, 1), PageText.read("<p>掲載日 2026年10月1日</p>", "https://a.example/").published)
