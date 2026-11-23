@@ -7,6 +7,7 @@ import io.github.duwenji.yorisoi.core.agent.ResultBook
 import io.github.duwenji.yorisoi.core.agent.ResultRole
 import io.github.duwenji.yorisoi.core.agent.ToolOutcome
 import io.github.duwenji.yorisoi.core.agent.ToolRunner
+import io.github.duwenji.yorisoi.core.web.PageCurrent
 import io.github.duwenji.yorisoi.core.web.ReadPolicy
 import io.github.duwenji.yorisoi.core.web.Source
 import io.github.duwenji.yorisoi.kit.calendar.KoyomiFact
@@ -139,7 +140,11 @@ class StandardTools(
         }
         // Hints for the pages read, in one call to the hint maker (A-18); pages with no date or older than 30 days
         // serve only a spot's preparation.
-        val usable = pages.filter { (_, p) -> input.forSpot || (p.published != null && ChronoUnit.DAYS.between(p.published, input.date) <= 30) }
+        // A page older than that still serves when its text names a period that includes today or a day soon (an
+        // event's page written before it opened and never updated, A-18).
+        val usable = pages.filter { (_, p) ->
+            input.forSpot || (p.published != null && ChronoUnit.DAYS.between(p.published, input.date) <= 30) || PageCurrent.of(p.text, input.date)
+        }
         pages.filter { it !in usable }.forEach { (r, _) -> out.append("${r.title}: 日付がないか古いので使いません\n") }
         if (usable.isNotEmpty()) {
             val fresh = ArrayList<Pair<Reachable, io.github.duwenji.yorisoi.core.web.Page>>()
