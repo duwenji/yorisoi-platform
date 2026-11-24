@@ -98,7 +98,6 @@
 
 - **収益化**: 広告、有料プラン、提携。既存の広告 SDK は、位置情報を外部に送らない方針（API-CHANNEL-PACKAGE F-10）と合わないので使わない方向。だれに何を提供し、だれが費用を持つかは[提供価値と事業の検討](overview/value-proposition.md)で検討中
 - **有料プラン（P-1）**: 料金の案（[P-1 の料金の案](overview/value-proposition.md#p-1-の料金の案)。たっぷりプラン月 980 円・1 日 200 回、無料 30 回、DeepSeek V3.2）と、上限・購入の確かめ方（[API-AI-RELAY](contracts/API-AI-RELAY.md) R-2・R-14・R-15〜R-23、`POST /v1/plan`）は決まった。始める時期は H-1 を確かめてから。残り:
-  - Play Console で、年の売上 100 万ドルまでの手数料 10% に登録が要るかを確かめる（API-AI-RELAY 未決事項 3。開発者）
   - 1 人 1 日あたりの回数の分布（H-9）を、利用者が増えてから見直す。中継が日ごとの分布を 400 日残す（console docs/operations/ai-relay.md「回数の分布を見る」）
   - 売り始めると決めたら作る: 中継（console。`daily-limit-plus`・`POST /v1/plan`・購入の確認の鍵・分布をプランで分ける）、kit-llm（`quota.plan`・`/v1/plan`）、SanpoGuide・CycleGuide（それぞれの商品 `plus`、kit-billing、設定の画面）
 - **公開サーバーの負荷**: スポットは運営のタイルを先に使い、Overpass は予備（[スポットのタイル](#スポットのタイル)）。Open-Meteo の公開サーバーは、アプリ利用者が増える前に利用ポリシーを確認し、自前のサーバーや商用のサービスを検討する
