@@ -99,6 +99,7 @@
 - **収益化**: 広告、有料プラン、提携。既存の広告 SDK は、位置情報を外部に送らない方針（API-CHANNEL-PACKAGE F-10）と合わないので使わない方向。だれに何を提供し、だれが費用を持つかは[提供価値と事業の検討](overview/value-proposition.md)で検討中
 - **有料プラン（P-1）**: 料金の案は承認済み（[P-1 の料金の案](overview/value-proposition.md#p-1-の料金の案)。たっぷりプラン月 980 円・1 日 200 回、無料 20 回、DeepSeek V3.2）。始める時期は H-1 を確かめてから。作る前に次をする
   - 1 人 1 日あたりの回数の分布（H-9）を、利用者が増えてから見直す。中継が日ごとの分布を 400 日残す（console docs/operations/ai-relay.md「回数の分布を見る」）
+  - 上限の持ち方・購入の確かめ方・商品の分け方は [ADR-PAID-PLAN](decisions/ADR-PAID-PLAN.md) で検討中。承認したら API-AI-RELAY に移す
   - API-AI-RELAY の R-2・R-14 を、プランごとに運営が変えられる上限（始めは無料 20、たっぷりプラン 200）に改める。準備役の枠（AGENT A-33）と長さの上限（R-9）も見直す
   - 購入の確認の契約を決める（Google Play Developer API で購入トークンを確かめる、リアルタイム デベロッパー通知を受ける、インストール ID との結び付け）
   - SanpoGuide と CycleGuide で定期購入を別にするか、まとめるかを決める
