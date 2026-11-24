@@ -28,8 +28,19 @@ import java.util.concurrent.TimeUnit
 /** The app as the relay knows it (API-AI-RELAY `app`). */
 data class RelayApp(val packageName: String, val versionCode: Long)
 
+/** The plans of API-AI-RELAY R-2: free, and たっぷりプラン (`plus`) bought on Google Play. */
+enum class RelayPlan(val wire: String) {
+    FREE("free"),
+    PLUS("plus");
+
+    companion object {
+        /** An unknown plan is taken as free (API-AI-RELAY「互換性方針」). */
+        fun of(wire: String?): RelayPlan = entries.firstOrNull { it.wire == wire } ?: FREE
+    }
+}
+
 /** Today's calls on the operator's AI (API-AI-RELAY `quota`). */
-data class RelayQuota(val limit: Int, val remaining: Int, val resetsAt: Instant) {
+data class RelayQuota(val limit: Int, val remaining: Int, val resetsAt: Instant, val plan: RelayPlan = RelayPlan.FREE) {
     /** Whether today's calls are used up and the day hasn't turned yet. */
     fun exhausted(now: Instant = Instant.now()): Boolean = remaining <= 0 && now.isBefore(resetsAt)
 }
@@ -44,6 +55,14 @@ interface RelaySessionStore {
     fun session(): Pair<String, Instant>?
     fun saveSession(token: String, expiresAt: Instant)
     fun clearSession()
+}
+
+/** A たっぷりプラン purchase on Google Play: its token and subscription id (API-AI-RELAY R-15, R-21). */
+data class PlanPurchase(val purchaseToken: String, val productId: String)
+
+/** The app's active たっぷりプラン purchase, or null; the app reads it from Google Play's billing library. */
+fun interface PlanPurchases {
+    suspend fun active(): PlanPurchase?
 }
 
 /** A Play Integrity Standard token bound to [requestHash] (API-AI-RELAY AR-3). */
@@ -71,9 +90,13 @@ class RelayClient(
     private val integrity: IntegrityTokenProvider? = null,
     private val http: OkHttpClient = defaultHttp,
     private val now: () -> Instant = Instant::now,
+    /** The app's たっぷりプラン, sent with each new session and after it expires (API-AI-RELAY R-18). */
+    private val plans: PlanPurchases? = null,
 ) : LlmClient {
     private val base = baseUrl.trimEnd('/')
     private val sessionLock = Mutex()
+    /** When the purchase was last sent, so a free answer doesn't send it on every call. */
+    @Volatile private var planSentAt: Instant? = null
 
     private val _quota = MutableStateFlow<RelayQuota?>(null)
     /** Today's calls as the relay last reported them; null until it has. */
@@ -85,7 +108,7 @@ class RelayClient(
             .put("system", system)
             .put("user", user)
         val out = authorized { token -> call("POST", "/v1/generate", body, token) }
-        out.optJSONObject("quota")?.let { _quota.value = parseQuota(it) }
+        out.optJSONObject("quota")?.let { onQuota(parseQuota(it)) }
         out.optString("text").trim()
     }
 
@@ -112,7 +135,7 @@ class RelayClient(
                 }
             }))
         val out = authorized { token -> call("POST", "/v1/agent", body, token) }
-        out.optJSONObject("quota")?.let { _quota.value = parseQuota(it) }
+        out.optJSONObject("quota")?.let { onQuota(parseQuota(it)) }
         val uses = out.optJSONArray("toolUses") ?: JSONArray()
         Reply((0 until uses.length()).map { i ->
             val u = uses.getJSONObject(i)
@@ -122,7 +145,48 @@ class RelayClient(
 
     /** Asks for today's calls without using one; also serves as the connection test. */
     suspend fun refreshQuota(): RelayQuota = withContext(Dispatchers.IO) {
-        parseQuota(authorized { token -> call("GET", "/v1/quota", null, token) }).also { _quota.value = it }
+        val q = parseQuota(authorized { token -> call("GET", "/v1/quota", null, token) })
+        onQuota(q)
+        _quota.value ?: q
+    }
+
+    /**
+     * Sends a たっぷりプラン purchase (POST /v1/plan; API-AI-RELAY R-15) right after it is bought; the relay
+     * checks it with Google Play. Throws [RelayException] (`plan_not_active` when it isn't active).
+     */
+    suspend fun sendPlan(purchase: PlanPurchase): RelayQuota = withContext(Dispatchers.IO) {
+        val out = authorized { token -> postPlan(token, purchase) }
+        parseQuota(out.getJSONObject("quota")).also { _quota.value = it }
+    }
+
+    private fun postPlan(token: String, purchase: PlanPurchase): JSONObject {
+        planSentAt = now()
+        return call("POST", "/v1/plan", JSONObject().put("purchaseToken", purchase.purchaseToken).put("productId", purchase.productId), token)
+    }
+
+    /**
+     * Keeps [quota]; when the relay counts this install as free while the app holds a purchase (a new
+     * session, or past the expiry the relay last saw, R-18), sends it again, at most every 10 minutes.
+     */
+    private suspend fun onQuota(q: RelayQuota) {
+        _quota.value = q
+        if (q.plan == RelayPlan.FREE) restorePlan(store.session()?.first ?: return)
+    }
+
+    private suspend fun restorePlan(token: String) {
+        val p = plans ?: return
+        val sent = planSentAt
+        if (sent != null && sent.plus(PLAN_RETRY).isAfter(now())) return
+        val purchase = try {
+            p.active()
+        } catch (e: Exception) {
+            null
+        } ?: return
+        try {
+            postPlan(token, purchase).optJSONObject("quota")?.let { _quota.value = parseQuota(it) }
+        } catch (e: RelayException) {
+            // Stays free: the relay couldn't check it now; the next free answer tries again.
+        }
     }
 
     /**
@@ -169,6 +233,9 @@ class RelayClient(
         val token = out.getString("token")
         store.saveSession(token, Instant.parse(out.getString("expiresAt")))
         out.optJSONObject("quota")?.let { _quota.value = parseQuota(it) }
+        // A new session starts free; a held purchase is sent at once (R-18).
+        planSentAt = null
+        restorePlan(token)
         return token
     }
 
@@ -208,6 +275,7 @@ class RelayClient(
     companion object {
         /** A token this close to expiring is renewed first, so a walk doesn't stall on it. */
         private val SESSION_MARGIN: Duration = Duration.ofMinutes(5)
+        private val PLAN_RETRY: Duration = Duration.ofMinutes(10)
         private val JSON = "application/json".toMediaType()
         /**
          * The relay answers once the model has written the whole line, which can take longer than
@@ -224,13 +292,14 @@ class RelayClient(
                 .encodeToString(MessageDigest.getInstance("SHA-256").digest("$installId.$nonce".toByteArray(Charsets.UTF_8)))
 
         internal fun parseQuota(json: JSONObject) =
-            RelayQuota(json.getInt("limit"), json.getInt("remaining"), Instant.parse(json.getString("resetsAt")))
+            RelayQuota(json.getInt("limit"), json.getInt("remaining"), Instant.parse(json.getString("resetsAt")), RelayPlan.of(json.optString("plan").ifEmpty { null }))
 
         /** What the user is told; the app goes on with its set phrases whatever the code. */
         internal fun messageFor(code: String, quota: RelayQuota?): String = when (code) {
             "daily_limit_reached" -> "今日の運営の AI の回数${quota?.let { "（${it.limit} 回）" }.orEmpty()}を使い切りました"
             "relay_paused" -> "運営の AI は今月の予算に達したため止まっています。設定で自分の APIキーに切り替えられます"
             "integrity_failed" -> "この端末・アプリでは運営の AI を使えません。設定で自分の APIキーを使えます"
+            "plan_not_active" -> "たっぷりプランが有効になっていません"
             "too_many_requests" -> "運営の AI が混み合っています。しばらくしてからお試しください"
             "model_refused" -> "このスポットの解説は用意できませんでした"
             "incomplete_output" -> "AI の応答が途中で切れました"

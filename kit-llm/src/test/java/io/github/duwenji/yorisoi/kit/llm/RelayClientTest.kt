@@ -40,8 +40,8 @@ class RelayClientTest {
     @After
     fun tearDown() = server.shutdown()
 
-    private fun client(integrity: IntegrityTokenProvider? = null) =
-        RelayClient(server.url("/api/").toString(), RelayApp("io.github.duwenji.yorisoi.sanpoguide", 4), store, integrity, now = { now })
+    private fun client(integrity: IntegrityTokenProvider? = null, plans: PlanPurchases? = null) =
+        RelayClient(server.url("/api/").toString(), RelayApp("io.github.duwenji.yorisoi.sanpoguide", 4), store, integrity, now = { now }, plans = plans)
 
     private fun ok(body: String) = MockResponse().setResponseCode(200).setHeader("content-type", "application/json").setBody(body)
     private fun problem(status: Int, code: String, extra: String = "") =
@@ -98,7 +98,7 @@ class RelayClientTest {
         server.enqueue(session())
         server.enqueue(generated())
         var asked: String? = null
-        client { hash -> asked = hash; "integrity-token" }.generate("s", "u")
+        client(integrity = { hash -> asked = hash; "integrity-token" }).generate("s", "u")
 
         server.takeRequest()
         val body = JSONObject(server.takeRequest().body.readUtf8())
@@ -184,6 +184,74 @@ class RelayClientTest {
             fail()
         } catch (e: RelayException) {
             assertEquals("network", e.code)
+        }
+    }
+
+    private val plusQuota = """{"limit":200,"remaining":200,"resetsAt":"2026-10-20T15:00:00Z","plan":"plus"}"""
+    private fun planned() = ok("""{"plan":{"name":"plus","expiresAt":"2026-11-20T03:00:00Z"},"quota":$plusQuota}""")
+
+    @Test
+    fun `sends a held たっぷりプラン purchase with each new session (API-AI-RELAY R-18)`() = runBlocking {
+        server.enqueue(challenge())
+        server.enqueue(session())
+        server.enqueue(planned())
+        server.enqueue(ok("""{"text":"やあ","quota":{"limit":200,"remaining":199,"resetsAt":"2026-10-20T15:00:00Z","plan":"plus"}}"""))
+        val c = client(plans = { PlanPurchase("pt-1", "plus") })
+
+        assertEquals("やあ", c.generate("s", "u", Purpose.CHAT))
+
+        server.takeRequest()
+        server.takeRequest()
+        val plan = server.takeRequest()
+        assertEquals("/api/v1/plan", plan.path)
+        assertEquals("Bearer t1", plan.getHeader("Authorization"))
+        val body = JSONObject(plan.body.readUtf8())
+        assertEquals("pt-1", body.getString("purchaseToken"))
+        assertEquals("plus", body.getString("productId"))
+        assertEquals("/api/v1/generate", server.takeRequest().path)
+        assertEquals(RelayQuota(200, 199, Instant.parse("2026-10-20T15:00:00Z"), RelayPlan.PLUS), c.quota.value)
+    }
+
+    @Test
+    fun `stays free when the relay can't check the purchase, and doesn't send it again for 10 minutes`() = runBlocking {
+        server.enqueue(challenge())
+        server.enqueue(session())
+        server.enqueue(problem(502, "upstream_error"))
+        server.enqueue(generated())
+        val c = client(plans = { PlanPurchase("pt-1", "plus") })
+
+        assertEquals("こんにちは", c.generate("s", "u", Purpose.GUIDE))
+
+        assertEquals(4, server.requestCount)
+        assertEquals(RelayPlan.FREE, c.quota.value?.plan)
+    }
+
+    @Test
+    fun `sends nothing without a purchase, and reads an unknown plan as free`() = runBlocking {
+        server.enqueue(challenge())
+        server.enqueue(session())
+        server.enqueue(ok("""{"text":"x","quota":{"limit":30,"remaining":29,"resetsAt":"2026-10-20T15:00:00Z","plan":"gold"}}"""))
+        val c = client(plans = { null })
+        c.generate("s", "u", Purpose.GUIDE)
+        assertEquals(3, server.requestCount)
+        assertEquals(RelayPlan.FREE, c.quota.value?.plan)
+    }
+
+    @Test
+    fun `sends a new purchase and tells when it isn't active`() = runBlocking {
+        server.enqueue(challenge())
+        server.enqueue(session())
+        server.enqueue(planned())
+        val c = client()
+        assertEquals(RelayPlan.PLUS, c.sendPlan(PlanPurchase("pt-2", "plus")).plan)
+
+        server.enqueue(problem(403, "plan_not_active"))
+        try {
+            c.sendPlan(PlanPurchase("pt-3", "plus"))
+            fail("expected plan_not_active")
+        } catch (e: RelayException) {
+            assertEquals("plan_not_active", e.code)
+            assertEquals("たっぷりプランが有効になっていません", e.message)
         }
     }
 }
