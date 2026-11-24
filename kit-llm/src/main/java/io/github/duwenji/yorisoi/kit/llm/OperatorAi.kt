@@ -17,13 +17,14 @@ import java.util.UUID
  * session in the app's preferences, or null when the build has no relay.
  *
  * @param cloudProjectNumber the Google Cloud project for Play Integrity; 0 to send no verdict
+ * @param plans the app's たっぷりプラン purchase (API-AI-RELAY R-15); null in an app that doesn't sell it
  */
 object OperatorAi {
-    fun create(context: Context, relayUrl: String, cloudProjectNumber: Long): RelayClient? {
+    fun create(context: Context, relayUrl: String, cloudProjectNumber: Long, plans: PlanPurchases? = null): RelayClient? {
         if (relayUrl.isEmpty()) return null
         val app = RelayApp(context.packageName, context.packageManager.getPackageInfo(context.packageName, 0).longVersionCodeCompat())
         val integrity = cloudProjectNumber.takeIf { it != 0L }?.let { PlayIntegrity(context, it) }
-        return RelayClient(relayUrl, app, PrefsSessionStore(context), integrity)
+        return RelayClient(relayUrl, app, PrefsSessionStore(context), integrity, plans = plans)
     }
 
     @Suppress("DEPRECATION")
