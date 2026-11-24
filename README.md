@@ -18,6 +18,7 @@
 | `kit-ui` | Android | どのアプリにも共通の見た目。よりそいの緑の配色（`YorisoiTheme`）、画面の上部のバー（`ScreenBar`）、ホーム画面のアイコンの緑の背景（`yorisoi_launcher_background`） |
 | `kit-voice` | Android | 読み上げ（オーディオフォーカス）と背景音の合成 |
 | `kit-llm` | Android | AI の接続（Claude・OpenAI 互換・運営の AI の中継。中継のセッションのトークンはほかの部品にも貸せる）と鍵の暗号化、自分のキーの 1 日の呼び出しの数、使わない返事（連絡先を含む）の判定 |
+| `kit-billing` | Android | たっぷりプラン（運営の AI の回数を広げる Google Play の定期購入。API-AI-RELAY R-15〜R-21）: 商品 `plus` の基本プランと値段を Play から読む、購入の画面を開く、買った購入を中継に送る（kit-llm の `PlanPurchases`）。承認は中継がする。課金の権限（BILLING）が付くので、売るアプリだけが使う |
 | [`kit-geo`](kit-geo/README.md) | Android | スポット・ルート・写真・天気・地図。運営のスポットのタイル、スポット検索のキャッシュ、よく通る道、市区町村の代表点の表で今いる市区町村を決める（`Municipalities`。AGENT A-14） |
 | `kit-mood` | Android | 雰囲気（時間帯・季節・空模様・場所）と、配色・絵・背景音。雰囲気がないときの配色は `kit-ui` の緑 |
 | [`kit-local-materials`](kit-local-materials/README.md) | Android | 区画ごとに運営から取る素材（スタジオ、一言）のアプリ側。組み込みの素材提供者 `builtin:studio`・`builtin:note`。近くのスタジオと一言を取って種類ごとに選ぶ（`LocalFeed`、`StudioProducer`・`NoteProducer`）、API-LOCAL-MATERIALS（`LocalClient`、トークンは運営の AI の中継から）、スタジオの音声（`ClipCache`・`ClipPlayer`）、一言を声で置く（`NoteRecognizer`）、設定（`LocalSettingsStore`） |
