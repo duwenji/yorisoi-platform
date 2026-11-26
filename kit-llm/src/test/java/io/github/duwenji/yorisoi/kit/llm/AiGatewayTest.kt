@@ -1,5 +1,6 @@
 package io.github.duwenji.yorisoi.kit.llm
 
+import io.github.duwenji.yorisoi.core.text.AppLanguage
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -56,6 +57,19 @@ class AiGatewayTest {
         gateway.generate(Purpose.GUIDE, "system", "user")
         assertEquals("a URL", calls.single().violation)
         assertEquals("guide", calls.single().kind)
+    }
+
+    @Test
+    fun `in another app language the instruction is added at the end, and a Japanese reply is unusable`() = runBlocking {
+        gateway.language = { AppLanguage.EN }
+        reply("ここは浅草寺です。とても古いお寺で、多くの人が訪れます。")
+        gateway.generate(Purpose.GUIDE, "system", "user")
+        assertTrue(calls.single().system.startsWith("system\n\n答えはすべて英語で話す。"))
+        assertEquals(OutputCheck.OTHER_LANGUAGE, calls.single().violation)
+        // The preparer's hints stay as the pages are.
+        reply("- 浅草寺は628年に建てられた")
+        gateway.generate(Purpose.HINTS, "system", "user")
+        assertEquals("system", calls.last().system)
     }
 
     @Test

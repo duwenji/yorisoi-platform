@@ -202,6 +202,18 @@
 | 2 | 形式（F-16〜F-22、core-format・API-CHANNEL-PACKAGE・API-MATERIALS・API-CHANNEL-LIST）、アプリの選ぶ画面と案内（F-23）、管理システムの機械審査・画面での作成・一次審査・審査の見本（F-27〜F-31）、浅草界隈ガイドの 3 言語の版 |
 | 3 | 状況のデータ（F-24〜F-26、スポットのタイル）、文書と Google Play の掲載（F-32） |
 
+## 実装の置き場所
+| 部品 | 役目 |
+|---|---|
+| core-text `AppLanguage` | 4 つの言語、端末の言語からの決め方（F-1）、1 秒の文字数と字数の直し方（D-6）、AI に加える話す言語の指示（D-5） |
+| core-text `LanguageCheck`・`ContactCheck`・`SpokenText` | アプリの言語でない返事、4 言語の電話番号・ト書き・返事についての注記（F-13、R-1） |
+| kit-llm `AiGateway.language` | 呼ぶたびにアプリの言語を読み、準備役の手がかり以外の指示の最後に話す言語の指示を加える（D-5・F-2・F-9） |
+| kit-ui `AppLocales` | 端末の言語、リソース・日付の言語の切り替え（`attachBaseContext` で包む）、声の言語（F-1・F-4・F-7） |
+| kit-voice `Speaker.use` | 次の発言からその言語の声で読む。声がないときは `voiceMissing`（F-2・F-7） |
+| kit-channel `RegionalNotice.text(language)` | 地域のチャンネルの知らせの 4 言語の決まった文（F-11） |
+
+画面の文字のリソースは、`values`（日本語）・`values-en`・`values-b+zh+Hans`・`values-ko` に置く。
+
 ## 関連ドキュメント・参照リンク
 - [API-CHANNEL-PACKAGE](../contracts/API-CHANNEL-PACKAGE.md): `lang`・スロット・素材
 - [API-MATERIALS](../contracts/API-MATERIALS.md): 素材集・AI の根拠

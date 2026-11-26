@@ -1,5 +1,6 @@
 package io.github.duwenji.yorisoi.kit.llm
 
+import io.github.duwenji.yorisoi.core.text.AppLanguage
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test
@@ -92,5 +93,17 @@ class OutputCheckTest {
     fun `speech that says 余談 or 続き stays`() {
         val text = "余談ですが、この橋は二代目です。\n続き：そういえばさっきの橋、夜も明るいんです。"
         assertEquals(text, OutputCheck.spoken(text))
+    }
+
+    @Test
+    fun `a reply mostly in another language than the app's is unusable, names in their own script are not`() {
+        val japanese = "ここは浅草寺です。とても古いお寺です。"
+        assertEquals(null, OutputCheck.violation(japanese))
+        assertEquals(OutputCheck.OTHER_LANGUAGE, OutputCheck.violation(japanese, AppLanguage.EN))
+        assertEquals(OutputCheck.OTHER_LANGUAGE, OutputCheck.violation(japanese, AppLanguage.ZH_HANS))
+        assertEquals(OutputCheck.OTHER_LANGUAGE, OutputCheck.violation(japanese, AppLanguage.KO))
+        assertEquals(null, OutputCheck.violation("This is Sensō-ji (浅草寺), the oldest temple in Tokyo.", AppLanguage.EN))
+        assertEquals(null, OutputCheck.violation("这里是浅草寺，是东京最古老的寺院。", AppLanguage.ZH_HANS))
+        assertEquals(null, OutputCheck.violation("여기는 센소지(浅草寺)입니다. 도쿄에서 가장 오래된 절입니다.", AppLanguage.KO))
     }
 }

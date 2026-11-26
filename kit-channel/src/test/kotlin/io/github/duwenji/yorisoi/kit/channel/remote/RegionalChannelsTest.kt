@@ -4,6 +4,7 @@ import io.github.duwenji.yorisoi.core.format.FileRef
 import io.github.duwenji.yorisoi.core.format.ListedChannel
 import io.github.duwenji.yorisoi.core.format.PackageRef
 import io.github.duwenji.yorisoi.core.format.material.Regions
+import io.github.duwenji.yorisoi.core.text.AppLanguage
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -83,5 +84,17 @@ class RegionalChannelsTest {
         // Not the channel in use, named with its version as stations are.
         val only = RegionalChannels.near(lat, lon, listOf(provider("p", view(asakusa))))
         assertNull(notices.due(only, inUse = "p/asakusa-guide@3", today = "2026-11-28"))
+    }
+
+    @Test
+    fun `the notice in each of the app's languages, the channel's name as written`() {
+        val near = RegionalChannels.near(lat, lon, listOf(provider("p", view(asakusa))))
+        val one = RegionalNotice(near[0], 0)
+        val three = RegionalNotice(near[0], 2)
+        assertEquals("This area has a channel, “浅草界隈ガイド”. You can choose it from the channels.", one.text(AppLanguage.EN))
+        assertEquals("This area has a channel, “浅草界隈ガイド”. There is one more. You can choose it from the channels.", RegionalNotice(near[0], 1).text(AppLanguage.EN))
+        assertEquals("这一带有「浅草界隈ガイド」频道。另外还有2个。可以在频道选择中使用。", three.text(AppLanguage.ZH_HANS))
+        assertEquals("이 지역에는 「浅草界隈ガイド」 채널이 있습니다. 그 밖에 2개가 더 있습니다. 채널 선택에서 사용할 수 있습니다.", three.text(AppLanguage.KO))
+        assertEquals(one.text, one.text(AppLanguage.JA))
     }
 }

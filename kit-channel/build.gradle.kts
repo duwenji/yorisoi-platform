@@ -25,6 +25,8 @@ kotlin {
 
 dependencies {
     api(project(":core-format"))
+    // The app's language, for the fixed lines (REQ-LANGUAGES F-11).
+    api(project(":core-text"))
     implementation(libs.kotlinx.coroutines.core)
     // As in core-format: Android ships org.json.
     compileOnly(libs.json)

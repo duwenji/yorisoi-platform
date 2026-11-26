@@ -27,7 +27,7 @@ kotlin {
 }
 
 dependencies {
-    implementation(project(":core-text"))
+    api(project(":core-text"))
     // The preparer's turns and tools (platform AGENT); kit-agent hands them in.
     api(project(":core-agent"))
     implementation(libs.kotlinx.coroutines.android)

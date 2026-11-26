@@ -31,6 +31,8 @@ kotlin {
 }
 
 dependencies {
+    // The app's language (REQ-LANGUAGES), which AppLocales turns into Android's locale.
+    api(project(":core-text"))
     implementation(platform(libs.compose.bom))
     implementation(libs.compose.ui)
     implementation(libs.compose.material3)

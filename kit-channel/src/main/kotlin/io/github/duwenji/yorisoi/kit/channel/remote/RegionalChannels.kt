@@ -2,6 +2,7 @@ package io.github.duwenji.yorisoi.kit.channel.remote
 
 import io.github.duwenji.yorisoi.core.format.ListedChannel
 import io.github.duwenji.yorisoi.core.format.material.Regions
+import io.github.duwenji.yorisoi.core.text.AppLanguage
 
 /**
  * A channel of a list the user added whose region the device is in (REQ-REGIONAL-CHANNELS F-1).
@@ -50,10 +51,27 @@ interface RegionalNoticeStore {
 
 /** What to tell when entering a region (REQ-REGIONAL-CHANNELS F-8・F-9): one channel, and how many others match. */
 data class RegionalNotice(val channel: RegionalChannel, val others: Int) {
-    /** The fixed line, shown on a card and read out (D-9): no AI, and nothing the publisher wrote but the name. */
-    val text: String get() =
-        "この地域には「${channel.channel.name}」のチャンネルがあります。" +
-            (if (others > 0) "ほかに${others}つあります。" else "") + "チャンネルの選択から使えます。"
+    /** The fixed line in Japanese. */
+    val text: String get() = text(AppLanguage.JA)
+
+    /**
+     * The fixed line in [language], shown on a card and read out (D-9, REQ-LANGUAGES F-11): no AI, and nothing
+     * the publisher wrote but the name.
+     */
+    fun text(language: AppLanguage): String {
+        val name = channel.channel.name
+        return when (language) {
+            AppLanguage.JA -> "この地域には「$name」のチャンネルがあります。" +
+                (if (others > 0) "ほかに${others}つあります。" else "") + "チャンネルの選択から使えます。"
+            AppLanguage.EN -> "This area has a channel, “$name”." +
+                (if (others == 1) " There is one more." else if (others > 1) " There are $others more." else "") +
+                " You can choose it from the channels."
+            AppLanguage.ZH_HANS -> "这一带有「$name」频道。" +
+                (if (others > 0) "另外还有${others}个。" else "") + "可以在频道选择中使用。"
+            AppLanguage.KO -> "이 지역에는 「$name」 채널이 있습니다." +
+                (if (others > 0) " 그 밖에 ${others}개가 더 있습니다." else "") + " 채널 선택에서 사용할 수 있습니다."
+        }
+    }
 }
 
 /**
