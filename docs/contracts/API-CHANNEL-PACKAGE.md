@@ -141,13 +141,14 @@ resources/                   パッケージに入れる素材（任意）
 | `id` | string | ○ | 英小文字・数字・`-`、3〜40 文字。リストの `channels[].id` と一致すること |
 | `version` | int | ○ | 1 以上。リストの `channels[].version` と一致すること |
 | `publisher` | string | 第三者のみ | チャンネル提供者のアカウントID（`sg1…`）。組み込みは省略 |
-| `name` | string | ○ | 1〜20 文字 |
-| `summary` | string | ○ | 1〜60 文字 |
+| `name` | string ／ object | ○ | 1〜20 文字。`langs` に 2 つ以上の言語を並べたときは、言語ごとの値（`{"ja": "…", "en": "…"}`。`langs` のすべての言語の値が要り、ほかの言語は書けない）。字数の上限は、ほかの言語では同じ時間で読み上げる字数に直す（REQ-LANGUAGES D-6。英語は 2.8 倍、中国語は 0.8 倍、韓国語は 1.2 倍） |
+| `summary` | string ／ object | ○ | 1〜60 文字。言語ごとの値は `name` と同じ |
 | `lang` | string | ○ | BCP 47。第 1 版は `ja` のみ |
+| `langs` | string[] | 任意 | 対応する言語（REQ-LANGUAGES F-16）。1〜4 個、`ja`・`en`・`zh-Hans`・`ko` から。最初は `lang` と同じ。書かなければ `[lang]` |
 | `activities` | string[] | ○ | このチャンネルが合う過ごし方。[過ごし方](#過ごし方activities)から 1〜4 個。語り手の文章がその過ごし方に合っているかは人の審査で確かめる |
 | `genres` | string[] | 任意 | アプリ利用者が探すときの分類。[ジャンル](#ジャンルgenres)から 0〜3 個 |
 | `requires.features` | string[] | 任意 | これがないアプリでは成り立たない機能。[機能](#機能requiresfeatures)から 0〜20 個。書かない機能は、アプリが実装していなければ使われないだけ |
-| `greeting` | string | ○ | 散歩中にこのチャンネルへ切り替えたとき、そのまま読み上げる一言。1〜60 文字。AI は使わない |
+| `greeting` | string ／ object | ○ | 散歩中にこのチャンネルへ切り替えたとき、そのまま読み上げる一言。1〜60 文字。AI は使わない。言語ごとの値は `name` と同じ。アプリの言語の値がなければ読まない（REQ-LANGUAGES D-8） |
 | `talk.level` | string | ○ | `quiet`（控えめ）/ `normal`（ふつう）/ `chatty`（おしゃべり）。アプリの `TalkLevel` と同じ 3 段階 |
 | `talk.events` | object | ○ | 次の出来事で話すか（真偽値）。必須の 6 つ: `spot`（初めてのスポットの解説）・`revisit`（再訪の一言）・`milestone`（距離・時間の区切り）・`rest`（休憩）・`start`（開始のあいさつ）・`finish`（終了の振り返り）。任意の 5 つ（書かなければ真）: `preview`（少し先の見どころの予告）・`chat`（話すことがないときの雑談）・`song`（雑談の話題の 1 つとしての季節の歌。`chat` が偽なら出さない）（REQ-NEARBY-TALK）・`calendar`（雑談の話題の 1 つとしての暦。`chat` が偽なら出さない）（REQ-KOYOMI）・`localEvent`（近くで今日ある地域の催し。雑談の話題と予告に使い、`chat` が偽なら雑談で、`preview` が偽なら予告で話さない）（REQ-LOCAL-EVENTS）。天気の急変・日の入り・施設の案内は項目がなく、常に話す |
 | `spots.prefer` | string[] | ○（空でもよい） | 優先して話題にするスポットの種類（下表）。最大 8 個 |

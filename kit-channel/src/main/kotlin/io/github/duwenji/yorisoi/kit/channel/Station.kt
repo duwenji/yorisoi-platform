@@ -1,5 +1,6 @@
 package io.github.duwenji.yorisoi.kit.channel
 
+import io.github.duwenji.yorisoi.core.text.Languages
 import io.github.duwenji.yorisoi.core.text.localized
 import io.github.duwenji.yorisoi.core.format.CalendarKind
 import io.github.duwenji.yorisoi.core.format.GuideLength
@@ -56,7 +57,14 @@ class Station(
 
     /** The channel's cues with the built-in producers' shorthand cues added (API-MATERIALS「省略形の展開」). */
     val cueMedia: StationMedia by lazy { Shorthands.expand(materials?.media ?: pkg.media) }
-    val name: String get() = manifest.name
+    /** The name in the app's language, else as written (REQ-LANGUAGES F-15・F-17). */
+    val name: String get() = manifest.name(Languages.current.tag)
+
+    /** The summary in the app's language, else as written. */
+    val summary: String get() = manifest.summary(Languages.current.tag)
+
+    /** The greeting in the app's language, or null when the channel has none in it: then it isn't read (D-8). */
+    val greeting: String? get() = manifest.greeting(Languages.current.tag)
 
     /** The name as screens show it: a channel on trial says so (API-CHANNEL-LIST 試用チケット). */
     val displayName: String get() = when {

@@ -35,6 +35,8 @@ dependencies {
     // The mood reads the weather and nearby spots (kit-geo) and picks a sound (kit-voice) the way
     // a channel asks (SoundChoice in core-format).
     api(project(":kit-geo"))
+    // The mood's words on screen in the app's language (REQ-LANGUAGES).
+    implementation(project(":core-text"))
     api(project(":kit-voice"))
     api(project(":core-format"))
     // With no mood, the yorisoi green.
