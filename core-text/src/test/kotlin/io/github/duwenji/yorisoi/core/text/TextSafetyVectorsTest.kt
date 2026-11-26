@@ -39,6 +39,9 @@ class TextSafetyVectorsTest {
             if (c.has("instruction")) {
                 assertEquals("instruction: $text", c.getBoolean("instruction"), InstructionCheck.looksLikeInstruction(text)); checked++
             }
+            if (c.has("notes")) {
+                assertEquals("notes: $text", c.getBoolean("notes"), SpokenText.isNotes(text)); checked++
+            }
             if (c.has("spoken")) {
                 assertEquals("spoken: $text", c.getString("spoken"), SpokenText.spoken(text)); checked++
             }
