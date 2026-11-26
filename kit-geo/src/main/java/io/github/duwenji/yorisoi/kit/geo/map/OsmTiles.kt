@@ -1,5 +1,6 @@
 package io.github.duwenji.yorisoi.kit.geo.map
 
+import io.github.duwenji.yorisoi.core.text.localized
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -44,9 +45,14 @@ class OsmTiles(
 
         fun errorOf(code: Int) = OsmTilesException(
             when (code) {
-                403 -> "OpenStreetMap の地図の利用を断られました"
-                429 -> "OpenStreetMap の地図が混み合っています"
-                else -> "OpenStreetMap の地図を取得できませんでした（HTTP $code）"
+                403 -> localized(
+                    "OpenStreetMap の地図の利用を断られました", "OpenStreetMap refused the map", "OpenStreetMap 拒绝了地图的使用", "OpenStreetMap이 지도 사용을 거절했습니다",
+                )
+                429 -> localized("OpenStreetMap の地図が混み合っています", "OpenStreetMap is busy", "OpenStreetMap 地图繁忙", "OpenStreetMap 지도가 혼잡합니다")
+                else -> localized(
+                    "OpenStreetMap の地図を取得できませんでした（HTTP $code）", "Could not fetch the OpenStreetMap map (HTTP $code)",
+                    "无法获取 OpenStreetMap 地图（HTTP $code）", "OpenStreetMap 지도를 가져올 수 없었습니다(HTTP $code)",
+                )
             },
         )
     }

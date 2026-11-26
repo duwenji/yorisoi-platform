@@ -1,5 +1,6 @@
 package io.github.duwenji.yorisoi.kit.local
 
+import io.github.duwenji.yorisoi.core.text.localized
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -223,9 +224,9 @@ class LocalClient(
         } catch (e: LocalException) {
             throw e
         } catch (e: IOException) {
-            throw LocalException("network", "スタジオに接続できませんでした", cause = e)
+            throw LocalException("network", messageFor("network"), cause = e)
         } catch (e: JSONException) {
-            throw LocalException("invalid_response", "スタジオの応答を解釈できませんでした", cause = e)
+            throw LocalException("invalid_response", messageFor("invalid_response"), cause = e)
         }
     }
 
@@ -239,16 +240,28 @@ class LocalClient(
 
         /** What the user is told about a note that wasn't placed, or another failure. */
         fun messageFor(code: String): String = when (code) {
-            "note_rejected" -> "置けませんでした"
-            "daily_note_limit" -> "今日置ける一言（10 件）を使い切りました"
-            "author_banned" -> "この端末からは一言を置けません"
-            "area_closed" -> "この辺りには置けません"
-            "terms_not_accepted" -> "利用規約に同意してから置いてください"
-            "text_too_long" -> "60 文字までです"
-            "relay_paused", "upstream_error" -> "今は置けません。少し待ってからお試しください"
-            "local_paused" -> "スタジオは今止まっています"
-            "too_many_requests" -> "混み合っています。少し待ってからお試しください"
-            else -> "スタジオでエラーが発生しました"
+            "network" -> localized("スタジオに接続できませんでした", "Could not connect to the studio", "无法连接到工作室", "스튜디오에 연결할 수 없었습니다")
+            "invalid_response" -> localized(
+                "スタジオの応答を解釈できませんでした", "Could not read the studio's reply", "无法解析工作室的回复", "스튜디오의 응답을 해석할 수 없었습니다",
+            )
+            "note_rejected" -> localized("置けませんでした", "It could not be placed", "无法放置", "남길 수 없었습니다")
+            "daily_note_limit" -> localized(
+                "今日置ける一言（10 件）を使い切りました", "Today's words (10) are used up", "今天可以留下的话（10 条）已用完", "오늘 남길 수 있는 한마디(10개)를 모두 사용했습니다",
+            )
+            "author_banned" -> localized("この端末からは一言を置けません", "Words can't be placed from this device", "此设备无法留下话语", "이 기기에서는 한마디를 남길 수 없습니다")
+            "area_closed" -> localized("この辺りには置けません", "Words can't be placed around here", "这一带无法留下话语", "이 근처에는 남길 수 없습니다")
+            "terms_not_accepted" -> localized(
+                "利用規約に同意してから置いてください", "Agree to the terms of use first", "请先同意使用条款再留下", "이용약관에 동의한 뒤 남겨 주세요",
+            )
+            "text_too_long" -> localized("60 文字までです", "Up to 60 characters", "最多 60 个字", "60자까지입니다")
+            "relay_paused", "upstream_error" -> localized(
+                "今は置けません。少し待ってからお試しください", "Words can't be placed now. Try again in a while", "现在无法留下，请稍后再试", "지금은 남길 수 없습니다. 잠시 후 다시 시도해 주세요",
+            )
+            "local_paused" -> localized("スタジオは今止まっています", "The studio is paused now", "工作室目前已暂停", "스튜디오는 지금 멈춰 있습니다")
+            "too_many_requests" -> localized(
+                "混み合っています。少し待ってからお試しください", "It's busy. Try again in a while", "目前繁忙，请稍后再试", "혼잡합니다. 잠시 후 다시 시도해 주세요",
+            )
+            else -> localized("スタジオでエラーが発生しました", "The studio had an error", "工作室出现错误", "스튜디오에서 오류가 발생했습니다")
         }
 
         internal fun note(o: JSONObject) = Note(

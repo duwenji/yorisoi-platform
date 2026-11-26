@@ -6,6 +6,8 @@ import io.github.duwenji.yorisoi.core.agent.Reply
 import io.github.duwenji.yorisoi.core.agent.ToolDef
 import io.github.duwenji.yorisoi.core.agent.Turn
 import io.github.duwenji.yorisoi.core.text.AppLanguage
+import io.github.duwenji.yorisoi.core.text.Languages
+import io.github.duwenji.yorisoi.core.text.localized
 import kotlin.coroutines.cancellation.CancellationException
 
 /**
@@ -38,10 +40,14 @@ data class AiConnection(
     }
 
     /** The model named beside what the AI said: the service's own for a user's key. */
-    val name: String get() = if (route == AiRoute.OPERATOR) OPERATOR_AI_NAME else model
+    val name: String get() = if (route == AiRoute.OPERATOR) operatorAiName else model
 
     companion object {
+        /** The operator's AI, as named in Japanese. */
         const val OPERATOR_AI_NAME = "運営の AI"
+
+        /** The operator's AI, as named in the app's language (REQ-LANGUAGES F-4). */
+        val operatorAiName: String get() = localized(OPERATOR_AI_NAME, "Operator's AI", "运营方的 AI", "운영자의 AI")
     }
 }
 
@@ -86,7 +92,7 @@ class AiGateway(
      * asked for in it, by adding [AppLanguage.instruction] at the end of the system prompt, and a reply mostly in
      * another language is recorded as unusable.
      */
-    var language: () -> AppLanguage = { AppLanguage.JA }
+    var language: () -> AppLanguage = { Languages.current }
 
     val isConfigured: Boolean get() = connection().isConfigured(relay != null)
 

@@ -99,7 +99,7 @@ class AiGatewayTest {
 
     @Test
     fun `the operator's AI is named as such`() {
-        assertEquals(AiConnection.OPERATOR_AI_NAME, AiConnection(AiRoute.OPERATOR).name)
+        assertEquals(AiConnection.operatorAiName, AiConnection(AiRoute.OPERATOR).name)
         assertEquals("deepseek-chat", AiConnection(AiRoute.OWN_KEY, Provider.DEEPSEEK).name)
     }
 }

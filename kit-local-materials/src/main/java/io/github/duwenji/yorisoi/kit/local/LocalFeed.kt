@@ -1,5 +1,6 @@
 package io.github.duwenji.yorisoi.kit.local
 
+import io.github.duwenji.yorisoi.core.text.localized
 import io.github.duwenji.yorisoi.kit.geo.Geohash
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,11 +20,19 @@ sealed interface Reading {
 
     data class OfNote(val note: Note) : Reading {
         override val spoken: String
-            get() = (note.spotName?.let { "${it}のそばで、" }.orEmpty()) + "この辺りを通った人の一言です。" + note.text
+            get() = localized(
+                (note.spotName?.let { "${it}のそばで、" }.orEmpty()) + "この辺りを通った人の一言です。",
+                "A word from someone who passed by here" + (note.spotName?.let { ", near $it" }.orEmpty()) + ". ",
+                (note.spotName?.let { "在${it}附近，" }.orEmpty()) + "这是路过这里的人留下的一句话。",
+                (note.spotName?.let { "$it 근처에서, " }.orEmpty()) + "이 근처를 지나간 사람의 한마디입니다. ",
+            ) + note.text
     }
 
     data class OfStudio(val studio: Studio, val audio: File?) : Reading {
-        override val spoken: String get() = "${studio.providerName}からのお知らせです。" + studio.text
+        override val spoken: String get() = localized(
+            "${studio.providerName}からのお知らせです。", "A notice from ${studio.providerName}. ",
+            "这是来自${studio.providerName}的通知。", "${studio.providerName}의 알림입니다. ",
+        ) + studio.text
     }
 }
 

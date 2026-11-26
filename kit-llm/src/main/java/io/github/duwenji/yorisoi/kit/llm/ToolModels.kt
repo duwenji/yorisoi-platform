@@ -37,9 +37,9 @@ internal object ToolForms {
                 return JSONObject(text)
             }
         } catch (e: IOException) {
-            throw GuideException("AIサービスに接続できませんでした", e)
+            throw GuideException(Messages.cantConnect, e)
         } catch (e: JSONException) {
-            throw GuideException("AIサービスの応答を解釈できませんでした", e)
+            throw GuideException(Messages.cantRead, e)
         }
     }
 }
@@ -116,7 +116,7 @@ class OpenAiToolModel(
                 .post(body.toString().toRequestBody(ToolForms.JSON))
                 .build()
         } catch (e: IllegalArgumentException) {
-            throw GuideException("接続先URLが正しくありません", e)
+            throw GuideException(Messages.badUrl, e)
         }
         val out = ToolForms.post(request)
         val message = out.getJSONArray("choices").getJSONObject(0).getJSONObject("message")

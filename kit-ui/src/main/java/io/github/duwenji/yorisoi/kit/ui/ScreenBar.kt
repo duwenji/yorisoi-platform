@@ -1,5 +1,6 @@
 package io.github.duwenji.yorisoi.kit.ui
 
+import io.github.duwenji.yorisoi.core.text.localized
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -17,7 +18,7 @@ fun ScreenBar(title: String, onBack: (() -> Unit)? = null, actions: @Composable 
     TopAppBar(
         title = { Text(title) },
         navigationIcon = {
-            onBack?.let { IconButton(onClick = it) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "戻る") } }
+            onBack?.let { IconButton(onClick = it) { Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = localized("戻る", "Back", "返回", "뒤로")) } }
         },
         actions = actions,
     )

@@ -114,14 +114,14 @@ class ChannelSync(
     fun addProvider(url: String, providerId: String) {
         val base = normalizeBase(url)
         val id = providerId.trim()
-        if (!ProviderIds.isWellFormed(id)) throw ChannelSyncException("リストIDの形が正しくありません（sc1 で始まる 35 文字）")
-        if (state.providers.any { it.id == id }) throw ChannelSyncException("このリストはもう登録されています")
+        if (!ProviderIds.isWellFormed(id)) throw ChannelSyncException(SyncMessages.badListId)
+        if (state.providers.any { it.id == id }) throw ChannelSyncException(SyncMessages.alreadyAdded)
         val info = try {
             docs.discovery(String(http.get(base + DISCOVERY_PATH, MAX_DISCOVERY_BYTES), Charsets.UTF_8), id)
         } catch (e: ProviderException) {
-            throw ChannelSyncException("リストの情報を確かめられませんでした（${e.message}）")
+            throw ChannelSyncException(SyncMessages.cantCheckList(e.message))
         } catch (e: IOException) {
-            throw ChannelSyncException("リストに接続できませんでした（${e.message}）")
+            throw ChannelSyncException(SyncMessages.cantReachList(e.message))
         }
         update { it.copy(providers = it.providers + ProviderRecord(id = id, url = base, name = info.name)) }
         refresh(id, unmetered = false)
@@ -172,7 +172,7 @@ class ChannelSync(
                 docs.channelList(listJson, info.keyset, at, record.listSeq, record.listSha256)
             } catch (e: ProviderException) {
                 if (e.error.code == "expired" && docs.issuedInFuture(listJson, at)) {
-                    throw ChannelSyncException("端末の時計がずれているようです。時刻を確かめてください")
+                    throw ChannelSyncException(SyncMessages.clockOff)
                 }
                 throw e
             }
@@ -202,7 +202,7 @@ class ChannelSync(
                     store.deletePackage(c.sha256)
                     update { s -> s.copy(installed = s.installed - c) }
                     collectGarbage()
-                    notice("「${listed?.name ?: c.name.ifEmpty { c.id }}」はリスト（${info.name}）から取り下げられました: ${revoked.reason}")
+                    notice(SyncMessages.revoked(listed?.name ?: c.name.ifEmpty { c.id }, info.name, revoked.reason))
                 }
                 listed != null && listed.version > c.version && unmetered -> runCatching { download(providerId, listed, c, list, unmetered) }
             }
@@ -221,11 +221,11 @@ class ChannelSync(
 
     /** Takes a listed channel onto the device: the package is fetched and checked when the user chooses it. */
     fun install(providerId: String, channelId: String, unmetered: Boolean = false) {
-        val (_, list) = validList(providerId) ?: throw ChannelSyncException("リストが有効ではありません。取得し直してください")
-        val entry = list.channels.firstOrNull { it.id == channelId } ?: throw ChannelSyncException("リストにないチャンネルです")
-        if (entry.pkg.format != StationValidator.FORMAT) throw ChannelSyncException("このアプリでは使えない形式のチャンネルです")
-        if (Compatibility.reasons(entry, profile).isNotEmpty()) throw ChannelSyncException("このアプリでは使えないチャンネルです")
-        if (needsUpdate(entry)) throw ChannelSyncException("このチャンネルを使うには、アプリの更新が必要です")
+        val (_, list) = validList(providerId) ?: throw ChannelSyncException(SyncMessages.listInvalid)
+        val entry = list.channels.firstOrNull { it.id == channelId } ?: throw ChannelSyncException(SyncMessages.notInList)
+        if (entry.pkg.format != StationValidator.FORMAT) throw ChannelSyncException(SyncMessages.badFormat)
+        if (Compatibility.reasons(entry, profile).isNotEmpty()) throw ChannelSyncException(SyncMessages.notForApp)
+        if (needsUpdate(entry)) throw ChannelSyncException(SyncMessages.needsUpdate)
         val installed = state.installed.firstOrNull { it.provider == providerId && it.id == channelId }
         download(providerId, entry, installed, list, unmetered)
     }
@@ -247,22 +247,22 @@ class ChannelSync(
             val change = entry.publisherChange
             if (change == null || change.from != previous.publisher) {
                 update { s -> s.copy(installed = s.installed.map { if (it == previous) it.copy(blocked = "publisher_changed") else it }) }
-                throw ChannelSyncException("チャンネル提供者が裏付けなく変わったため、新しい版は使いません（publisher_changed）")
+                throw ChannelSyncException(SyncMessages.publisherChanged)
             }
         }
         val url = checkedUrl(entry.pkg.url)
         val bytes = try {
             http.get(url, minOf(entry.pkg.size, ProviderDocuments.MAX_PACKAGE_BYTES))
         } catch (e: IOException) {
-            throw ChannelSyncException("パッケージを取得できませんでした（${e.message}）")
+            throw ChannelSyncException(SyncMessages.cantFetchPackage(e.message))
         }
-        if (bytes.size != entry.pkg.size || sha256(bytes) != entry.pkg.sha256) throw ChannelSyncException("パッケージがリストと一致しません（hash_mismatch）")
+        if (bytes.size != entry.pkg.size || sha256(bytes) != entry.pkg.sha256) throw ChannelSyncException(SyncMessages.packageNotList)
         val listedAs = ListedAs(entry.id, entry.version, entry.publisher, entry.activities, entry.genres, entry.requires)
         val check = StationValidator.checkArchive(bytes, listedAs, verifier, mediaStage, Strictness.APP)
-        if (check is StationCheck.Rejected) throw ChannelSyncException("パッケージの確認に失敗しました（package_rejected: ${check.code.json}）")
+        if (check is StationCheck.Rejected) throw ChannelSyncException(SyncMessages.packageRejected(check.code.json))
         check as StationCheck.Ok
         // What the package holds may rule out this app where the list's copy couldn't (an unknown restriction).
-        if (Compatibility.reasons(check.station.manifest, profile).isNotEmpty()) throw ChannelSyncException("このアプリでは使えないチャンネルです")
+        if (Compatibility.reasons(check.station.manifest, profile).isNotEmpty()) throw ChannelSyncException(SyncMessages.notForApp)
 
         store.writePackage(entry.pkg.sha256, bytes)
         val next = InstalledChannel(providerId, entry.id, entry.version, entry.publisher, entry.pkg.sha256, name = entry.name)
@@ -271,7 +271,7 @@ class ChannelSync(
         fetchMaterials(providerId, list, check.station, entry.publisher, unmetered)
         collectGarbage()
         if (previous != null && entry.publisher != previous.publisher) {
-            notice("「${entry.name}」のチャンネル提供者の鍵が移し替えられました: ${entry.publisherChange!!.reason}")
+            notice(SyncMessages.keyMoved(entry.name, entry.publisherChange!!.reason))
         }
     }
 
@@ -333,30 +333,30 @@ class ChannelSync(
      * must be the ticket's channel by the ticket's publisher. Returns the trial's station id.
      */
     fun loadTicket(json: String, developerMode: Boolean, unmetered: Boolean = false): String {
-        if (!developerMode) throw ChannelSyncException("試用チケットは開発者モードのときだけ読み込めます（ticket_invalid）")
-        val providerId = runCatching { ticketProvider(json) }.getOrNull() ?: throw ChannelSyncException("試用チケットとして読めません（ticket_invalid）")
-        val record = state.providers.firstOrNull { it.id == providerId } ?: throw ChannelSyncException("この試用チケットのリスト（$providerId）を先に足してください")
+        if (!developerMode) throw ChannelSyncException(SyncMessages.ticketNeedsDeveloperMode)
+        val providerId = runCatching { ticketProvider(json) }.getOrNull() ?: throw ChannelSyncException(SyncMessages.notATicket)
+        val record = state.providers.firstOrNull { it.id == providerId } ?: throw ChannelSyncException(SyncMessages.addTicketListFirst(providerId))
         val info = runCatching { docs.discovery(record.discovery ?: "", record.id) }.getOrNull()
-            ?: throw ChannelSyncException("リストの情報がまだありません。「今すぐ確かめる」を押してから読み込んでください")
+            ?: throw ChannelSyncException(SyncMessages.noListYet)
         val ticket = try {
             docs.testTicket(json, info.keyset, now())
         } catch (e: ProviderException) {
-            throw ChannelSyncException("試用チケットを確かめられませんでした（${e.message}）")
+            throw ChannelSyncException(SyncMessages.cantCheckTicket(e.message))
         }
-        if (ticket.pkg.format != 1) throw ChannelSyncException("このアプリでは使えない形式のチャンネルです")
+        if (ticket.pkg.format != 1) throw ChannelSyncException(SyncMessages.badFormat)
         val bytes = try {
             http.get(checkedUrl(ticket.pkg.url), minOf(ticket.pkg.size, ProviderDocuments.MAX_PACKAGE_BYTES))
         } catch (e: IOException) {
-            throw ChannelSyncException("パッケージを取得できませんでした（${e.message}）")
+            throw ChannelSyncException(SyncMessages.cantFetchPackage(e.message))
         }
-        if (bytes.size != ticket.pkg.size || sha256(bytes) != ticket.pkg.sha256) throw ChannelSyncException("パッケージがチケットと一致しません（hash_mismatch）")
+        if (bytes.size != ticket.pkg.size || sha256(bytes) != ticket.pkg.sha256) throw ChannelSyncException(SyncMessages.packageNotTicket)
         val pkg = when (val check = StationValidator.checkArchive(bytes, null, verifier, mediaStage, Strictness.APP)) {
-            is StationCheck.Rejected -> throw ChannelSyncException("パッケージの確認に失敗しました（package_rejected: ${check.code.json}）")
+            is StationCheck.Rejected -> throw ChannelSyncException(SyncMessages.packageRejected(check.code.json))
             is StationCheck.Ok -> check.station
         }
-        if (Compatibility.reasons(pkg.manifest, profile).isNotEmpty()) throw ChannelSyncException("このアプリでは使えないチャンネルです")
+        if (Compatibility.reasons(pkg.manifest, profile).isNotEmpty()) throw ChannelSyncException(SyncMessages.notForApp)
         if (pkg.manifest.id != ticket.channel || pkg.manifest.publisher != ticket.publisher) {
-            throw ChannelSyncException("パッケージがチケットのチャンネル・チャンネル提供者と違います（ticket_invalid）")
+            throw ChannelSyncException(SyncMessages.ticketMismatch)
         }
         store.writePackage(ticket.pkg.sha256, bytes)
         val trial = TrialChannel(providerId, ticket.channel, pkg.manifest.version, ticket.publisher, ticket.pkg.sha256, pkg.manifest.name, ticket.expiresAt)
@@ -601,7 +601,7 @@ class ChannelSync(
         for (p in state.providers) {
             if (p.list == null || p.expiryNoticed || validList(p.id) != null) continue
             if (state.installed.any { it.provider == p.id }) {
-                notice("リスト（${p.name ?: p.id}）の期限が切れたため、そのチャンネルは使えません。取得できるようになると戻ります")
+                notice(SyncMessages.listExpired(p.name ?: p.id))
             }
             updateProvider(p.id) { it.copy(expiryNoticed = true) }
         }
@@ -627,7 +627,7 @@ class ChannelSync(
     private fun checkedUrl(url: String): String {
         val uri = runCatching { URI(url) }.getOrNull()
         val ok = uri != null && uri.host != null && (uri.scheme == "https" || (allowLocalHttp && uri.scheme == "http" && uri.host in LOCAL_HOSTS))
-        if (!ok) throw ChannelSyncException("URL は https:// で始まる必要があります")
+        if (!ok) throw ChannelSyncException(SyncMessages.httpsOnly)
         return url
     }
 

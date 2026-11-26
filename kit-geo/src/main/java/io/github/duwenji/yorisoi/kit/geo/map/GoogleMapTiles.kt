@@ -1,5 +1,6 @@
 package io.github.duwenji.yorisoi.kit.geo.map
 
+import io.github.duwenji.yorisoi.core.text.localized
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -92,10 +93,19 @@ class GoogleMapTiles(
             val detail = runCatching { JSONObject(body).getJSONObject("error").optString("message") }.getOrNull().orEmpty()
             return when (code) {
                 400, 401, 403 -> GoogleMapsException(
-                    "Google マップの APIキーが使えませんでした。キーと、Map Tiles API が有効になっているかを確認してください" +
-                        if (detail.isNotEmpty()) "（$detail）" else "",
+                    localized(
+                        "Google マップの APIキーが使えませんでした。キーと、Map Tiles API が有効になっているかを確認してください",
+                        "The Google Maps API key could not be used. Check the key and that the Map Tiles API is enabled",
+                        "无法使用 Google 地图的 API 密钥。请检查密钥以及 Map Tiles API 是否已启用",
+                        "Google 지도 API 키를 사용할 수 없었습니다. 키와 Map Tiles API가 사용 설정되어 있는지 확인해 주세요",
+                    ) + if (detail.isNotEmpty()) " ($detail)" else "",
                 )
-                429 -> GoogleMapsException("Google マップの利用上限に達しました。しばらくしてから試してください")
+                429 -> GoogleMapsException(
+                    localized(
+                        "Google マップの利用上限に達しました。しばらくしてから試してください", "The Google Maps limit is reached. Try again in a while",
+                        "已达到 Google 地图的使用上限，请稍后再试", "Google 지도 사용 한도에 도달했습니다. 잠시 후 다시 시도해 주세요",
+                    ),
+                )
                 else -> IOException("Map Tiles API error: HTTP $code $detail")
             }
         }

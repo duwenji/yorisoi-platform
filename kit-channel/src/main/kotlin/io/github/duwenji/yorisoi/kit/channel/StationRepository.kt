@@ -1,5 +1,6 @@
 package io.github.duwenji.yorisoi.kit.channel
 
+import io.github.duwenji.yorisoi.core.text.localized
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -46,7 +47,7 @@ class StationRepository(
      * `標準 → 歴史探訪`. A channel the app no longer has shows as such.
      */
     fun namesOf(keys: List<String>): String {
-        return keys.map { key -> all.firstOrNull { sameChannel(it.key, key) }?.name ?: "（今はないチャンネル）" }
+        return keys.map { key -> all.firstOrNull { sameChannel(it.key, key) }?.name ?: localized("（今はないチャンネル）", "(a channel no longer here)", "（现已没有的频道）", "(지금은 없는 채널)") }
             .fold(emptyList<String>()) { acc, name -> if (acc.lastOrNull() == name) acc else acc + name }
             .joinToString(" → ")
     }

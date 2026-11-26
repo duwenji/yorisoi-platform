@@ -1,5 +1,9 @@
 package io.github.duwenji.yorisoi.kit.geo.map
 
+import io.github.duwenji.yorisoi.kit.ui.AppLocales
+import io.github.duwenji.yorisoi.core.text.localized
+import io.github.duwenji.yorisoi.core.text.Languages
+import android.text.format.DateFormat
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -46,18 +50,35 @@ import java.util.Locale
 /** What was said about a spot along a way, and when. */
 data class WayTalk(val name: String, val at: Long, val text: String)
 
-/** The words for going along a way in each app: a walker's and a rider's. */
-data class WayWords(
-    /** "同じ道を 3 回歩くと". */
-    val threeTimes: String,
-    /** "60 日歩かないと". */
-    val unused: String,
-    /** "散歩", "走行". */
-    val trip: String,
-) {
+/** The words for going along a way in each app, a walker's and a rider's, in the app's language (REQ-LANGUAGES F-4). */
+class WayWords private constructor(private val walk: Boolean) {
+    /** What the list says while it is empty. */
+    internal val empty: String get() = if (walk) {
+        localized(
+            "まだありません。同じ道を 3 回歩くと、よく通る道になります。散歩の履歴から作ることもできます。",
+            "None yet. Walk the same way three times and it becomes a frequent way. You can also make one from a walk in the history.",
+            "还没有。同一条路走 3 次，就会成为常走的路。也可以从散步记录中创建。",
+            "아직 없습니다. 같은 길을 3번 걸으면 자주 다니는 길이 됩니다. 산책 기록에서 만들 수도 있습니다.",
+        )
+    } else {
+        localized(
+            "まだありません。同じ道を 3 回走ると、よく通る道になります。走行の履歴から作ることもできます。",
+            "None yet. Ride the same way three times and it becomes a frequent way. You can also make one from a ride in the history.",
+            "还没有。同一条路骑 3 次，就会成为常走的路。也可以从骑行记录中创建。",
+            "아직 없습니다. 같은 길을 3번 달리면 자주 다니는 길이 됩니다. 주행 기록에서 만들 수도 있습니다.",
+        )
+    }
+
+    /** A way found and not kept: when it goes. */
+    internal val foundUnsaved: String get() = if (walk) {
+        localized("自動で見つけた（60 日歩かないと消えます）", "found (goes if not walked for 60 days)", "自动发现（60 天不走就会消失）", "자동으로 찾음(60일 동안 걷지 않으면 사라집니다)")
+    } else {
+        localized("自動で見つけた（60 日走らないと消えます）", "found (goes if not ridden for 60 days)", "自动发现（60 天不骑就会消失）", "자동으로 찾음(60일 동안 달리지 않으면 사라집니다)")
+    }
+
     companion object {
-        val WALK = WayWords("同じ道を 3 回歩くと", "60 日歩かないと", "散歩")
-        val RIDE = WayWords("同じ道を 3 回走ると", "60 日走らないと", "走行")
+        val WALK = WayWords(walk = true)
+        val RIDE = WayWords(walk = false)
     }
 }
 
@@ -83,14 +104,11 @@ fun FrequentWaysScreen(ways: List<FrequentWay>, actions: WayActions, words: WayW
         WayDetail(way, actions, words, onClose = { open = null })
         return
     }
-    Scaffold(topBar = { ScreenBar("よく通る道", onBack = onClose) }) { padding ->
+    Scaffold(topBar = { ScreenBar(localized("よく通る道", "Frequent ways", "常走的路", "자주 다니는 길"), onBack = onClose) }) { padding ->
         LazyColumn(Modifier.fillMaxSize().padding(padding).padding(horizontal = 24.dp)) {
             item {
                 if (ways.isEmpty()) {
-                    Text(
-                        "まだありません。${words.threeTimes}、よく通る道になります。${words.trip}の履歴から作ることもできます。",
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
+                    Text(words.empty, style = MaterialTheme.typography.bodyMedium)
                 }
             }
             items(ways, key = { it.id }) { way ->
@@ -106,15 +124,15 @@ fun FrequentWaysScreen(ways: List<FrequentWay>, actions: WayActions, words: WayW
 
 /** "1.6 km・12 回・最後は10月28日・自動で見つけた（保存済み）". */
 private fun summary(way: FrequentWay, words: WayWords): String = listOf(
-    "%.1f km".format(Locale.JAPAN, way.lengthM / 1000),
-    "${way.passes} 回",
-    "最後は${day.format(way.lastPassedAt)}",
+    "%.1f km".format(Locale.ROOT, way.lengthM / 1000),
+    localized("${way.passes} 回", "${way.passes} times", "${way.passes} 次", "${way.passes}회"),
+    localized("最後は", "last on ", "最近一次：", "마지막: ") + day(way.lastPassedAt),
     when {
-        way.origin == WayOrigin.USER -> "自分で作った"
-        way.saved -> "自動で見つけた（保存済み）"
-        else -> "自動で見つけた（${words.unused}消えます）"
+        way.origin == WayOrigin.USER -> localized("自分で作った", "made by you", "自己创建", "직접 만듦")
+        way.saved -> localized("自動で見つけた（保存済み）", "found (kept)", "自动发现（已保存）", "자동으로 찾음(저장됨)")
+        else -> words.foundUnsaved
     },
-).joinToString("・")
+).joinToString(localized("・", " · ", " · ", " · "))
 
 @Composable
 private fun WayDetail(way: FrequentWay, actions: WayActions, words: WayWords, onClose: () -> Unit) {
@@ -124,18 +142,27 @@ private fun WayDetail(way: FrequentWay, actions: WayActions, words: WayWords, on
     if (deleting) {
         AlertDialog(
             onDismissRequest = { deleting = false },
-            title = { Text("「${way.name}」を消しますか") },
+            title = { Text(localized("「${way.name}」を消しますか", "Delete “${way.name}”?", "要删除「${way.name}」吗？", "「${way.name}」을(를) 삭제할까요?")) },
             text = {
-                if (way.origin == WayOrigin.FOUND) Text("消した道は、また何度通っても、自動ではよく通る道になりません。")
+                if (way.origin == WayOrigin.FOUND) {
+                    Text(
+                        localized(
+                            "消した道は、また何度通っても、自動ではよく通る道になりません。",
+                            "A deleted way doesn't become a frequent way again by itself, however often you go along it.",
+                            "删除的路，无论再走多少次，都不会自动成为常走的路。",
+                            "삭제한 길은 몇 번을 다시 지나가도 자동으로 자주 다니는 길이 되지 않습니다.",
+                        ),
+                    )
+                }
             },
             confirmButton = {
                 TextButton(onClick = {
                     deleting = false
                     actions.delete(way.id)
                     onClose()
-                }) { Text("消す") }
+                }) { Text(Labels.delete) }
             },
-            dismissButton = { TextButton(onClick = { deleting = false }) { Text("やめる") } },
+            dismissButton = { TextButton(onClick = { deleting = false }) { Text(Labels.cancel) } },
         )
     }
     Scaffold(topBar = { ScreenBar(way.name, onBack = onClose) }) { padding ->
@@ -146,19 +173,19 @@ private fun WayDetail(way: FrequentWay, actions: WayActions, words: WayWords, on
             item { Text(summary(way, words), style = MaterialTheme.typography.bodyMedium) }
             item { WayMap(way.points, highlight = null, Modifier.fillMaxWidth().height(320.dp)) }
             item {
-                OutlinedTextField(name, { name = it }, label = { Text("名前") }, singleLine = true, modifier = Modifier.fillMaxWidth())
+                OutlinedTextField(name, { name = it }, label = { Text(localized("名前", "Name", "名称", "이름")) }, singleLine = true, modifier = Modifier.fillMaxWidth())
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 8.dp)) {
                     OutlinedButton(onClick = { actions.rename(way.id, name.trim()) }, enabled = name.isNotBlank() && name.trim() != way.name) {
-                        Text("名前を変える")
+                        Text(localized("名前を変える", "Rename", "改名", "이름 바꾸기"))
                     }
-                    if (!way.saved) OutlinedButton(onClick = { actions.save(way.id) }) { Text("保存する") }
-                    TextButton(onClick = { deleting = true }) { Text("消す") }
+                    if (!way.saved) OutlinedButton(onClick = { actions.save(way.id) }) { Text(Labels.save) }
+                    TextButton(onClick = { deleting = true }) { Text(Labels.delete) }
                 }
             }
-            if (talks.isNotEmpty()) item { Text("この道で話した見どころ", style = MaterialTheme.typography.titleMedium) }
+            if (talks.isNotEmpty()) item { Text(localized("この道で話した見どころ", "Sights talked about on this way", "在这条路上讲过的景点", "이 길에서 이야기한 볼거리"), style = MaterialTheme.typography.titleMedium) }
             items(talks) { talk ->
                 Column(Modifier.padding(vertical = 4.dp)) {
-                    Text("${day.format(talk.at)}　${talk.name}", style = MaterialTheme.typography.titleSmall)
+                    Text("${day(talk.at)}　${talk.name}", style = MaterialTheme.typography.titleSmall)
                     Text(talk.text, style = MaterialTheme.typography.bodyMedium)
                 }
             }
@@ -180,17 +207,19 @@ fun NewWayFromTrip(route: List<LatLon>, onSave: (String, List<LatLon>) -> Unit, 
     var name by remember { mutableStateOf("") }
     val section = remember(route, range) { FrequentWayFinder.section(route, range.start.toDouble(), range.endInclusive.toDouble()) }
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text("よく通る道にする", style = MaterialTheme.typography.titleMedium)
+        Text(localized("よく通る道にする", "Make it a frequent way", "设为常走的路", "자주 다니는 길로 만들기"), style = MaterialTheme.typography.titleMedium)
         WayMap(route, highlight = section, Modifier.fillMaxWidth().height(320.dp))
         Text(
-            "始まりと終わり: ${"%.1f".format(Locale.JAPAN, range.start / 1000)}〜${"%.1f".format(Locale.JAPAN, range.endInclusive / 1000)} km（太い線）",
+            localized("始まりと終わり: ", "Start and end: ", "起点和终点：", "시작과 끝: ") +
+                "${"%.1f".format(Locale.ROOT, range.start / 1000)}〜${"%.1f".format(Locale.ROOT, range.endInclusive / 1000)} km" +
+                localized("（太い線）", " (thick line)", "（粗线）", " (굵은 선)"),
             style = MaterialTheme.typography.bodySmall,
         )
         RangeSlider(value = range, onValueChange = { range = it }, valueRange = 0f..total.toFloat().coerceAtLeast(1f))
-        OutlinedTextField(name, { name = it }, label = { Text("名前（例: 通勤の道）") }, singleLine = true, modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(name, { name = it }, label = { Text(localized("名前（例: 通勤の道）", "Name (e.g. To work)", "名称（例：通勤的路）", "이름(예: 출근길)")) }, singleLine = true, modifier = Modifier.fillMaxWidth())
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Button(onClick = { onSave(name.trim(), section) }, enabled = name.isNotBlank() && section.size >= 2) { Text("保存する") }
-            TextButton(onClick = onCancel) { Text("やめる") }
+            Button(onClick = { onSave(name.trim(), section) }, enabled = name.isNotBlank() && section.size >= 2) { Text(Labels.save) }
+            TextButton(onClick = onCancel) { Text(Labels.cancel) }
         }
     }
 }
@@ -222,4 +251,15 @@ private const val END_M = 200.0
 /** No spot: the end of the line the map draws thick. */
 private val WAY_END = Poi("", "", 0.0, 0.0, "", emptyMap())
 
-private val day = SimpleDateFormat("M月d日", Locale.JAPAN)
+/** A day as the app's language writes it: 「10月28日」「Oct 28」. */
+private fun day(at: Long): String {
+    val locale = AppLocales.locale(Languages.current)
+    return SimpleDateFormat(DateFormat.getBestDateTimePattern(locale, "MMMd"), locale).format(at)
+}
+
+/** The buttons' words. */
+private object Labels {
+    val save get() = localized("保存する", "Save", "保存", "저장")
+    val delete get() = localized("消す", "Delete", "删除", "삭제")
+    val cancel get() = localized("やめる", "Cancel", "取消", "취소")
+}
