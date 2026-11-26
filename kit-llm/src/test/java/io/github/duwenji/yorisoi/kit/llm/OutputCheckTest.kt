@@ -18,6 +18,17 @@ class OutputCheckTest {
     }
 
     @Test
+    fun `a reply written as notes is caught, before and after its marks are taken out`() {
+        // A reply the operator's AI gave before a song: research notes, read out as they were.
+        val notes = "# 調べた手がかり\n- 唱歌「うさぎ」は月を題材とし、秋の十五夜を連想させることが多い。"
+        assertEquals(OutputCheck.NOTES, OutputCheck.violation(notes))
+        assertEquals(OutputCheck.NOTES, OutputCheck.violation(OutputCheck.spoken(notes)))
+        assertEquals(OutputCheck.NOTES, OutputCheck.violation("見どころ\n・雷門\n・仲見世"))
+        assertNull(OutputCheck.violation("1：秋の風ですね。\n2：鳥の声がします。"))
+        assertNull(OutputCheck.violation("雷門・仲見世・宝蔵門と続く参道です。"))
+    }
+
+    @Test
     fun `ordinary narration passes`() {
         assertNull(OutputCheck.violation("本宮は1180年に今の場所へ移されました。石段は61段あります。"))
         assertNull(OutputCheck.violation("ここから約450m、徒歩で6分ほどです。コーヒーの香りがします。"))

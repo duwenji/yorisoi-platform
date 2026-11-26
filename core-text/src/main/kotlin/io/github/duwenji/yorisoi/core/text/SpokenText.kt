@@ -26,6 +26,15 @@ object SpokenText {
 
     private val BLANK_LINES = Regex("\n{3,}")
 
+    /**
+     * A heading or a list item at the start of a line: a reply written as notes (「# 調べた手がかり」「- …」), not
+     * as speech. Numbered lines (「1：」) aren't counted: a batch of chats is numbered on purpose.
+     */
+    private val NOTE_LINE = Regex("(?m)^[ \t　]*(?:#{1,6}[ \t　]|[-+•‣][ \t　]|・)")
+
+    /** Whether [text] is written as notes (headings, list items) rather than as speech: not read out (AI-ROLES H-6 ③). */
+    fun isNotes(text: String): Boolean = NOTE_LINE.containsMatchIn(text)
+
     /** [text] as it may be read out: without stage directions, Markdown marks and notes on the reply. */
     fun spoken(text: String): String = withoutMetaNotes(withoutStageDirections(withoutMarkdown(text)))
 

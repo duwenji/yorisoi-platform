@@ -1,5 +1,5 @@
 {
-  "$comment": "core-text の機械の確認の見本（AGENT A-52）。contact は AI の出力の連絡先の確かめ（ContactCheck.violation。全角を半角にそろえてから見る）、written は提供者が書いた文の確かめ（WrittenText。スロット・素材・素材集。全角を半角にそろえてから見る）、spoken は読み上げる前の文（SpokenText.spoken）、instruction は指示のような文の確かめ（InstructionCheck。ページの文とリンクの題名）。書いていない項目は確かめない。Kotlin（core-text）と運営の画面の確認（TypeScript）は、どちらもこの見本を満たす。",
+  "$comment": "core-text の機械の確認の見本（AGENT A-52）。contact は AI の出力の連絡先の確かめ（ContactCheck.violation。全角を半角にそろえてから見る）、written は提供者が書いた文の確かめ（WrittenText。スロット・素材・素材集。全角を半角にそろえてから見る）、spoken は読み上げる前の文（SpokenText.spoken）、notes はメモの形の返事か（SpokenText.isNotes。行頭の見出し・箇条書き。番号の行は数えない）、instruction は指示のような文の確かめ（InstructionCheck。ページの文とリンクの題名）。書いていない項目は確かめない。Kotlin（core-text）と運営の画面の確認（TypeScript）は、どちらもこの見本を満たす。",
   "version": 1,
   "cases": [
     {
@@ -136,6 +136,34 @@
     {
       "text": "係員の指示に従って見学してください。",
       "instruction": false
+    },
+    {
+      "text": "# 調べた手がかり\n- 唱歌「うさぎ」は月を題材とし、秋の十五夜を連想させることが多い。",
+      "notes": true
+    },
+    {
+      "text": "調べた手がかり\n- 唱歌「うさぎ」は秋に関連づけて紹介される。",
+      "notes": true
+    },
+    {
+      "text": "見どころ\n・雷門\n・仲見世",
+      "notes": true
+    },
+    {
+      "text": "1：秋の風ですね。\n2：鳥の声がします。",
+      "notes": false
+    },
+    {
+      "text": "石段は61段、#1 の札が目印です。",
+      "notes": false
+    },
+    {
+      "text": "雷門・仲見世・宝蔵門と続く参道です。",
+      "notes": false
+    },
+    {
+      "text": "ここは-10度になることもあります。",
+      "notes": false
     }
   ]
 }

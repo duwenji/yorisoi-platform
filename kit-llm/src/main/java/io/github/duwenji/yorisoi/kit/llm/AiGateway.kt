@@ -102,7 +102,12 @@ class AiGateway(
         if (limitReached() || !takeCall(c)) throw AiUnavailableException("The daily limit of AI calls is reached")
         val startedAt = System.currentTimeMillis()
         fun report(reply: String?, error: String?) = onCall(
-            AiCall(purpose.name.lowercase(), c.name, system, user, reply, error, reply?.let(OutputCheck::violation), System.currentTimeMillis() - startedAt),
+            // Hints are written as a list on purpose: only speech counts as notes.
+            AiCall(
+                purpose.name.lowercase(), c.name, system, user, reply, error,
+                reply?.let(OutputCheck::violation)?.takeUnless { purpose == Purpose.HINTS && it == OutputCheck.NOTES },
+                System.currentTimeMillis() - startedAt,
+            ),
         )
         val text = try {
             clientFor(c).generate(system, user, purpose)
