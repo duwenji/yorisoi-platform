@@ -1,5 +1,6 @@
 package io.github.duwenji.yorisoi.core.format.material
 
+import io.github.duwenji.yorisoi.core.format.langValue
 import io.github.duwenji.yorisoi.core.format.HEADING_PATTERN
 import io.github.duwenji.yorisoi.core.format.RejectCode
 import io.github.duwenji.yorisoi.core.format.StationFiles
@@ -44,6 +45,7 @@ data class Resource(
     val type: MaterialType,
     val location: ResourceLocation,
     val durationSec: Int?,
+    /** The image's description in the package's first language. */
     val alt: String?,
     /** The id of the text resource that transcribes this audio or video. */
     val transcript: String?,
@@ -53,7 +55,14 @@ data class Resource(
     val about: About?,
     /** As written; tags this version doesn't know are kept and simply never match (API-MATERIALS「タグ」). */
     val tags: List<String>,
-)
+    /** A text's versions in the package's other languages, as paths (REQ-LANGUAGES F-18). */
+    val translations: Map<String, String> = emptyMap(),
+    /** An image's description per language, the first language's included (F-22). */
+    val alts: Map<String, String> = emptyMap(),
+) {
+    /** The description in [tag], else in the first language. */
+    fun alt(tag: String): String? = alts[tag] ?: alt
+}
 
 /** The tags of API-MATERIALS「タグ」. */
 object Tags {
@@ -61,8 +70,21 @@ object Tags {
 }
 
 /** The resources of a package, with the text of those inside it. */
-data class Resources(val items: List<Resource>, val texts: Map<String, String>) {
+data class Resources(
+    val items: List<Resource>,
+    val texts: Map<String, String>,
+    /** The texts' versions in other languages: id, then language (REQ-LANGUAGES F-18). */
+    val translatedTexts: Map<String, Map<String, String>> = emptyMap(),
+    /** The package's first language, the one [texts] are in. */
+    val lang: String = "ja",
+) {
     operator fun get(id: String): Resource? = items.firstOrNull { it.id == id }
+
+    /**
+     * Text [id] in [tag], or null when there's no version in it: a text read out as is isn't read in another
+     * language than the app's (REQ-LANGUAGES D-8).
+     */
+    fun text(id: String, tag: String): String? = if (tag == lang) texts[id] else translatedTexts[id]?.get(tag)
 
     /** Bytes fetched ahead when the channel is chosen (API-CHANNEL-PACKAGE: all outside resources but video). */
     val prefetchBytes: Long get() = items.filter { it.type != MaterialType.VIDEO }.sumOf { (it.location as? ResourceLocation.External)?.size ?: 0L }
@@ -103,28 +125,36 @@ object ResourceReader {
     )
     private val CODE = RejectCode.BAD_RESOURCE
 
-    fun read(json: JSONObject, files: StationFiles, inCollection: Boolean): Resources {
+    /** [langs]: the package's languages, its first language first (REQ-LANGUAGES F-16・F-20). */
+    fun read(json: JSONObject, files: StationFiles, inCollection: Boolean, langs: List<String> = listOf("ja")): Resources {
         val list = json.optList("resources", CODE)
         if (list.size > MAX_RESOURCES) reject(CODE, "${list.size} resources (max $MAX_RESOURCES)")
         val items = list.map { item ->
             val r = item as? JSONObject ?: reject(CODE, "resources has an item that is not an object")
-            readOne(r, inCollection)
+            readOne(r, inCollection, langs)
         }
         items.groupBy { it.id }.values.firstOrNull { it.size > 1 }?.let { reject(CODE, "resource id \"${it[0].id}\" twice") }
         val byId = items.associateBy { it.id }
         val texts = LinkedHashMap<String, String>()
+        val translatedTexts = LinkedHashMap<String, MutableMap<String, String>>()
         for (r in items) {
             r.transcript?.let { if (byId[it]?.type != MaterialType.TEXT) reject(CODE, "${r.id}: transcript \"$it\" is not a text resource") }
             r.poster?.let { if (byId[it]?.type != MaterialType.IMAGE) reject(CODE, "${r.id}: poster \"$it\" is not an image resource") }
             val file = r.location as? ResourceLocation.File ?: continue
             val bytes = files.read(file.path) ?: reject(CODE, "${r.id}: no file ${file.path}")
             when (r.type) {
-                MaterialType.TEXT -> texts[r.id] = checkText(r.id, file.path, bytes)
+                MaterialType.TEXT -> {
+                    texts[r.id] = checkText(r.id, file.path, bytes)
+                    for ((tag, path) in r.translations) {
+                        val translated = files.read(path) ?: reject(CODE, "${r.id}: no file $path")
+                        translatedTexts.getOrPut(r.id) { LinkedHashMap() }[tag] = checkText(r.id, path, translated)
+                    }
+                }
                 MaterialType.IMAGE -> checkImage(r.id, file.path, bytes)
                 else -> reject(CODE, "${r.id}: only text and image can be in the package")
             }
         }
-        val resources = Resources(items, texts)
+        val resources = Resources(items, texts, translatedTexts, langs.first())
         if (resources.externalBytes > MAX_EXTERNAL_TOTAL) reject(CODE, "outside resources total ${resources.externalBytes} bytes (max $MAX_EXTERNAL_TOTAL)")
         if (resources.prefetchBytes > MAX_PREFETCH_TOTAL) reject(CODE, "outside resources but video total ${resources.prefetchBytes} bytes (max $MAX_PREFETCH_TOTAL)")
         return resources
@@ -132,9 +162,9 @@ object ResourceReader {
 
     /** Paths under `resources/` that some resource points at; any other file there is unexpected (API-CHANNEL-PACKAGE). */
     fun files(resources: Resources): Set<String> =
-        resources.items.mapNotNull { (it.location as? ResourceLocation.File)?.path }.toSet()
+        resources.items.flatMap { listOfNotNull((it.location as? ResourceLocation.File)?.path) + it.translations.values }.toSet()
 
-    private fun readOne(r: JSONObject, inCollection: Boolean): Resource {
+    private fun readOne(r: JSONObject, inCollection: Boolean, langs: List<String>): Resource {
         val id = r.string("id", CODE)
         if (!RESOURCE_ID.matches(id)) reject(CODE, "resource id \"$id\"")
         val typeName = r.string("type", CODE)
@@ -155,8 +185,20 @@ object ResourceReader {
             }
             else -> if (duration != null) reject(CODE, "$id: durationSec is for audio and video")
         }
-        val alt = r.optString("alt", CODE)
-        if (type == MaterialType.IMAGE) checkLength("$id alt", alt ?: reject(CODE, "$id: an image needs alt"), 1, 120, CODE)
+        // F-22: an image's description, once or per language (the first one required).
+        val alts = r.optNullable("alt")?.let { langValue("$id alt", it, langs, 120, CODE, all = false) } ?: emptyMap()
+        if (type == MaterialType.IMAGE && alts.isEmpty()) reject(CODE, "$id: an image needs alt")
+        val alt = alts[langs.first()]
+        // F-18: a text's versions in the package's other languages.
+        val translations = r.optNullable("translations")?.let { t ->
+            if (type != MaterialType.TEXT) reject(CODE, "$id: translations are for text")
+            val o = t as? JSONObject ?: reject(CODE, "$id: translations is not an object")
+            o.keySet().associateWith { tag ->
+                if (tag !in langs.drop(1)) reject(CODE, "$id: translations \"$tag\" is not one of the other langs ${langs.drop(1)}")
+                val path = o.opt(tag) as? String ?: reject(CODE, "$id: translations.$tag is not a string")
+                readFile(id, MaterialType.TEXT, path).path
+            }
+        } ?: emptyMap()
         val transcript = r.optString("transcript", CODE)
         if ((type == MaterialType.AUDIO || type == MaterialType.VIDEO) && transcript == null) reject(CODE, "$id: ${type.json} needs a transcript")
         val poster = r.optString("poster", CODE)
@@ -167,6 +209,8 @@ object ResourceReader {
             id, type, location, duration, alt, transcript, poster, credit,
             about = if (inCollection) r.optNullable("about")?.let { readAbout(id, it as? JSONObject ?: reject(CODE, "$id: about is not an object")) } else null,
             tags = if (inCollection) readTags(id, r) else emptyList(),
+            translations = translations,
+            alts = alts,
         )
     }
 

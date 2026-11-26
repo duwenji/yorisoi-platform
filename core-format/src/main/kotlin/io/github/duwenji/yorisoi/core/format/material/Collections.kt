@@ -1,5 +1,7 @@
 package io.github.duwenji.yorisoi.core.format.material
 
+import io.github.duwenji.yorisoi.core.format.langTexts
+import io.github.duwenji.yorisoi.core.format.readLangs
 import io.github.duwenji.yorisoi.core.format.ACCOUNT_ID_PATTERN
 import io.github.duwenji.yorisoi.core.format.AppIds
 import io.github.duwenji.yorisoi.core.format.ArchiveException
@@ -52,7 +54,17 @@ data class CollectionManifest(
     val summary: String,
     val lang: String,
     val grants: Grants,
-)
+    /** The languages the collection offers (REQ-LANGUAGES F-20), [lang] first. */
+    val langs: List<String> = listOf(lang),
+    val names: Map<String, String> = mapOf(lang to name),
+    val summaries: Map<String, String> = mapOf(lang to summary),
+) {
+    /** The name in [tag], else in [lang]. */
+    fun name(tag: String): String = names[tag] ?: name
+
+    /** The summary in [tag], else in [lang]. */
+    fun summary(tag: String): String = summaries[tag] ?: summary
+}
 
 /** A collection that passed every check: its settings and its resources. */
 data class CollectionPackage(val manifest: CollectionManifest, val resources: Resources)
@@ -124,7 +136,7 @@ object CollectionValidator {
             }
         }
 
-        val resources = ResourceReader.read(json, files, inCollection = true)
+        val resources = ResourceReader.read(json, files, inCollection = true, langs = manifest.langs)
         if (resources.items.isEmpty()) reject(RejectCode.BAD_RESOURCE, "a collection has no resources")
         if (manifest.grants.grounding) checkGroundingTexts(resources)
         val pointed = ResourceReader.files(resources)
@@ -143,12 +155,18 @@ object CollectionValidator {
         if (!ACCOUNT_ID_PATTERN.matches(producer)) reject(RejectCode.BAD_MANIFEST, "producer \"$producer\"")
         val lang = json.string("lang")
         if (lang != "ja") reject(RejectCode.BAD_VALUE, "lang \"$lang\"")
+        val langs = json.readLangs(lang)
+        val names = json.langTexts("name", langs, 20)
+        val summaries = json.langTexts("summary", langs, 60)
         return CollectionManifest(
             format, id, version, producer,
-            name = json.string("name").also { checkLength("name", it, 1, 20) },
-            summary = json.string("summary").also { checkLength("summary", it, 1, 60) },
+            name = names.getValue(lang),
+            summary = summaries.getValue(lang),
             lang = lang,
             grants = readGrants(json.obj("grants"), strictness),
+            langs = langs,
+            names = names,
+            summaries = summaries,
         )
     }
 

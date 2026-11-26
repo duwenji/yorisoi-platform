@@ -366,7 +366,7 @@ resources/
 | `id` | 英小文字・数字・`-`、3〜40 文字。リストの中で一意。最初に登録した素材提供者が持ち、取り下げ・退会のあとも再利用しない（MATERIALS D-17）。チャンネルの ID とは別の名前空間 |
 | `version` | 1 以上 |
 | `producer` | 素材提供者のアカウントID（`sg1…`）。`signature.json` の公開鍵から計算した値と一致し、リストの `collections[].producer` とも一致すること（API-CHANNEL-PACKAGE F-6 と同じ確かめ方）。鍵を移し替えたあとの版は、新しいアカウントIDの鍵（その秘密鍵）で署名する。前の鍵で署名した承認済みの版は、リストが同じ素材集の版として載せている限り使える |
-| `name` / `summary` / `lang` | API-CHANNEL-PACKAGE の `channel.json` と同じ決まり |
+| `name` / `summary` / `lang` / `langs` | API-CHANNEL-PACKAGE の `channel.json` と同じ決まり（`langs` と言語ごとの `name`・`summary`。REQ-LANGUAGES F-20）。素材の `translations`・言語ごとの `alt` も API-CHANNEL-PACKAGE と同じ（F-18・F-22）。AI の根拠には、どの言語の文を使ってもよい（F-19） |
 | `grants.publishers` | 使ってよいチャンネル提供者。`"*"`（誰でも）か、アカウントIDの配列（1〜50 個）（MATERIALS D-9） |
 | `grants.apps` | （I-11）使ってよいアプリの ID の配列（1〜20 個）。省略はすべてのアプリ |
 | `grants.grounding` | （I-13）AI の根拠に使ってよいか。省略は偽。真のときは、根拠になるテキスト（`text` の本文・`alt`・書き起こし）が API-CHANNEL-PACKAGE F-2 と同じ決まり（`{{`・URL を含まない）に従うこと |

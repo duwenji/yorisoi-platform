@@ -41,6 +41,8 @@ class CollectionValidatorTest {
         """.trimIndent(),
     ).apply(change)
 
+    private fun png(): ByteArray = ByteArrayOutputStream().also { ImageIO.write(BufferedImage(8, 8, BufferedImage.TYPE_INT_RGB), "png", it) }.toByteArray()
+
     private fun b64(bytes: ByteArray) = Base64.getUrlEncoder().withoutPadding().encodeToString(bytes)
     private fun sha(bytes: ByteArray) = MessageDigest.getInstance("SHA-256").digest(bytes).joinToString("") { "%02x".format(it) }
 
@@ -84,6 +86,45 @@ class CollectionValidatorTest {
         assertEquals(listOf("history", "faith"), intro.tags)
         assertEquals(About.Point(35.3258, 139.5564, 60), c.resources["hachimangu-audio"]!!.about)
         assertEquals("鶴岡八幡宮の本宮は、石段を上った先にあります。", c.resources.texts["hachimangu-intro"])
+    }
+
+    @Test
+    fun `a collection may offer more languages, with translated texts and descriptions (REQ-LANGUAGES F-18・F-20・F-22)`() {
+        fun two(ja: String, en: String) = JSONObject().put("ja", ja).put("en", en)
+        val m = manifest {
+            put("langs", JSONArray(listOf("ja", "en")))
+            put("name", two("鎌倉音声ガイド", "Kamakura Audio Guide"))
+            put("summary", two("鎌倉の寺社の音声ガイド", "An audio guide to Kamakura's temples and shrines"))
+            getJSONArray("resources").getJSONObject(0).put("translations", JSONObject().put("en", "resources/text/hachimangu.en.md"))
+            getJSONArray("resources").put(
+                JSONObject().put("id", "gate").put("type", "image").put("file", "resources/img/gate.png")
+                    .put("alt", two("八幡宮の門", "The shrine's gate")).put("credit", JSONObject().put("author", "鎌倉市").put("license", "CC-BY-4.0")),
+            )
+        }
+        val files = files(m) + mapOf(
+            "resources/text/hachimangu.en.md" to "The main shrine stands at the top of the stone steps.\n".toByteArray(),
+            "resources/img/gate.png" to png(),
+        )
+        val result = check(signed(files))
+        assertTrue("$result", result is CollectionCheck.Ok)
+        val c = (result as CollectionCheck.Ok).collection
+        assertEquals("Kamakura Audio Guide", c.manifest.name("en"))
+        assertEquals("鎌倉音声ガイド", c.manifest.name("ko"))
+        assertEquals("The main shrine stands at the top of the stone steps.", c.resources.text("hachimangu-intro", "en"))
+        assertEquals("鶴岡八幡宮の本宮は、石段を上った先にあります。", c.resources.text("hachimangu-intro", "ja"))
+        assertEquals(null, c.resources.text("hachimangu-intro", "ko"))
+        assertEquals("The shrine's gate", c.resources["gate"]!!.alt("en"))
+        assertEquals("八幡宮の門", c.resources["gate"]!!.alt("ko"))
+        // A translation in a language not offered, or with no file, is turned away.
+        val ko = manifest { getJSONArray("resources").getJSONObject(0).put("translations", JSONObject().put("ko", "resources/text/hachimangu.ko.md")) }
+        assertEquals(RejectCode.BAD_RESOURCE, code(check(signed(files(ko) + ("resources/text/hachimangu.ko.md" to "x".toByteArray())))))
+        val missing = manifest {
+            put("langs", JSONArray(listOf("ja", "en")))
+            put("name", two("鎌倉音声ガイド", "Kamakura Audio Guide"))
+            put("summary", two("鎌倉の寺社の音声ガイド", "An audio guide"))
+            getJSONArray("resources").getJSONObject(0).put("translations", JSONObject().put("en", "resources/text/hachimangu.en.md"))
+        }
+        assertEquals(RejectCode.BAD_RESOURCE, code(check(signed(files(missing)))))
     }
 
     @Test

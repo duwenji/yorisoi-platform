@@ -1,5 +1,6 @@
 package io.github.duwenji.yorisoi.kit.channel.material
 
+import io.github.duwenji.yorisoi.core.text.Languages
 import io.github.duwenji.yorisoi.core.format.material.CollectionPackage
 import io.github.duwenji.yorisoi.core.format.material.Exposure
 import io.github.duwenji.yorisoi.core.format.material.Fetch
@@ -43,7 +44,7 @@ class SelectorProducer(
                 val about = r.about
                 if (about != null && !SubjectMatch.matches(about, request.subject)) continue
                 val read = readResource(
-                    r, request, stage, { c.pkg.resources.texts[it.id] }, { bytes(c, it) }, descriptor.id, c.listed.producerName,
+                    r, request, stage, { c.pkg.resources.text(it.id, Languages.current.tag) }, { bytes(c, it) }, descriptor.id, c.listed.producerName,
                 )
                 when (read) {
                     is ResourceRead.Ok -> return MaterialResult.Ready(read.material)

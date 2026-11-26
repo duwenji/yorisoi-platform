@@ -1,5 +1,6 @@
 package io.github.duwenji.yorisoi.core.format
 
+import io.github.duwenji.yorisoi.core.text.AppLanguage
 import io.github.duwenji.yorisoi.core.text.WrittenText
 import org.json.JSONArray
 import org.json.JSONException
@@ -111,3 +112,51 @@ internal inline fun <reified E> JSONObject.enum(key: String, code: RejectCode = 
     val value = string(key, code)
     return parseEnum<E>(value) ?: reject(if (code == RejectCode.BAD_MANIFEST) RejectCode.BAD_VALUE else code, "$key \"$value\"")
 }
+
+/**
+ * The languages a package offers (REQ-LANGUAGES F-16・F-20): `langs`, 1–4 of the four, [lang] first; `[lang]`
+ * when left out.
+ */
+internal fun JSONObject.readLangs(lang: String): List<String> {
+    val langs = optNullable("langs")?.let { list("langs").strings("langs", RejectCode.BAD_MANIFEST).distinctOrReject("langs") } ?: listOf(lang)
+    if (langs.size !in 1..AppLanguage.entries.size) reject(RejectCode.BAD_VALUE, "langs has ${langs.size} values (1..${AppLanguage.entries.size})")
+    if (langs.first() != lang) reject(RejectCode.BAD_VALUE, "langs must start with lang \"$lang\"")
+    langs.firstOrNull { t -> AppLanguage.entries.none { it.tag == t } }?.let { reject(RejectCode.BAD_VALUE, "langs \"$it\"") }
+    return langs
+}
+
+/**
+ * A text written once, or per language (REQ-LANGUAGES F-17): a string is the only language's; an object
+ * gives one for each of [langs], no more and no fewer. [maxJapanese] is the limit in Japanese characters,
+ * made a limit as long to read out in each language (D-6).
+ */
+internal fun JSONObject.langTexts(key: String, langs: List<String>, maxJapanese: Int, code: RejectCode = RejectCode.BAD_VALUE): Map<String, String> {
+    val value = required(key, RejectCode.BAD_MANIFEST)
+    return langValue(key, value, langs, maxJapanese, code, all = true)
+}
+
+/**
+ * [value] as a text per language: a string is [langs]' first; an object gives texts for some of [langs]
+ * ([all]: each of them), [langs]' first among them.
+ */
+internal fun langValue(key: String, value: Any, langs: List<String>, maxJapanese: Int, code: RejectCode, all: Boolean, min: Int = 1): Map<String, String> {
+    fun limit(tag: String) = AppLanguage.of(tag)?.fromJapanese(maxJapanese) ?: maxJapanese
+    val texts = when (value) {
+        is String -> {
+            if (all && langs.size > 1) reject(code, "$key must be given for each of langs")
+            mapOf(langs.first() to value)
+        }
+        is JSONObject -> {
+            val keys = value.keySet()
+            if (all && keys != langs.toSet()) reject(code, "$key has ${keys.sorted()}, not langs $langs")
+            if (!all && (langs.first() !in keys || !langs.containsAll(keys))) reject(code, "$key has ${keys.sorted()}: ${langs.first()} and only langs $langs")
+            langs.filter { it in keys }.associateWith { value.optString(it).takeIf { _ -> value.opt(it) is String } ?: reject(code, "$key.$it is not a string") }
+        }
+        else -> reject(code, "\"$key\" is not a string or an object")
+    }
+    texts.forEach { (tag, text) -> checkLength(if (texts.size > 1) "$key.$tag" else key, text, min, limit(tag), code) }
+    return texts
+}
+
+internal fun List<String>.distinctOrReject(field: String): List<String> =
+    also { if (toSet().size != size) reject(RejectCode.BAD_VALUE, "$field has duplicates") }

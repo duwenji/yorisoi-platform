@@ -156,19 +156,19 @@ object StationValidator {
                 }
             }
         }
-        val media = readMedia(json, files, paths, mediaStage, lenient)
+        val media = readMedia(json, files, paths, mediaStage, lenient, manifest.langs)
         return StationPackage(manifest, readSlots(files, paths), media)
     }
 
     /** The material (手順 8・9・10). Without any stage, a channel that has some can't be shown and isn't read. */
-    private fun readMedia(json: JSONObject, files: StationFiles, paths: List<String>, mediaStage: Int, lenient: Boolean): StationMedia {
+    private fun readMedia(json: JSONObject, files: StationFiles, paths: List<String>, mediaStage: Int, lenient: Boolean, langs: List<String>): StationMedia {
         if (mediaStage <= 0) {
             MEDIA_FIELDS.firstOrNull { json.optList(it).isNotEmpty() }?.let { reject(RejectCode.UNSUPPORTED_RESOURCE, "$it are not supported yet") }
             paths.firstOrNull { it.startsWith(ResourceReader.RESOURCES_DIR) }?.let { reject(RejectCode.UNEXPECTED_FILE, it) }
             // Turning shorthand cues off needs no material stage: those producers are the app's own.
             return StationMedia.NONE.copy(shorthandsOff = CueReader.readShorthands(json, lenient))
         }
-        val resources = ResourceReader.read(json, files, inCollection = false)
+        val resources = ResourceReader.read(json, files, inCollection = false, langs = langs)
         val pointed = ResourceReader.files(resources)
         paths.firstOrNull { it.startsWith(ResourceReader.RESOURCES_DIR) && it !in pointed }?.let { reject(RejectCode.UNEXPECTED_FILE, it) }
         val media = CueReader.read(json, resources, lenient)
@@ -200,11 +200,7 @@ object StationValidator {
         }
         val lang = json.string("lang")
         if (lang != "ja") reject(RejectCode.BAD_VALUE, "lang \"$lang\"")
-        // REQ-LANGUAGES F-16: the languages offered, `lang` first.
-        val langs = json.optNullable("langs")?.let { json.list("langs").strings("langs", RejectCode.BAD_MANIFEST).distinctOrReject("langs") } ?: listOf(lang)
-        if (langs.size !in 1..AppLanguage.entries.size) reject(RejectCode.BAD_VALUE, "langs has ${langs.size} values (1..${AppLanguage.entries.size})")
-        if (langs.first() != lang) reject(RejectCode.BAD_VALUE, "langs must start with lang \"$lang\"")
-        langs.firstOrNull { t -> AppLanguage.entries.none { it.tag == t } }?.let { reject(RejectCode.BAD_VALUE, "langs \"$it\"") }
+        val langs = json.readLangs(lang)
 
         val talk = json.obj("talk")
         val events = talk.obj("events")
@@ -238,9 +234,9 @@ object StationValidator {
         val calendarSkip = calendarKinds("skip")
         (calendarPrefer intersect calendarSkip.toSet()).firstOrNull()?.let { reject(RejectCode.BAD_VALUE, "calendar ${it.json} is both preferred and skipped") }
 
-        val names = json.texts("name", langs, 20)
-        val summaries = json.texts("summary", langs, 60)
-        val greetings = json.texts("greeting", langs, 60)
+        val names = json.langTexts("name", langs, 20)
+        val summaries = json.langTexts("summary", langs, 60)
+        val greetings = json.langTexts("greeting", langs, 60)
 
         return StationManifest(
             format = format,
@@ -273,29 +269,6 @@ object StationValidator {
         )
     }
 
-    /**
-     * A text written once, or per language (REQ-LANGUAGES F-17): a string is the only language's; an object
-     * gives one for each of [langs], no more and no fewer. [maxJapanese] is the limit in Japanese characters,
-     * made a limit as long to read out in each language (D-6).
-     */
-    private fun JSONObject.texts(key: String, langs: List<String>, maxJapanese: Int): Map<String, String> {
-        fun limit(tag: String) = AppLanguage.of(tag)?.fromJapanese(maxJapanese) ?: maxJapanese
-        val value = required(key, RejectCode.BAD_MANIFEST)
-        val texts = when (value) {
-            is String -> {
-                if (langs.size > 1) reject(RejectCode.BAD_VALUE, "$key must be given for each of langs")
-                mapOf(langs.first() to value)
-            }
-            is JSONObject -> {
-                val keys = value.keySet()
-                if (keys != langs.toSet()) reject(RejectCode.BAD_VALUE, "$key has ${keys.sorted()}, not langs ${langs}")
-                langs.associateWith { value.string(it) }
-            }
-            else -> reject(RejectCode.BAD_MANIFEST, "\"$key\" is not a string or an object")
-        }
-        texts.forEach { (tag, text) -> checkLength(if (texts.size > 1) "$key.$tag" else key, text, 1, limit(tag)) }
-        return texts
-    }
 
     private fun readSlots(files: StationFiles, paths: List<String>): Map<Slot, String> {
         val slots = Slot.entries.filter { it.path in paths }.associateWith { slot ->
@@ -321,8 +294,6 @@ object StationValidator {
         return written.mapNotNull { value -> parseEnum<SpotKind>(value) ?: unknown(value) }
     }
 
-    private fun List<String>.distinctOrReject(field: String): List<String> =
-        also { if (toSet().size != size) reject(RejectCode.BAD_VALUE, "$field has duplicates") }
 
     /** `activities`, `genres` and `requires.features` as written. */
     private fun writtenEcosystemValues(json: JSONObject): Map<String, List<String>> = mapOf(
