@@ -7,7 +7,7 @@
 | ドキュメント種別 | 要件定義書 |
 | 対象システム/機能 | 両アプリ（画面・読み上げ・AI の語り・決まった文）、チャンネルと素材集の形式（API-CHANNEL-PACKAGE・API-MATERIALS・API-CHANNEL-LIST）、組み込みのチャンネル、運営の審査（yorisoi-console）、platform の部品（kit-voice・kit-geo・kit-channel・core-format・core-prompt ほか） |
 | 承認者 | 開発者（duwenji） |
-| ステータス | 草案 |
+| ステータス | 承認済（2026-11-26） |
 
 ## 目的・背景
 
