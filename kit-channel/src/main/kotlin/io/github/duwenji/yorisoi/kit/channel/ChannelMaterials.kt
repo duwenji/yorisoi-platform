@@ -1,5 +1,6 @@
 package io.github.duwenji.yorisoi.kit.channel
 
+import io.github.duwenji.yorisoi.core.text.Languages
 import io.github.duwenji.yorisoi.core.format.material.CollectionPackage
 import io.github.duwenji.yorisoi.core.format.material.Resource
 import io.github.duwenji.yorisoi.core.format.material.ResourceLocation
@@ -35,9 +36,12 @@ class ChannelMaterials(
     /** A usable collection by its alias in this channel, or null. */
     fun collection(alias: String): CollectionStatus.Usable? = collections[alias] as? CollectionStatus.Usable
 
-    /** The text of a text resource: the channel's own when [alias] is null, else the collection's. */
+    /**
+     * The text of a text resource in the app's language: the channel's own when [alias] is null, else the
+     * collection's. Null when there's no version in that language (REQ-LANGUAGES D-8・F-18).
+     */
     fun text(resource: Resource, alias: String?): String? =
-        (if (alias == null) media.resources.texts else collection(alias)?.pkg?.resources?.texts)?.get(resource.id)
+        (if (alias == null) media.resources else collection(alias)?.pkg?.resources)?.text(resource.id, Languages.current.tag)
 
     /** The bytes of an image (or later audio and video): from its package, or as fetched ahead. */
     fun bytes(resource: Resource, alias: String?): ByteArray? = when (val at = resource.location) {

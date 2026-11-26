@@ -96,9 +96,21 @@ class ListedChannel(
     val requires: List<String>,
     /** API-CHANNEL-LIST P-20: the version each app needs, by app id. */
     val minAppVersions: Map<String, Int>,
+    /** The name and summary in the channel's other languages ([lang] after the first; REQ-LANGUAGES F-21). */
+    val names: Map<String, String> = emptyMap(),
+    val summaries: Map<String, String> = emptyMap(),
 ) {
     /** The version [appId] needs, or null if none (API-CHANNEL-LIST P-20). */
     fun minAppVersionFor(appId: String): Int? = minAppVersions[appId]
+
+    /** The name in [tag], else as written. */
+    fun name(tag: String): String = names[tag] ?: name
+
+    /** The summary in [tag], else as written. */
+    fun summary(tag: String): String = summaries[tag] ?: summary
+
+    /** Whether the channel offers [tag] (D-8, F-23). */
+    fun offers(tag: String): Boolean = tag in lang
 }
 
 /** One entry of `collections[]` (API-CHANNEL-LIST P-10・P-15). */
@@ -329,6 +341,8 @@ class ProviderDocuments(private val ed25519: Ed25519Verifier) {
         genres = c.getJSONArray("genres").strings(),
         requires = c.getJSONArray("requires").strings(),
         minAppVersions = versionsByApp(c.getJSONObject("minAppVersions")),
+        names = c.optJSONObject("names")?.let { o -> o.keySet().associateWith { o.getString(it) } }.orEmpty(),
+        summaries = c.optJSONObject("summaries")?.let { o -> o.keySet().associateWith { o.getString(it) } }.orEmpty(),
     )
 
     private fun versionsByApp(o: JSONObject): Map<String, Int> =

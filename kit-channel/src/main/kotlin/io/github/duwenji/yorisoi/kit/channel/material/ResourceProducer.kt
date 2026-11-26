@@ -1,5 +1,6 @@
 package io.github.duwenji.yorisoi.kit.channel.material
 
+import io.github.duwenji.yorisoi.core.text.Languages
 import io.github.duwenji.yorisoi.core.format.material.About
 import io.github.duwenji.yorisoi.core.format.material.Exposure
 import io.github.duwenji.yorisoi.core.format.material.Fetch
@@ -71,7 +72,10 @@ internal fun readResource(
 ): ResourceRead {
     if (r.type !in request.accepts || stageOf(r.type) > stage) return ResourceRead.No
     val content = when (r.type) {
-        MaterialType.TEXT -> text(r)?.takeIf { t -> request.maxTextChars?.let { t.codePointCount(0, t.length) <= it } ?: true }?.let(Content::Text)
+        // The limit is in Japanese characters: as long to read in the app's language (REQ-LANGUAGES D-6).
+        MaterialType.TEXT -> text(r)?.takeIf { t ->
+            request.maxTextChars?.let { t.codePointCount(0, t.length) <= Languages.current.fromJapanese(it) } ?: true
+        }?.let(Content::Text)
         MaterialType.IMAGE -> bytes(r)?.let(Content::EncodedImage) ?: return ResourceRead.Missing
         // Audio and video come with later app stages.
         else -> null
@@ -79,7 +83,7 @@ internal fun readResource(
     // A collection's text often has no credit of its own; whose it is is still shown.
     val credit = r.credit?.let { Credit(it.author, it.license, it.source, via = producerName) }
         ?: producerName?.let { Credit(null, null, via = it) }
-    return ResourceRead.Ok(Material(r.type, content, producerId, credit, alt = r.alt))
+    return ResourceRead.Ok(Material(r.type, content, producerId, credit, alt = r.alt(Languages.current.tag)))
 }
 
 private fun stageOf(type: MaterialType) = when (type) {

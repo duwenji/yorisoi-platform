@@ -420,7 +420,8 @@ ECOSYSTEM E-24 のとおり、実装するアプリを作ると決めた過ご�
 | `url`・`sha256`・`size` | パッケージの外の素材。HTTPS のみ。`image`・`audio`・`video` で使える。`file` とどちらか一方 |
 | `mime` | 外の素材では必須。下表の形式のみ |
 | `durationSec` | `audio`・`video` で必須 |
-| `alt` | `image` で必須。1〜120 文字 |
+| `alt` | `image` で必須。1〜120 文字。言語ごとの値（`{"ja": "…", "en": "…"}`）でも書ける。最初の言語（`lang`）の値は必須で、ほかは `langs` のうち任意（REQ-LANGUAGES F-22）。字数の上限は `name` と同じく言語ごとに直す |
+| `translations` | `text` で任意。同じ文のほかの言語の版（`{"en": "resources/text/….en.md"}`）。言語は `langs` の 2 つ目以降から。ファイルの決まりは `file` と同じ。アプリはアプリの言語の版を読み、なければ読まずに次の候補に回る（REQ-LANGUAGES F-18・D-8） |
 | `transcript` | `audio`・`video` で必須。書き起こしの `text` 素材の `id` |
 | `poster` | `video` で任意。最初に見せる `image` 素材の `id` |
 | `credit` | `image`・`audio`・`video` で必須（`author` は 1〜80 文字、`license` は 1〜40 文字、`source` は HTTPS のみ）。`author`（必須）、`license`（必須。SPDX の識別子、`PD`（パブリックドメイン）、`permission`（権利者の許諾））、`source`（任意。画面に出すだけで、読み上げない） |

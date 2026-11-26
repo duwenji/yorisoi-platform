@@ -285,6 +285,8 @@ flowchart LR
 | `channels[].publisher` | string | チャンネル提供者のアカウントID（API-SECRET-MESSAGES と同じ鍵）。CHANNELS C-4 のとおり、パッケージにはチャンネル提供者の署名も付く（形式は API-CHANNEL-PACKAGE） |
 | `channels[].publisherChange` | object? | 運営がチャンネル提供者の鍵を移し替えた（P-9・CHANNELS C-11）ときだけ付ける。`from` は前のアカウントID、`at` は移し替えた日時、`reason` はアプリ利用者に見せる理由。移し替え後の最初の版から、少なくとも 90 日は載せ続ける |
 | `channels[].regions` | string[]? | 地域に限ったチャンネルの geohash の接頭辞（1〜8 文字、8 個まで）。省略するとどこでも使える。アプリは端末の中で今いる位置と照らし、一覧の並び順と、チャンネルの選択の先頭（「この地域のチャンネル」）に使う。5 文字以上の接頭辞で合ったときは、散歩・走行中に 1 日 1 回知らせる（[REQ-REGIONAL-CHANNELS](../requirements/REQ-REGIONAL-CHANNELS.md)）。地域の外でも使える |
+| `channels[].lang` | string[] | チャンネルの対応する言語（パッケージの `langs`、なければ `[lang]`）。アプリは、アプリの言語に対応したチャンネルを先に並べ、対応していないものに「日本語のみ」などの印を付ける（REQ-LANGUAGES D-8・F-21・F-23） |
+| `channels[].names`・`channels[].summaries` | object? | 2 つ目以降の言語の名前・概要（言語 → 文字列）。パッケージの言語ごとの値から管理システムが写す。省略は `lang` の最初の言語だけ（F-21） |
 | `channels[].package.format` | int | パッケージの形式の版（API-CHANNEL-PACKAGE）。アプリが知らない版のチャンネルは一覧に出さない |
 | `channels[].minAppVersions` | object | （P-20）アプリの ID → 必要な versionCode。満たさなければ一覧に「アプリの更新が必要」と出す。自分の ID の値がなければ版の条件はない |
 | `channels[].activities` | string[] | （P-19）パッケージの `activities` |
