@@ -1,5 +1,6 @@
 package io.github.duwenji.yorisoi.core.format
 
+import io.github.duwenji.yorisoi.core.text.AppLanguage
 import io.github.duwenji.yorisoi.core.format.material.ResourceReader
 import org.json.JSONException
 import org.json.JSONObject
@@ -199,6 +200,11 @@ object StationValidator {
         }
         val lang = json.string("lang")
         if (lang != "ja") reject(RejectCode.BAD_VALUE, "lang \"$lang\"")
+        // REQ-LANGUAGES F-16: the languages offered, `lang` first.
+        val langs = json.optNullable("langs")?.let { json.list("langs").strings("langs", RejectCode.BAD_MANIFEST).distinctOrReject("langs") } ?: listOf(lang)
+        if (langs.size !in 1..AppLanguage.entries.size) reject(RejectCode.BAD_VALUE, "langs has ${langs.size} values (1..${AppLanguage.entries.size})")
+        if (langs.first() != lang) reject(RejectCode.BAD_VALUE, "langs must start with lang \"$lang\"")
+        langs.firstOrNull { t -> AppLanguage.entries.none { it.tag == t } }?.let { reject(RejectCode.BAD_VALUE, "langs \"$it\"") }
 
         val talk = json.obj("talk")
         val events = talk.obj("events")
@@ -232,15 +238,19 @@ object StationValidator {
         val calendarSkip = calendarKinds("skip")
         (calendarPrefer intersect calendarSkip.toSet()).firstOrNull()?.let { reject(RejectCode.BAD_VALUE, "calendar ${it.json} is both preferred and skipped") }
 
+        val names = json.texts("name", langs, 20)
+        val summaries = json.texts("summary", langs, 60)
+        val greetings = json.texts("greeting", langs, 60)
+
         return StationManifest(
             format = format,
             id = id,
             version = version,
             publisher = publisher,
-            name = json.string("name").also { checkLength("name", it, 1, 20) },
-            summary = json.string("summary").also { checkLength("summary", it, 1, 60) },
+            name = names.getValue(lang),
+            summary = summaries.getValue(lang),
             lang = lang,
-            greeting = json.string("greeting").also { checkLength("greeting", it, 1, 60) },
+            greeting = greetings.getValue(lang),
             talkLevel = talkLevel,
             events = TalkEventKind.entries.filter { if (it.required || events.optNullable(it.json) != null) events.bool(it.json) else true }
                 .let { if (TalkEventKind.CHAT in it) it else it - TalkEventKind.SONG - TalkEventKind.CALENDAR }.toSet(),
@@ -256,7 +266,35 @@ object StationValidator {
             requires = requires,
             agent = ChannelAgent.read(json, lenient),
             unknownRestrictions = unknownRestrictions,
+            langs = langs,
+            names = names,
+            summaries = summaries,
+            greetings = greetings,
         )
+    }
+
+    /**
+     * A text written once, or per language (REQ-LANGUAGES F-17): a string is the only language's; an object
+     * gives one for each of [langs], no more and no fewer. [maxJapanese] is the limit in Japanese characters,
+     * made a limit as long to read out in each language (D-6).
+     */
+    private fun JSONObject.texts(key: String, langs: List<String>, maxJapanese: Int): Map<String, String> {
+        fun limit(tag: String) = AppLanguage.of(tag)?.fromJapanese(maxJapanese) ?: maxJapanese
+        val value = required(key, RejectCode.BAD_MANIFEST)
+        val texts = when (value) {
+            is String -> {
+                if (langs.size > 1) reject(RejectCode.BAD_VALUE, "$key must be given for each of langs")
+                mapOf(langs.first() to value)
+            }
+            is JSONObject -> {
+                val keys = value.keySet()
+                if (keys != langs.toSet()) reject(RejectCode.BAD_VALUE, "$key has ${keys.sorted()}, not langs ${langs}")
+                langs.associateWith { value.string(it) }
+            }
+            else -> reject(RejectCode.BAD_MANIFEST, "\"$key\" is not a string or an object")
+        }
+        texts.forEach { (tag, text) -> checkLength(if (texts.size > 1) "$key.$tag" else key, text, 1, limit(tag)) }
+        return texts
     }
 
     private fun readSlots(files: StationFiles, paths: List<String>): Map<Slot, String> {

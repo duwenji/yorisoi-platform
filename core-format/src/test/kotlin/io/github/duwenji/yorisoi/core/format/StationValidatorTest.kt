@@ -90,6 +90,44 @@ class StationValidatorTest {
     }
 
     @Test
+    fun `name, summary and greeting may be given for each language offered`() {
+        fun texts(ja: String, en: String) = JSONObject().put("ja", ja).put("en", en)
+        val m = manifest {
+            put("langs", JSONArray(listOf("ja", "en")))
+            put("name", texts("鎌倉歴史散歩", "Kamakura History Walk"))
+            put("summary", texts("鎌倉の寺社と武士の歴史", "Temples, shrines and samurai of Kamakura"))
+            // An English greeting may be longer: as long to read out as 60 Japanese characters (D-6).
+            put("greeting", texts("鎌倉の歴史をたどりましょう。", "a".repeat(150)))
+        }
+        val read = (StationValidator.check(files(m), StationOrigin.BUILT_IN) as StationCheck.Ok).station.manifest
+        assertEquals(listOf("ja", "en"), read.langs)
+        assertEquals("鎌倉歴史散歩", read.name)
+        assertEquals("Kamakura History Walk", read.name("en"))
+        assertEquals("鎌倉歴史散歩", read.name("ko"))
+        assertEquals(null, read.greeting("ko"))
+        // A package without langs reads as before.
+        val plain = (StationValidator.check(files(), StationOrigin.BUILT_IN) as StationCheck.Ok).station.manifest
+        assertEquals(listOf("ja"), plain.langs)
+        assertEquals(plain.greeting, plain.greeting("ja"))
+        assertEquals(null, plain.greeting("en"))
+    }
+
+    @Test
+    fun `a language offered without its text, or one the format doesn't know, is rejected`() {
+        val en = JSONArray(listOf("ja", "en"))
+        // A plain string with two languages offered.
+        assertEquals(RejectCode.BAD_VALUE, rejected(files(manifest { put("langs", en) })))
+        assertEquals(RejectCode.BAD_VALUE, rejected(files(manifest { put("langs", JSONArray(listOf("ja", "fr"))) })))
+        assertEquals(RejectCode.BAD_VALUE, rejected(files(manifest { put("langs", JSONArray(listOf("en", "ja"))) })))
+        assertEquals(RejectCode.BAD_VALUE, rejected(files(manifest {
+            put("langs", en)
+            put("name", JSONObject().put("ja", "鎌倉"))
+            put("summary", JSONObject().put("ja", "鎌倉").put("en", "Kamakura"))
+            put("greeting", JSONObject().put("ja", "鎌倉").put("en", "Kamakura"))
+        })))
+    }
+
+    @Test
     fun `the preview, chat and song events are on unless a channel turns them off`() {
         fun events(vararg off: String) = (StationValidator.check(files(manifest {
             val events = getJSONObject("talk").getJSONObject("events")

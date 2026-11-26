@@ -213,6 +213,9 @@
 | kit-voice `Speaker.use` | 次の発言からその言語の声で読む。声がないときは `voiceMissing`（F-2・F-7） |
 | kit-channel `RegionalNotice.text(language)` | 地域のチャンネルの知らせの 4 言語の決まった文（F-11） |
 | core-text `Languages.current`・`localized`・`Words` | 部品の文をアプリの言語で出す。アプリは起動したときと設定を変えたときに `Languages.current` を変え、画面を作り直す（D-4・F-4） |
+| core-format `StationManifest.langs`・`name(tag)`・`summary(tag)`・`greeting(tag)` | `channel.json` の `langs` と言語ごとの `name`・`summary`・`greeting`（F-16・F-17）。組み込みのチャンネルの 4 言語（F-15）のため段 1 で入れた |
+| kit-channel `Station.name`・`summary`・`greeting` | アプリの言語の値。あいさつはその言語の値がなければ null（D-8） |
+| kit-mood `Mood.display` | 画面に出す雰囲気の言葉（AI へは `summary` の日本語のまま） |
 | kit-geo `relativeSide` | スポットのある側（前方・右手…）の 4 言語の言い方（F-11） |
 
 画面の文字のリソースは、`values`（日本語）・`values-en`・`values-b+zh+Hans`・`values-ko` に置く。

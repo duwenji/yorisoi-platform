@@ -36,7 +36,22 @@ data class StationManifest(
      * ([Compatibility]); empty with [Strictness.REVIEW], which turns such values away instead.
      */
     val unknownRestrictions: List<String> = emptyList(),
-)
+    /** The languages the channel offers (REQ-LANGUAGES F-16), [lang] first; `[lang]` when `langs` is left out. */
+    val langs: List<String> = listOf(lang),
+    /** [name], [summary] and [greeting] in each of [langs] (F-17); the plain fields are the [lang] ones. */
+    val names: Map<String, String> = mapOf(lang to name),
+    val summaries: Map<String, String> = mapOf(lang to summary),
+    val greetings: Map<String, String> = mapOf(lang to greeting),
+) {
+    /** The name in [tag], else in [lang] (a name is shown whatever the language, REQ-LANGUAGES D-8). */
+    fun name(tag: String): String = names[tag] ?: name
+
+    /** The summary in [tag], else in [lang]. */
+    fun summary(tag: String): String = summaries[tag] ?: summary
+
+    /** The greeting in [tag], or null: a line read out as is isn't read in another language than the app's (D-8). */
+    fun greeting(tag: String): String? = greetings[tag]
+}
 
 /** A value of an enumerated field, with its spelling in `channel.json`. */
 interface JsonValue {

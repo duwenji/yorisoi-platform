@@ -1,6 +1,9 @@
 package io.github.duwenji.yorisoi.kit.mood
 
 import io.github.duwenji.yorisoi.kit.geo.weather.WeatherCodes
+import io.github.duwenji.yorisoi.core.text.AppLanguage
+import io.github.duwenji.yorisoi.core.text.Languages
+import io.github.duwenji.yorisoi.core.text.localized
 import java.util.Calendar
 
 enum class TimeOfDay(val label: String) {
@@ -84,6 +87,49 @@ data class Mood(val time: TimeOfDay, val season: Season, val sky: Sky? = null, v
     val summary: String
         get() = listOfNotNull("${season.label}の${time.label}", sky?.label, place?.let { "${it.label}の近く" })
             .joinToString("、")
+
+    /**
+     * For the screen, in the app's language (REQ-LANGUAGES F-4), e.g. "autumn evening, rain, near shrines & temples".
+     * The prompt keeps [summary] in Japanese (D-10).
+     */
+    val display: String
+        get() = listOfNotNull(
+            localized("${season.label}の${time.label}", "${seasonWord(Languages.current)} ${timeWord(Languages.current)}", "${season.label}天的${timeWord(Languages.current)}", "${seasonWord(Languages.current)} ${timeWord(Languages.current)}"),
+            sky?.let { skyWord(it) },
+            place?.let { placeWord(it) },
+        ).joinToString(localized("、", ", ", "，", ", "))
+
+    private fun seasonWord(l: AppLanguage) = when (season) {
+        Season.SPRING -> localized("春", "spring", "春", "봄", l)
+        Season.SUMMER -> localized("夏", "summer", "夏", "여름", l)
+        Season.AUTUMN -> localized("秋", "autumn", "秋", "가을", l)
+        Season.WINTER -> localized("冬", "winter", "冬", "겨울", l)
+    }
+
+    private fun timeWord(l: AppLanguage) = when (time) {
+        TimeOfDay.MORNING -> localized("朝", "morning", "早晨", "아침", l)
+        TimeOfDay.DAY -> localized("昼", "daytime", "白天", "낮", l)
+        TimeOfDay.EVENING -> localized("夕方", "evening", "傍晚", "저녁", l)
+        TimeOfDay.NIGHT -> localized("夜", "night", "夜晚", "밤", l)
+        TimeOfDay.LATE_NIGHT -> localized("深夜", "late night", "深夜", "심야", l)
+    }
+
+    private fun skyWord(sky: Sky) = when (sky) {
+        Sky.CLEAR -> localized("晴れ", "clear", "晴", "맑음")
+        Sky.CLOUDY -> localized("くもり", "cloudy", "多云", "흐림")
+        Sky.FOG -> localized("霧", "fog", "雾", "안개")
+        Sky.RAIN -> localized("雨", "rain", "雨", "비")
+        Sky.SNOW -> localized("雪", "snow", "雪", "눈")
+        Sky.THUNDER -> localized("雷雨", "thunderstorm", "雷雨", "뇌우")
+    }
+
+    private fun placeWord(place: Place) = when (place) {
+        Place.SHRINE_TEMPLE -> localized("寺社の近く", "near shrines & temples", "寺社附近", "신사·절 근처")
+        Place.PARK -> localized("公園・緑地の近く", "near parks", "公园绿地附近", "공원 근처")
+        Place.WATERSIDE -> localized("水辺の近く", "by the water", "水边", "물가 근처")
+        Place.HISTORIC -> localized("史跡の近く", "near historic sites", "史迹附近", "사적 근처")
+        Place.TOWN -> localized("街なかの近く", "in town", "街区", "시내")
+    }
 
     companion object {
         fun at(c: Calendar, sky: Sky? = null, place: Place? = null) = Mood(TimeOfDay.of(c), Season.of(c), sky, place)
