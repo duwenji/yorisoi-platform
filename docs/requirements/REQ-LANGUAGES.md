@@ -209,6 +209,7 @@
 | core-text `LanguageCheck`・`ContactCheck`・`SpokenText` | アプリの言語でない返事、4 言語の電話番号・ト書き・返事についての注記（F-13、R-1） |
 | kit-llm `AiGateway.language` | 呼ぶたびにアプリの言語を読み、準備役の手がかり以外の指示の最後に話す言語の指示を加える（D-5・F-2・F-9） |
 | kit-ui `AppLocales` | 端末の言語、リソース・日付の言語の切り替え（`attachBaseContext` で包む）、声の言語（F-1・F-4・F-7） |
+| kit-ui `AppLanguageSetting`・`LanguageChoice` | 設定で選んだ言語の保存（選ばなければ端末の言語）と、設定の「言語」の欄（F-2・F-3） |
 | kit-voice `Speaker.use` | 次の発言からその言語の声で読む。声がないときは `voiceMissing`（F-2・F-7） |
 | kit-channel `RegionalNotice.text(language)` | 地域のチャンネルの知らせの 4 言語の決まった文（F-11） |
 | core-text `Languages.current`・`localized`・`Words` | 部品の文をアプリの言語で出す。アプリは起動したときと設定を変えたときに `Languages.current` を変え、画面を作り直す（D-4・F-4） |
