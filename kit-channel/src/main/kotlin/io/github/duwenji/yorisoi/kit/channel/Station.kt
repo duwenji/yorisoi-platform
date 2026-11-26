@@ -1,5 +1,6 @@
 package io.github.duwenji.yorisoi.kit.channel
 
+import io.github.duwenji.yorisoi.core.text.localized
 import io.github.duwenji.yorisoi.core.format.CalendarKind
 import io.github.duwenji.yorisoi.core.format.GuideLength
 import io.github.duwenji.yorisoi.core.format.Slot
@@ -59,7 +60,7 @@ class Station(
 
     /** The name as screens show it: a channel on trial says so (API-CHANNEL-LIST 試用チケット). */
     val displayName: String get() = when {
-        source?.trial == true -> "$name（審査前の試用）"
+        source?.trial == true -> name + localized("（審査前の試用）", " (trial before review)", "（审核前试用）", " (심사 전 체험)")
         else -> name
     }
 

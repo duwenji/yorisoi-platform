@@ -37,7 +37,7 @@ class OpenAiCompatibleClient(
                 .post(body)
                 .build()
         } catch (e: IllegalArgumentException) {
-            throw GuideException("接続先URLが正しくありません", e)
+            throw GuideException(Messages.badUrl, e)
         }
 
         try {
@@ -50,12 +50,12 @@ class OpenAiCompatibleClient(
                     .getJSONArray("choices").getJSONObject(0)
                     .getJSONObject("message").optString("content")
                     .trim()
-                    .ifEmpty { throw GuideException("AIから空の応答が返りました") }
+                    .ifEmpty { throw GuideException(Messages.empty) }
             }
         } catch (e: IOException) {
-            throw GuideException("AIサービスに接続できませんでした", e)
+            throw GuideException(Messages.cantConnect, e)
         } catch (e: JSONException) {
-            throw GuideException("AIサービスの応答を解釈できませんでした", e)
+            throw GuideException(Messages.cantRead, e)
         }
     }
 

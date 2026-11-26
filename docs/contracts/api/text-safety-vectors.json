@@ -164,6 +164,62 @@
     {
       "text": "ここは-10度になることもあります。",
       "notes": false
+    },
+    {
+      "text": "For details, call +81 3-3842-0181.",
+      "contact": "phone"
+    },
+    {
+      "text": "Call (555) 123-4567 for tours.",
+      "contact": "phone"
+    },
+    {
+      "text": "The temple was rebuilt in 1958, and the gate is 11.7 meters tall.",
+      "contact": null
+    },
+    {
+      "text": "详情请拨打 138 1234 5678。",
+      "contact": "phone"
+    },
+    {
+      "text": "客服电话 400-123-4567。",
+      "contact": "phone"
+    },
+    {
+      "text": "浅草寺建于628年，每年约有3000万人参观。",
+      "contact": null
+    },
+    {
+      "text": "문의는 010-1234-5678로 하세요.",
+      "contact": "phone"
+    },
+    {
+      "text": "센소지는 628년에 세워졌습니다. 길이는 약 250m입니다.",
+      "contact": null
+    },
+    {
+      "text": "(softly, in a calm voice) Here is Sensō-ji, the oldest temple in Tokyo.",
+      "spoken": "Here is Sensō-ji, the oldest temple in Tokyo."
+    },
+    {
+      "text": "Stone lanterns line the path. (Stone lanterns were gifts from merchants.)",
+      "spoken": "Stone lanterns line the path. (Stone lanterns were gifts from merchants.)"
+    },
+    {
+      "text": "（语气轻柔）这里是浅草寺。",
+      "spoken": "这里是浅草寺。"
+    },
+    {
+      "text": "(부드러운 목소리로) 여기는 센소지입니다.",
+      "spoken": "여기는 센소지입니다."
+    },
+    {
+      "text": "Here is the gate.\nI kept it within the word count.",
+      "spoken": "Here is the gate."
+    },
+    {
+      "text": "- Sensō-ji\n- Kaminarimon",
+      "notes": true
     }
   ]
 }

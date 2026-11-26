@@ -5,6 +5,9 @@ import io.github.duwenji.yorisoi.core.agent.PreparerModel
 import io.github.duwenji.yorisoi.core.agent.Reply
 import io.github.duwenji.yorisoi.core.agent.ToolDef
 import io.github.duwenji.yorisoi.core.agent.Turn
+import io.github.duwenji.yorisoi.core.text.AppLanguage
+import io.github.duwenji.yorisoi.core.text.Languages
+import io.github.duwenji.yorisoi.core.text.localized
 import kotlin.coroutines.cancellation.CancellationException
 
 /**
@@ -37,10 +40,14 @@ data class AiConnection(
     }
 
     /** The model named beside what the AI said: the service's own for a user's key. */
-    val name: String get() = if (route == AiRoute.OPERATOR) OPERATOR_AI_NAME else model
+    val name: String get() = if (route == AiRoute.OPERATOR) operatorAiName else model
 
     companion object {
+        /** The operator's AI, as named in Japanese. */
         const val OPERATOR_AI_NAME = "運営の AI"
+
+        /** The operator's AI, as named in the app's language (REQ-LANGUAGES F-4). */
+        val operatorAiName: String get() = localized(OPERATOR_AI_NAME, "Operator's AI", "运营方的 AI", "운영자의 AI")
     }
 }
 
@@ -80,6 +87,13 @@ class AiGateway(
     /** Hears of every call made, for the developer's record. */
     var onCall: (AiCall) -> Unit = {}
 
+    /**
+     * The app's language, read at each call (REQ-LANGUAGES D-5・F-2・F-9): every reply but the preparer's hints is
+     * asked for in it, by adding [AppLanguage.instruction] at the end of the system prompt, and a reply mostly in
+     * another language is recorded as unusable.
+     */
+    var language: () -> AppLanguage = { Languages.current }
+
     val isConfigured: Boolean get() = connection().isConfigured(relay != null)
 
     /** Whether today's calls reached the limit (AI-ROLES H-9, API-AI-RELAY R-2). */
@@ -100,17 +114,20 @@ class AiGateway(
         val c = connection()
         if (!c.isConfigured(relay != null)) throw AiUnavailableException("No AI service is set up")
         if (limitReached() || !takeCall(c)) throw AiUnavailableException("The daily limit of AI calls is reached")
+        // Hints are notes for the narrator, in whatever language the pages are (D-10).
+        val spokenIn = if (purpose == Purpose.HINTS) AppLanguage.JA else language()
+        val prompt = spokenIn.instruction?.let { "$system\n\n$it" } ?: system
         val startedAt = System.currentTimeMillis()
         fun report(reply: String?, error: String?) = onCall(
             // Hints are written as a list on purpose: only speech counts as notes.
             AiCall(
-                purpose.name.lowercase(), c.name, system, user, reply, error,
-                reply?.let(OutputCheck::violation)?.takeUnless { purpose == Purpose.HINTS && it == OutputCheck.NOTES },
+                purpose.name.lowercase(), c.name, prompt, user, reply, error,
+                reply?.let { OutputCheck.violation(it, spokenIn) }?.takeUnless { purpose == Purpose.HINTS && it == OutputCheck.NOTES },
                 System.currentTimeMillis() - startedAt,
             ),
         )
         val text = try {
-            clientFor(c).generate(system, user, purpose)
+            clientFor(c).generate(prompt, user, purpose)
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {

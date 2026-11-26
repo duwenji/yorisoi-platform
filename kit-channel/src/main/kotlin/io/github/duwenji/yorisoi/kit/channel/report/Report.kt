@@ -1,5 +1,6 @@
 package io.github.duwenji.yorisoi.kit.channel.report
 
+import io.github.duwenji.yorisoi.core.text.localized
 import io.github.duwenji.yorisoi.kit.channel.Station
 import java.time.Instant
 import java.time.ZoneId
@@ -27,10 +28,11 @@ class Report(private val appName: String, private val appContact: String) {
 
     /**
      * The draft's body: the channel and, for a line, when it was said and what (AI-ROLES H-11).
-     * Never where: the user adds it only if they want to.
+     * Never where: the user adds it only if they want to. What the user reads is in the app's language; the
+     * lines for the one who receives it stay in Japanese (the management system is in Japanese, REQ-LANGUAGES D-2).
      */
     fun body(target: ReportTarget, said: Pair<Long, String>?, appVersion: String): String = buildString {
-        appendLine("（何が問題だったかを書いてください）")
+        appendLine(localized("（何が問題だったかを書いてください）", "(Write what was wrong)", "（请写下出了什么问题）", "(무엇이 문제였는지 적어 주세요)"))
         appendLine()
         appendLine("---")
         appendLine("チャンネル: ${target.channelName}（${target.channelKey}）")
@@ -40,7 +42,7 @@ class Report(private val appName: String, private val appContact: String) {
             appendLine("発言: $text")
         }
         appendLine("アプリ: $appName $appVersion")
-        append("位置は含めていません。")
+        append(localized("位置は含めていません。", "位置は含めていません。(No location is included.)", "位置は含めていません。（不包含位置。）", "位置は含めていません。(위치는 포함하지 않았습니다.)"))
     }
 
     fun subject(target: ReportTarget, said: Pair<Long, String>?): String =

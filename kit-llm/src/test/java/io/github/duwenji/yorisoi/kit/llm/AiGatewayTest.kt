@@ -1,5 +1,6 @@
 package io.github.duwenji.yorisoi.kit.llm
 
+import io.github.duwenji.yorisoi.core.text.AppLanguage
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -59,6 +60,19 @@ class AiGatewayTest {
     }
 
     @Test
+    fun `in another app language the instruction is added at the end, and a Japanese reply is unusable`() = runBlocking {
+        gateway.language = { AppLanguage.EN }
+        reply("ここは浅草寺です。とても古いお寺で、多くの人が訪れます。")
+        gateway.generate(Purpose.GUIDE, "system", "user")
+        assertTrue(calls.single().system.startsWith("system\n\n答えはすべて英語で話す。"))
+        assertEquals(OutputCheck.OTHER_LANGUAGE, calls.single().violation)
+        // The preparer's hints stay as the pages are.
+        reply("- 浅草寺は628年に建てられた")
+        gateway.generate(Purpose.HINTS, "system", "user")
+        assertEquals("system", calls.last().system)
+    }
+
+    @Test
     fun `the user's key is called up to the day's limit`() {
         reply("一")
         reply("二")
@@ -85,7 +99,7 @@ class AiGatewayTest {
 
     @Test
     fun `the operator's AI is named as such`() {
-        assertEquals(AiConnection.OPERATOR_AI_NAME, AiConnection(AiRoute.OPERATOR).name)
+        assertEquals(AiConnection.operatorAiName, AiConnection(AiRoute.OPERATOR).name)
         assertEquals("deepseek-chat", AiConnection(AiRoute.OWN_KEY, Provider.DEEPSEEK).name)
     }
 }

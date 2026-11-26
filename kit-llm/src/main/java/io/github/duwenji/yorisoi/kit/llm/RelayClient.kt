@@ -1,5 +1,6 @@
 package io.github.duwenji.yorisoi.kit.llm
 
+import io.github.duwenji.yorisoi.core.text.localized
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -266,9 +267,9 @@ class RelayClient(
                 throw RelayException(code, messageFor(code, quota), quota)
             }
         } catch (e: IOException) {
-            throw RelayException("network", "運営の AI に接続できませんでした", cause = e)
+            throw RelayException("network", messageFor("network", null), cause = e)
         } catch (e: JSONException) {
-            throw RelayException("invalid_response", "運営の AI の応答を解釈できませんでした", cause = e)
+            throw RelayException("invalid_response", messageFor("invalid_response", null), cause = e)
         }
     }
 
@@ -296,15 +297,41 @@ class RelayClient(
 
         /** What the user is told; the app goes on with its set phrases whatever the code. */
         internal fun messageFor(code: String, quota: RelayQuota?): String = when (code) {
-            "daily_limit_reached" -> "今日の運営の AI の回数${quota?.let { "（${it.limit} 回）" }.orEmpty()}を使い切りました"
-            "relay_paused" -> "運営の AI は今月の予算に達したため止まっています。設定で自分の APIキーに切り替えられます"
-            "integrity_failed" -> "この端末・アプリでは運営の AI を使えません。設定で自分の APIキーを使えます"
-            "plan_not_active" -> "たっぷりプランが有効になっていません"
-            "too_many_requests" -> "運営の AI が混み合っています。しばらくしてからお試しください"
-            "model_refused" -> "このスポットの解説は用意できませんでした"
-            "incomplete_output" -> "AI の応答が途中で切れました"
-            "input_too_long", "invalid_request" -> "運営の AI に送れない内容でした"
-            else -> "運営の AI でエラーが発生しました"
+            "network" -> localized(
+                "運営の AI に接続できませんでした", "Could not connect to the operator's AI", "无法连接到运营方的 AI", "운영자의 AI에 연결할 수 없었습니다",
+            )
+            "invalid_response" -> localized(
+                "運営の AI の応答を解釈できませんでした", "Could not read the operator's AI's reply", "无法解析运营方 AI 的回复", "운영자 AI의 응답을 해석할 수 없었습니다",
+            )
+            "daily_limit_reached" -> localized(
+                "今日の運営の AI の回数${quota?.let { "（${it.limit} 回）" }.orEmpty()}を使い切りました",
+                "Today's calls to the operator's AI${quota?.let { " (${it.limit})" }.orEmpty()} are used up",
+                "今天运营方 AI 的次数${quota?.let { "（${it.limit} 次）" }.orEmpty()}已用完",
+                "오늘의 운영자 AI 사용 횟수${quota?.let { "(${it.limit}회)" }.orEmpty()}를 모두 사용했습니다",
+            )
+            "relay_paused" -> localized(
+                "運営の AI は今月の予算に達したため止まっています。設定で自分の APIキーに切り替えられます",
+                "The operator's AI is paused: this month's budget is reached. You can switch to your own API key in the settings",
+                "运营方的 AI 已达到本月预算，暂时停止。可以在设置中改用自己的 API 密钥",
+                "운영자의 AI는 이번 달 예산에 도달해 멈춰 있습니다. 설정에서 자신의 API 키로 바꿀 수 있습니다",
+            )
+            "integrity_failed" -> localized(
+                "この端末・アプリでは運営の AI を使えません。設定で自分の APIキーを使えます",
+                "The operator's AI can't be used on this device or app. You can use your own API key in the settings",
+                "此设备或应用无法使用运营方的 AI。可以在设置中使用自己的 API 密钥",
+                "이 기기·앱에서는 운영자의 AI를 사용할 수 없습니다. 설정에서 자신의 API 키를 사용할 수 있습니다",
+            )
+            "plan_not_active" -> localized("たっぷりプランが有効になっていません", "The Plus plan is not active", "Plus 套餐尚未生效", "플러스 플랜이 활성화되어 있지 않습니다")
+            "too_many_requests" -> localized(
+                "運営の AI が混み合っています。しばらくしてからお試しください", "The operator's AI is busy. Try again in a while",
+                "运营方的 AI 繁忙，请稍后再试", "운영자의 AI가 혼잡합니다. 잠시 후 다시 시도해 주세요",
+            )
+            "model_refused" -> Messages.refused
+            "incomplete_output" -> localized("AI の応答が途中で切れました", "The AI's reply was cut off", "AI 的回复中途中断了", "AI의 응답이 중간에 끊겼습니다")
+            "input_too_long", "invalid_request" -> localized(
+                "運営の AI に送れない内容でした", "This could not be sent to the operator's AI", "这些内容无法发送给运营方的 AI", "운영자의 AI에 보낼 수 없는 내용이었습니다",
+            )
+            else -> localized("運営の AI でエラーが発生しました", "The operator's AI had an error", "运营方的 AI 出现错误", "운영자의 AI에서 오류가 발생했습니다")
         }
     }
 }

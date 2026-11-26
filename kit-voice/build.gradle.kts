@@ -27,6 +27,8 @@ kotlin {
 }
 
 dependencies {
+    // The sounds' names in the app's language (REQ-LANGUAGES).
+    implementation(project(":core-text"))
     implementation(libs.kotlinx.coroutines.android)
 
     testImplementation(libs.junit)

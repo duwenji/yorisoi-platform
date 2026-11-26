@@ -43,10 +43,10 @@ class ClaudeClient(apiKey: String, private val model: String) : LlmClient {
         } catch (e: AnthropicServiceException) {
             throw GuideException(messageForStatus(e.statusCode(), e.message), e)
         } catch (e: AnthropicIoException) {
-            throw GuideException("AIサービスに接続できませんでした", e)
+            throw GuideException(Messages.cantConnect, e)
         }
         if (message.stopReason().orElse(null) == StopReason.REFUSAL) {
-            throw GuideException("このスポットの解説は用意できませんでした")
+            throw GuideException(Messages.refused)
         }
         message.content()
             .mapNotNull { block -> block.text().orElse(null)?.text() }

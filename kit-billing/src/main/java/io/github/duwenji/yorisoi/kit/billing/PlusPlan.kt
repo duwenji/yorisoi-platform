@@ -1,5 +1,6 @@
 package io.github.duwenji.yorisoi.kit.billing
 
+import io.github.duwenji.yorisoi.core.text.localized
 import android.app.Activity
 import android.content.Context
 import android.util.Log
@@ -65,7 +66,10 @@ class PlusPlan(context: Context, private val scope: CoroutineScope) : PlanPurcha
             BillingClient.BillingResponseCode.OK -> purchases.orEmpty().firstOrNull { it.isPlus() }?.let { scope.launch { send(it) } }
             BillingClient.BillingResponseCode.USER_CANCELED -> _state.value = PlusState.Idle
             BillingClient.BillingResponseCode.ITEM_ALREADY_OWNED -> scope.launch { active()?.let { p -> sendToRelay(p) } }
-            else -> _state.value = PlusState.Failed("購入できませんでした（${result.debugMessage.ifEmpty { result.responseCode.toString() }}）")
+            else -> _state.value = PlusState.Failed(
+                localized("購入できませんでした", "The purchase didn't go through", "购买未能完成", "구매하지 못했습니다") +
+                    " (${result.debugMessage.ifEmpty { result.responseCode.toString() }})",
+            )
         }
     }
 
@@ -119,7 +123,10 @@ class PlusPlan(context: Context, private val scope: CoroutineScope) : PlanPurcha
         ).build()
         val result = client.launchBillingFlow(activity, params)
         if (result.responseCode != BillingClient.BillingResponseCode.OK) {
-            _state.value = PlusState.Failed("購入の画面を開けませんでした（${result.responseCode}）")
+            _state.value = PlusState.Failed(
+                localized("購入の画面を開けませんでした", "Could not open the purchase screen", "无法打开购买画面", "구매 화면을 열 수 없었습니다") +
+                    " (${result.responseCode})",
+            )
         }
     }
 
@@ -142,7 +149,18 @@ class PlusPlan(context: Context, private val scope: CoroutineScope) : PlanPurcha
         } catch (e: RelayException) {
             Log.w("PlusPlan", "The relay did not take the plan: ${e.code}")
             PlusState.Failed(
-                if (e.code == "plan_not_active") "${e.message}。少し待ってから、もう一度開いてください" else "購入は済みました。確認に失敗したので、あとで自動でやり直します（${e.code}）",
+                if (e.code == "plan_not_active") {
+                    e.message + localized(
+                        "。少し待ってから、もう一度開いてください", ". Wait a little and open it again", "。请稍等，然后再打开一次", ". 잠시 기다린 뒤 다시 열어 주세요",
+                    )
+                } else {
+                    localized(
+                        "購入は済みました。確認に失敗したので、あとで自動でやり直します",
+                        "The purchase is done. Checking it failed, so it is tried again later by itself",
+                        "购买已完成。确认失败，稍后会自动重试",
+                        "구매는 완료되었습니다. 확인에 실패하여 나중에 자동으로 다시 시도합니다",
+                    ) + " (${e.code})"
+                },
             )
         }
     }

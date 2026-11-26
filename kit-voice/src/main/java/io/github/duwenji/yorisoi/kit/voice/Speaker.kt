@@ -15,15 +15,18 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicInteger
 
 /**
- * Japanese text-to-speech. Utterances queue up rather than cutting each other off.
+ * Text-to-speech in the app's language (REQ-LANGUAGES F-7). Utterances queue up rather than cutting each other off.
  *
  * While it talks it holds transient, "may duck" audio focus, so music the user is listening to
  * gets quieter instead of playing over the voice, and comes back when the queue is done.
  *
- * When the phone's engine has no Japanese voice, it would read in its own language; [japaneseMissing]
+ * When the phone's engine has no voice for the language, it would read in its own; [voiceMissing]
  * says so, and [installVoiceDataIntent] opens the engine's screen for adding one.
+ *
+ * @param locale the voice's language at first; [use] changes it (for Simplified Chinese, [Locale.CHINA])
  */
-class Speaker(context: Context) : TextToSpeech.OnInitListener {
+class Speaker(context: Context, locale: Locale = Locale.JAPAN) : TextToSpeech.OnInitListener {
+    @Volatile private var locale: Locale = locale
     private val tts = TextToSpeech(context.applicationContext, this)
     private val audio = context.getSystemService(AudioManager::class.java)
     private var ready = false
@@ -45,16 +48,19 @@ class Speaker(context: Context) : TextToSpeech.OnInitListener {
     /** True from the start of the first queued line until the last one ends (for ducking our own background sound). */
     val speaking: StateFlow<Boolean> = _speaking.asStateFlow()
 
-    private val _japaneseMissing = MutableStateFlow(false)
-    /** True when there is no engine, or the engine has no Japanese voice (its data is not installed). */
-    val japaneseMissing: StateFlow<Boolean> = _japaneseMissing.asStateFlow()
+    private val _voiceMissing = MutableStateFlow(false)
+    /** True when there is no engine, or the engine has no voice for the language (its data is not installed). */
+    val voiceMissing: StateFlow<Boolean> = _voiceMissing.asStateFlow()
+
+    @Deprecated("The voice follows the app's language now.", ReplaceWith("voiceMissing"))
+    val japaneseMissing: StateFlow<Boolean> get() = voiceMissing
 
     override fun onInit(status: Int) {
         if (status != TextToSpeech.SUCCESS) {
-            _japaneseMissing.value = true
+            _voiceMissing.value = true
             return
         }
-        useJapanese()
+        useLocale()
         tts.setAudioAttributes(attributes)
         tts.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
             override fun onStart(utteranceId: String?) = Unit
@@ -68,13 +74,20 @@ class Speaker(context: Context) : TextToSpeech.OnInitListener {
         pending.clear()
     }
 
-    /** Checks the Japanese voice again, e.g. back from installing it. */
+    /** Checks the voice again, e.g. back from installing it. */
     fun recheck() {
-        if (ready) useJapanese()
+        if (ready) useLocale()
     }
 
-    private fun useJapanese() {
-        _japaneseMissing.value = tts.setLanguage(Locale.JAPAN) < TextToSpeech.LANG_AVAILABLE
+    /** Speaks in [locale] from the next line on (F-2: changed mid-walk, the next line is in the new language). */
+    fun use(locale: Locale) {
+        if (locale == this.locale) return
+        this.locale = locale
+        if (ready) useLocale()
+    }
+
+    private fun useLocale() {
+        _voiceMissing.value = tts.setLanguage(locale) < TextToSpeech.LANG_AVAILABLE
     }
 
     fun speak(text: String) {
