@@ -57,7 +57,10 @@ fun LanguageChoice(chosen: AppLanguage?, onChoose: (AppLanguage?) -> Unit, modif
     Column(modifier.selectableGroup()) {
         val device = AppLocales.fromDevice()
         LanguageRow(
-            localized("端末の言語に合わせる", "Follow the device", "跟随设备语言", "기기 언어에 맞추기") + "（${device.selfName}）",
+            localized(
+                "端末の言語に合わせる（${device.selfName}）", "Follow the device (${device.selfName})",
+                "跟随设备语言（${device.selfName}）", "기기 언어에 맞추기 (${device.selfName})",
+            ),
             chosen == null,
         ) { onChoose(null) }
         AppLanguage.entries.forEach { language ->
