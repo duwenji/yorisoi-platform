@@ -5,8 +5,8 @@ import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
 
-/** A location the app got, as far as telling a ride goes. */
-data class RidingFix(val timeMs: Long, val lat: Double, val lon: Double, val accuracyM: Float)
+/** A location the app got, as far as telling a ride goes; [speedMps] the GPS's own speed, null when it has none. */
+data class RidingFix(val timeMs: Long, val lat: Double, val lon: Double, val accuracyM: Float, val speedMps: Float? = null)
 
 /** That the user got on a vehicle (bus, train, car) or off it, at [timeMs] and [speedKmh] over the window. */
 data class RidingChange(val riding: Boolean, val timeMs: Long, val speedKmh: Double)
@@ -16,7 +16,10 @@ data class RidingChange(val riding: Boolean, val timeMs: Long, val speedKmh: Dou
  * The speed is how far the user got in the last [windowMs] (from the newest fix at least that old),
  * so one jumpy fix doesn't count; fixes worse than [maxAccuracyM] are left out.
  *
- * On: the speed stays above [enterKmh] for [enterHoldMs]. Off: it stays below [exitKmh] for
+ * On: the speed stays above [enterKmh] for [enterHoldMs], and the fix's GPS speed, when it has one, is
+ * above [exitKmh] (positions that jump while the GPS says walking or cycling speed are not a ride). Nothing
+ * is told in the first [settleMs] from the first fix: the GPS can drift fast while it settles (R-1).
+ * Off: it stays below [exitKmh] for
  * [exitHoldMs], so stops at a bus stop, a station or a light don't end the ride. While no speed can be
  * told (no fix old enough, as in a tunnel), the state stays as it is (ADR-RIDING R-b).
  * The app gives the thresholds: SanpoGuide walks, CycleGuide rides a bicycle.
@@ -28,6 +31,7 @@ class RidingDetector(
     private val enterHoldMs: Long = 30_000,
     private val exitHoldMs: Long = 120_000,
     private val maxAccuracyM: Float = 50f,
+    private val settleMs: Long = 300_000,
 ) {
     init {
         require(exitKmh < enterKmh) { "exitKmh ($exitKmh) must be below enterKmh ($enterKmh)" }
@@ -40,6 +44,7 @@ class RidingDetector(
     private val fixes = ArrayDeque<RidingFix>()
     private var fastSince: Long? = null
     private var slowSince: Long? = null
+    private var firstAt: Long? = null
 
     /** Takes [fix] and returns the change it makes, or null. */
     fun update(fix: RidingFix): RidingChange? {
@@ -49,10 +54,13 @@ class RidingDetector(
         fixes.addLast(fix)
         // Keep the base for the next window and nothing older.
         while (fixes.size > 1 && fixes[1].timeMs <= fix.timeMs - windowMs) fixes.removeFirst()
+        val first = firstAt ?: fix.timeMs.also { firstAt = it }
         base ?: return null
+        if (fix.timeMs - first < settleMs) return null
         val speed = distanceM(base, fix) / (fix.timeMs - base.timeMs) * 3600.0
+        val gpsKmh = fix.speedMps?.let { it * 3.6 }
         return if (!riding) {
-            if (speed > enterKmh) {
+            if (speed > enterKmh && (gpsKmh == null || gpsKmh > exitKmh)) {
                 val since = fastSince ?: fix.timeMs.also { fastSince = it }
                 if (fix.timeMs - since >= enterHoldMs) change(true, fix, speed) else null
             } else {
@@ -76,6 +84,7 @@ class RidingDetector(
         fixes.clear()
         fastSince = null
         slowSince = null
+        firstAt = null
     }
 
     private fun change(riding: Boolean, fix: RidingFix, speed: Double): RidingChange {

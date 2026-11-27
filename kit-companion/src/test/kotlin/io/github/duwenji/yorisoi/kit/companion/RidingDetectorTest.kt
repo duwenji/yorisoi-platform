@@ -12,8 +12,13 @@ class RidingDetectorTest {
     private fun lat(northM: Double) = 35.0 + northM / 111_195.0
 
     /** Fixes every [everyS] seconds at [kmh], from [fromS] for [forS] seconds, starting [startM] north. */
-    private fun run(fromS: Int, forS: Int, kmh: Double, startM: Double = 0.0, everyS: Int = 10, accuracyM: Float = 5f) =
-        (0..forS step everyS).map { s -> RidingFix((fromS + s) * 1000L, lat(startM + kmh / 3.6 * s), 139.0, accuracyM) }
+    private fun run(fromS: Int, forS: Int, kmh: Double, startM: Double = 0.0, everyS: Int = 10, accuracyM: Float = 5f, gpsKmh: Double? = null) =
+        (0..forS step everyS).map { s ->
+            RidingFix((fromS + s) * 1000L, lat(startM + kmh / 3.6 * s), 139.0, accuracyM, gpsKmh?.let { (it / 3.6).toFloat() })
+        }
+
+    /** The rules other than the first minutes (R-1): told from the first fix. */
+    private fun detector(enterKmh: Double) = RidingDetector(enterKmh = enterKmh, settleMs = 0)
 
     private fun changes(detector: RidingDetector, fixes: List<RidingFix>) = fixes.mapNotNull(detector::update)
 
@@ -54,7 +59,7 @@ class RidingDetectorTest {
 
     @Test
     fun `a ride starts only after the speed has stayed up for 30 seconds`() {
-        val d = RidingDetector(enterKmh = 12.0)
+        val d = detector(12.0)
         changes(d, run(0, 120, 5.0))
         val onBus = run(130, 120, 30.0, startM = 5.0 / 3.6 * 120)
         val change = changes(d, onBus).single()
@@ -65,7 +70,7 @@ class RidingDetectorTest {
 
     @Test
     fun `stops at a bus stop or a light don't end the ride`() {
-        val d = RidingDetector(enterKmh = 12.0)
+        val d = detector(12.0)
         var m = 0.0
         val fixes = buildList {
             var s = 0
@@ -80,7 +85,7 @@ class RidingDetectorTest {
 
     @Test
     fun `a ride ends after two minutes below half the speed`() {
-        val d = RidingDetector(enterKmh = 12.0)
+        val d = detector(12.0)
         changes(d, run(0, 300, 30.0))
         val walk = run(310, 300, 4.0, startM = 30.0 / 3.6 * 300)
         val change = changes(d, walk).single()
@@ -100,7 +105,7 @@ class RidingDetectorTest {
 
     @Test
     fun `while no speed can be told, the state stays`() {
-        val d = RidingDetector(enterKmh = 12.0)
+        val d = detector(12.0)
         changes(d, run(0, 300, 30.0))
         assertTrue(d.riding)
         // A tunnel: one fix ten minutes later, at walking speed over those ten minutes would be slow,
@@ -120,9 +125,36 @@ class RidingDetectorTest {
 
     @Test
     fun `reset forgets a ride`() {
-        val d = RidingDetector(enterKmh = 12.0)
+        val d = detector(12.0)
         changes(d, run(0, 300, 30.0))
         d.reset()
         assertFalse(d.riding)
+    }
+
+    @Test
+    fun `the GPS drifting fast in the first minutes is not a ride`() {
+        // The ride of 2026-10-25 (CycleGuide 1.4.0): 1.7 km at about 45 km/h in the first three minutes,
+        // the GPS's own speed as fast, then a ride at 15 km/h.
+        val d = RidingDetector(enterKmh = 40.0)
+        val fixes = run(0, 30, 5.0) + run(40, 150, 45.0, startM = 40.0, gpsKmh = 45.0) +
+            run(200, 1200, 15.0, startM = 40.0 + 45.0 / 3.6 * 150, gpsKmh = 15.0)
+        assertTrue(changes(d, fixes).isEmpty())
+        assertFalse(d.riding)
+    }
+
+    @Test
+    fun `a train after the first minutes is still told`() {
+        val d = RidingDetector(enterKmh = 40.0)
+        val fixes = run(0, 300, 15.0) + run(310, 240, 80.0, startM = 15.0 / 3.6 * 300, gpsKmh = 80.0)
+        assertTrue(changes(d, fixes).single().riding)
+    }
+
+    @Test
+    fun `positions running fast while the GPS says cycling speed are not a ride`() {
+        val d = detector(40.0)
+        val fixes = run(0, 300, 15.0, gpsKmh = 15.0) + run(310, 300, 60.0, startM = 15.0 / 3.6 * 300, gpsKmh = 15.0)
+        assertTrue(changes(d, fixes).isEmpty())
+        // Without the GPS's speed, the same positions are a ride.
+        assertTrue(changes(detector(40.0), run(0, 300, 15.0) + run(310, 300, 60.0, startM = 15.0 / 3.6 * 300)).single().riding)
     }
 }
