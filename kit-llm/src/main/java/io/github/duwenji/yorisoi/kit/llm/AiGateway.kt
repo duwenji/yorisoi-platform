@@ -70,6 +70,13 @@ data class AiCall(
 class AiUnavailableException(message: String, cause: Throwable? = null) : IllegalStateException(message, cause)
 
 /**
+ * The app's language changed while the AI was writing: the reply is in the one asked for before, so it isn't
+ * used (REQ-LANGUAGES F-2). The call was made and counted.
+ */
+class LanguageChangedException(val askedIn: AppLanguage, val now: AppLanguage) :
+    IllegalStateException("The app's language changed from ${askedIn.tag} to ${now.tag} while the AI was writing")
+
+/**
  * The AI, however the app reaches it: the operator's [relay] (null in a build without one) or the
  * user's own key, within the day's limit (the relay's on the operator's AI, [usage] on the user's
  * key), with the stage directions the AI slips in taken out. The app writes the prompts and
@@ -90,7 +97,8 @@ class AiGateway(
     /**
      * The app's language, read at each call (REQ-LANGUAGES D-5・F-2・F-9): every reply but the preparer's hints is
      * asked for in it, by adding [AppLanguage.instruction] at the end of the system prompt, and a reply mostly in
-     * another language is recorded as unusable.
+     * another language is recorded as unusable. When it is no longer the same once the reply comes back, the
+     * reply isn't returned ([LanguageChangedException], F-2).
      */
     var language: () -> AppLanguage = { Languages.current }
 
@@ -109,6 +117,7 @@ class AiGateway(
      * The AI's reply to [system] and [user], without stage directions and Markdown marks.
      *
      * @throws AiUnavailableException when no AI is set up or today's limit is reached (on the relay too)
+     * @throws LanguageChangedException when the app's language changed while the AI was writing (not for hints)
      */
     suspend fun generate(purpose: Purpose, system: String, user: String): String {
         val c = connection()
@@ -137,6 +146,12 @@ class AiGateway(
             throw e
         }
         // Recorded as the AI wrote it, so stage directions and marks it slipped in can still be counted.
+        val now = language()
+        if (purpose != Purpose.HINTS && now != spokenIn) {
+            val changed = LanguageChangedException(spokenIn, now)
+            report(text, changed.message)
+            throw changed
+        }
         report(text, null)
         return OutputCheck.spoken(text)
     }
