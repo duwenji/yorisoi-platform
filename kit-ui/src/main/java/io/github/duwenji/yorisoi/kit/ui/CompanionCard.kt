@@ -65,7 +65,7 @@ data class CardSource(val label: String, val url: String?)
  * under them (an image and its credit, in place of [CardLine.credit]), and [actions] at the end
  * (opening a detail, a report; the second argument is whether the earlier lines are open).
  *
- * Not [interactive] (while riding, ADR-RIDE-SCREEN D-2・D-3), it shows the latest line with its
+ * Not [interactive] (while riding, CycleGuide's requirements F-36), it shows the latest line with its
  * credit and nothing to press: no buttons, links or [actions].
  */
 @Composable
