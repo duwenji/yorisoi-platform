@@ -73,6 +73,33 @@ class AiGatewayTest {
     }
 
     @Test
+    fun `a reply written before the app's language changed is not returned, but the call is recorded`() = runBlocking {
+        var language = AppLanguage.JA
+        gateway.language = { language }
+        server.dispatcher = object : okhttp3.mockwebserver.Dispatcher() {
+            override fun dispatch(request: okhttp3.mockwebserver.RecordedRequest): MockResponse {
+                // The user picks English while the AI is writing.
+                language = AppLanguage.EN
+                return MockResponse().setBody(
+                    JSONObject().put("choices", listOf(JSONObject().put("message", JSONObject().put("content", "ここは浅草寺です。")))).toString(),
+                )
+            }
+        }
+        try {
+            gateway.generate(Purpose.CHAT, "system", "user")
+            fail("the reply in Japanese should not be returned")
+        } catch (e: LanguageChangedException) {
+            assertEquals(AppLanguage.JA, e.askedIn)
+            assertEquals(AppLanguage.EN, e.now)
+        }
+        assertEquals("ここは浅草寺です。", calls.single().reply)
+        assertTrue(calls.single().error!!.contains("changed"))
+        // Hints are in Japanese whatever the app's language, so they come back though it changes again.
+        language = AppLanguage.JA
+        assertEquals("ここは浅草寺です。", gateway.generate(Purpose.HINTS, "system", "user"))
+    }
+
+    @Test
     fun `the user's key is called up to the day's limit`() {
         reply("一")
         reply("二")
