@@ -53,6 +53,9 @@ enum class FacilityKind(
 }
 
 data class Facility(val id: String, val kind: FacilityKind, val lat: Double, val lon: Double, val name: String?) {
+    /** The kind, with the name if it has one: 「トイレ（浅草寺）」. Shown on the map. */
+    val title: String get() = name?.let { "${kind.label}（$it）" } ?: kind.label
+
     fun distanceFrom(location: Location): Float = distanceFrom(location.latitude, location.longitude)
 
     fun distanceFrom(fromLat: Double, fromLon: Double): Float {
