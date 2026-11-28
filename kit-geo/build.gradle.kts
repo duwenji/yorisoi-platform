@@ -43,6 +43,8 @@ dependencies {
     implementation(libs.compose.ui)
     // The screens of the frequent ways (FrequentWaysScreen).
     implementation(libs.compose.material3)
+    // The facility icons and the buttons over the map (MapOverlays, MapUp).
+    implementation(libs.compose.material.icons.extended)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.compose)
