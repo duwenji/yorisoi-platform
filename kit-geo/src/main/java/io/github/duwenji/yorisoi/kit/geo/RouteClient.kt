@@ -26,19 +26,25 @@ data class WalkRoute(val points: List<LatLon>, val distanceM: Double, val onPath
 }
 
 /**
- * Walking routes from the FOSSGIS OSRM server (OpenStreetMap data, no API key; a public
- * service for light use, so callers should ask only when the target or the user's track changes).
+ * Walking and cycling routes from the FOSSGIS OSRM servers (OpenStreetMap data, no API key; a
+ * public service for light use, so callers should ask only when the target or the user's track
+ * changes, as RouteKeeper does).
  */
 class RouteClient(
     private val http: OkHttpClient = OkHttpClient.Builder().callTimeout(15, TimeUnit.SECONDS).build(),
+    private val userAgent: String = "SanpoGuide/0.1 (Android)",
 ) {
-    suspend fun walk(from: LatLon, to: LatLon): WalkRoute = withContext(Dispatchers.IO) {
-        // OSRM takes lon,lat; the "driving" segment is fixed by the API, the foot profile is in the host path.
+    suspend fun walk(from: LatLon, to: LatLon): WalkRoute = route(FOOT, from, to)
+
+    suspend fun bike(from: LatLon, to: LatLon): WalkRoute = route(BIKE, from, to)
+
+    private suspend fun route(endpoint: String, from: LatLon, to: LatLon): WalkRoute = withContext(Dispatchers.IO) {
+        // OSRM takes lon,lat; the "driving" segment is fixed by the API, the profile is in the host path.
         val url = String.format(
             Locale.ROOT, "%s/%.6f,%.6f;%.6f,%.6f?overview=full&geometries=geojson",
-            ENDPOINT, from.lon, from.lat, to.lon, to.lat,
+            endpoint, from.lon, from.lat, to.lon, to.lat,
         )
-        val request = Request.Builder().url(url).header("User-Agent", "SanpoGuide/0.1 (Android)").build()
+        val request = Request.Builder().url(url).header("User-Agent", userAgent).build()
         http.newCall(request).execute().use { res ->
             if (!res.isSuccessful) throw IOException("Routing error: HTTP ${res.code}")
             parse(res.body!!.string())
@@ -58,7 +64,8 @@ class RouteClient(
     }
 
     private companion object {
-        const val ENDPOINT = "https://routing.openstreetmap.de/routed-foot/route/v1/driving"
+        const val FOOT = "https://routing.openstreetmap.de/routed-foot/route/v1/driving"
+        const val BIKE = "https://routing.openstreetmap.de/routed-bike/route/v1/driving"
     }
 }
 

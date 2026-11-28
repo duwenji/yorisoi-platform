@@ -39,7 +39,6 @@ import androidx.compose.ui.unit.dp
 import io.github.duwenji.yorisoi.kit.geo.FrequentWay
 import io.github.duwenji.yorisoi.kit.geo.FrequentWayFinder
 import io.github.duwenji.yorisoi.kit.geo.LatLon
-import io.github.duwenji.yorisoi.kit.geo.Poi
 import io.github.duwenji.yorisoi.kit.geo.WalkRoute
 import io.github.duwenji.yorisoi.kit.geo.WayOrigin
 import kotlinx.coroutines.Dispatchers
@@ -249,7 +248,7 @@ private fun WayMap(points: List<LatLon>, highlight: List<LatLon>?, modifier: Mod
 private const val END_M = 200.0
 
 /** No spot: the end of the line the map draws thick. */
-private val WAY_END = Poi("", "", 0.0, 0.0, "", emptyMap())
+private val WAY_END = RouteTarget("", "", 0.0, 0.0)
 
 /** A day as the app's language writes it: 「10月28日」「Oct 28」. */
 private fun day(at: Long): String {

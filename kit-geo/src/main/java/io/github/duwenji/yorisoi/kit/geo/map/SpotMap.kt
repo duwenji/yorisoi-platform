@@ -82,8 +82,8 @@ fun facilityColor(kind: FacilityKind) = when (kind) {
 
 /**
  * Map showing the user's position (with the way they face, [heading]), nearby spots in their
- * [SpotGroup] colors and amenities, the way already [walked] on this walk, and the way to the
- * spot being guided to. Pans to [focus] when it changes.
+ * [SpotGroup] colors and amenities, the way already [walked] on this walk, and the [route] to a
+ * spot or a facility. Pans to [focus] when it changes.
  * [onViewportChanged] reports the area on screen (zoom, north, south, east, west) once the
  * map settles, for attributions that depend on it.
  * The [selected] spot is drawn larger and on top, the others faded, and the map pans to it when
@@ -94,6 +94,8 @@ fun facilityColor(kind: FacilityKind) = when (kind) {
  * small arrow shows north; null keeps north up.
  * [onTilesFailed] is called when OpenStreetMap tiles keep failing to download, so the screen
  * can switch to other tiles.
+ * [onFacilityClick] is called when an amenity is tapped (to show the way to it); without it, the
+ * tap shows the amenity's name in a bubble.
  */
 @Composable
 fun SpotMap(
@@ -113,6 +115,7 @@ fun SpotMap(
     fitWalked: Boolean = false,
     up: Float? = null,
     onTilesFailed: () -> Unit = {},
+    onFacilityClick: ((Facility) -> Unit)? = null,
 ) {
     val context = LocalContext.current
     val density = context.resources.displayMetrics.density
@@ -177,11 +180,23 @@ fun SpotMap(
                     position = GeoPoint(f.lat, f.lon)
                     icon = facilityIcons[f.kind]
                     setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-                    title = f.name?.let { "${f.kind.label}（$it）" } ?: f.kind.label
+                    title = f.title
+                    setOnMarkerClickListener { m, _ ->
+                        val click = markers.onFacilityClick
+                        if (click != null) {
+                            click(f)
+                        } else {
+                            // osmdroid's own reaction to a tap, when the screen has none.
+                            m.showInfoWindow()
+                            map.controller.animateTo(m.position)
+                        }
+                        true
+                    }
                 }
             }
             markers.facilityIds = facilityIds
         }
+        markers.onFacilityClick = onFacilityClick
         markers.spotsById = spots.associateBy { it.poi.id }
         markers.onSpotClick = onSpotClick
         val spotIds = spots.map { it.poi.id }.toSet()
@@ -337,6 +352,7 @@ private class NorthArrowOverlay(private val density: Float) : Overlay() {
 private class MapMarkers {
     var facilityIds: Set<String>? = null
     var facilities: List<Marker> = emptyList()
+    var onFacilityClick: ((Facility) -> Unit)? = null
     var spotIds: Set<String>? = null
     var spots: List<Marker> = emptyList()
     var spotsById: Map<String, SpotItem> = emptyMap()
